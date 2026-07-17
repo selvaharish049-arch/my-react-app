@@ -1,0 +1,247 @@
+/* 1. Top Bar Styling */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 40px;
+  font-size: 12px;
+  background-color: #fcfbf9;
+  color: #666;
+}
+
+.left-links, .right-links {
+  display: flex;
+  gap: 25px;
+}
+
+/* 2. Main Header */
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* லோகோ, சர்ச், ஐகான்களைச் சரியாகப் பிரிக்கும் */
+  padding: 20px 40px;
+  position: relative;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: 800;
+  color: #333;
+  letter-spacing: -0.5px;
+  flex-shrink: 0; /* லோகோ சுருங்காமல் இருக்க */
+}
+
+/* சர்ச் பார் கண்டெய்னர் (நடுவில் இருக்க) */
+.navbar-search {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 30px;
+}
+
+.search-bar {
+  display: none; /* SearchComponent பயன்பாட்டில் இருப்பதால் பழையது மறைக்கப்படுகிறது */
+}
+
+/* வலதுபுறம் அடுக்கப்பட்ட ஐகான்கள் */
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  font-size: 14px;
+  color: #333;
+  flex-shrink: 0;
+}
+
+/* 3. Bottom Menu */
+.bottom-menu {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  padding: 15px 20px;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+  color: #444;
+  font-weight: 500;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: black;
+  padding-bottom: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: #c98544;
+  border-bottom: 2px solid #c98544;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .top-bar {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 6px 10px !important;
+    font-size: 10.5px !important;
+    background-color: #fcfbf9;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .top-bar .left-links {
+    display: none !important;
+  }
+  .top-bar .right-links {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .main-header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 20px;
+  }
+  .navbar-search {
+    width: 100%;
+    margin: 5px 0;
+  }
+  .nav-icons {
+    width: 100%;
+    justify-content: space-around;
+  }
+  .bottom-menu {
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    gap: 15px !important;
+    padding: 10px 15px !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .bottom-menu .nav-link {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    padding-bottom: 8px;
+  }
+}
+
+/* User profile triggers and circles */
+.profile-avatar-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #c98544;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(201, 133, 68, 0.25);
+}
+
+.profile-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 250px;
+  background: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  padding: 15px;
+  z-index: 10005;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideDownFade 0.2s ease-out;
+}
+
+.profile-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f4f3f0;
+}
+
+.menu-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #f0e6dd;
+  color: #8c6239;
+  font-weight: 800;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-role-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: #c98544;
+  margin: 0 0 2px 0;
+}
+
+.menu-email-text {
+  font-size: 11px;
+  color: #777;
+  margin: 0;
+}
+
+.profile-dropdown-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-action-link {
+  display: block;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  padding: 8px 12px;
+  background: #fdfbf9;
+  border: 1px solid #f0e6dd;
+  border-radius: 6px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.menu-action-link:hover {
+  background: #f0e6dd;
+  color: #8c6239;
+}
+
+.menu-logout-btn {
+  width: 100%;
+  border: none;
+  background: #ffebee;
+  color: #c62828;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.menu-logout-btn:hover {
+  background: #c62828;
+  color: white;
+}
+
+@keyframes slideDownFade {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

@@ -1,0 +1,73 @@
+/* 1. wrapper மற்றும் Container அமைப்பு */
+.offer-wrapper {
+  padding: 40px 20px;
+  width: 100%;
+  box-sizing: border-box; /* முழு அகலத்திற்கு கச்சிதமாக அமையும் */
+}
+
+.offer-container {
+  display: flex;
+  gap: 20px; /* படங்களுக்கு இடையே உள்ள இடைவெளி */
+  width: 100%;
+  justify-content: center;
+}
+
+/* 2. பெட்டியின் அளவு மற்றும் வடிவம் (Rectangle) */
+.offer-box {
+  flex: 1; /* மூன்று பெட்டிகளும் சமமான அகலத்தைப் பெறும் */
+  height: 250px; /* படத்தின் உயரம் */
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f4f4f4;
+}
+
+.offer-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* படம் சிதையாமல் பெட்டியை முழுமையாக நிரப்பும் */
+  display: block;
+}
+
+/* 3. ஆஃபர் டெக்ஸ்ட் (உரை) அமைப்பு */
+.offer-content {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1;
+}
+
+.badge {
+  background-color: #6a4f3b; /* ஆஃபர் பேட்ஜ் நிறம் */
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.offer-content h3 {
+  font-size: 22px;
+  margin: 0;
+  color: #333;
+}
+
+.offer-content p {
+  font-size: 15px;
+  margin-top: 5px;
+  color: #555;
+  font-weight: 500;
+}
+
+/* 4. மொபைல் வியூ - சிறிய திரையில் ஒன்றன் கீழ் ஒன்றாக வரும் */
+@media (max-width: 768px) {
+  .offer-container {
+    flex-direction: column;
+  }
+  .offer-box {
+    height: 250px; /* மொபைலில் உயரம் சற்று குறையும் */
+  }
+}

@@ -1,0 +1,27 @@
+.checkout-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.checkout-box {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 450px;
+}
+
+.order-form label { display: block; margin-top: 15px; font-weight: bold; }
+.order-form input, .order-form select, .order-form textarea {
+  width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px;
+}
+
+.price-quantity { display: flex; gap: 10px; }
+.total-box { background: #e7f3ff; padding: 15px; margin-top: 20px; font-weight: bold; border-radius: 5px; }
+.submit-btn {
+  width: 100%; padding: 12px; background: #6c5ce7; color: white; border: none;
+  margin-top: 20px; cursor: pointer; border-radius: 5px; font-size: 16px;
+}

@@ -1,0 +1,85 @@
+/* Container Box with exact grid ratios */
+.banner-grid-container {
+  display: grid;
+  grid-template-columns: 1.85fr 1fr; /* Image-il ulla main width split weight ratio */
+  gap: 14px; /* Gaps between columns and blocks */
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Common Image Control styles */
+.responsive-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Stretch aagama perfect crop layout layout view structure */
+  display: block;
+}
+
+/* Left Section Slider Design */
+.left-banner {
+  width: 100%;
+  height: 460px; /* Over-all layout standard view height */
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.left-banner .swiper {
+  width: 100%;
+  height: 100%;
+}
+
+/* Right Section Container Layout */
+.right-banner-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px; /* Gap between Top chair image and bottom lamp image */
+  height: 460px; /* Matches left slider height exactly */
+}
+
+/* Right side elements sharing equal 50%-50% height dynamically */
+.right-box-wrapper {
+  flex: 1; 
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+/* Mobile Devices view stack configuration */
+@media (max-width: 768px) {
+  .banner-grid-container {
+    grid-template-columns: 1fr; /* Responsive horizontal row collapse */
+    gap: 10px;
+  }
+  .left-banner {
+    height: 280px;
+  }
+  .right-banner-container {
+    height: 380px;
+    gap: 10px;
+  }
+}
+
+/* Customize Swiper slider elements to be white instead of default blue */
+.left-banner .mySwiper {
+  --swiper-navigation-color: #ffffff;
+  --swiper-pagination-color: #ffffff;
+}
+
+.left-banner .swiper-button-next,
+.left-banner .swiper-button-prev {
+  color: #ffffff !important;
+}
+
+.left-banner .swiper-pagination-bullet {
+  background: #ffffff !important;
+  opacity: 0.6;
+}
+
+.left-banner .swiper-pagination-bullet-active {
+  background: #ffffff !important;
+  opacity: 1;
+}

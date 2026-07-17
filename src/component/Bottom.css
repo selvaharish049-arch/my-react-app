@@ -1,0 +1,59 @@
+.bottom-footer {
+  background-color: #f4f4f4; /* லேசான சாம்பல் நிறம் */
+  padding: 40px 20px;
+  border-top: 1px solid #ddd;
+  margin-top: 50px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.footer-logo {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.footer-links {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.footer-links span {
+  padding: 0 5px;
+  cursor: pointer;
+}
+
+.copyright, .company-name {
+  font-size: 12px;
+  color: #777;
+  margin: 5px 0;
+}
+
+.address {
+  text-align: right;
+  font-size: 13px;
+  color: #444;
+}
+
+.address h3 {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+/* மொபைல் வியூ */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .address {
+    text-align: center;
+  }
+}

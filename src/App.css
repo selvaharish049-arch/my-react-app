@@ -1,0 +1,36 @@
+/* App.css */
+
+/* அனைத்து எலிமெண்ட்களுக்கும் பொதுவான ரீசெட் */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* பாடி ஸ்டைல் - எழுத்துரு மற்றும் பேக்ரவுண்ட் */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #ffffff;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* மெயின் கன்டெய்னர் */
+.App {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* லிங்க்களுக்கான பொதுவான ஸ்டைல் */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* பட்டன்களுக்கான பொதுவான ஸ்டைல் (தேவைப்பட்டால்) */
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+}

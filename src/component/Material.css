@@ -1,0 +1,46 @@
+.material-wrapper {
+  padding: 50px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.material-heading {
+  text-align: center; /* தலைப்பை மையப்படுத்த */
+  font-size: 32px;
+  color: #222;
+  margin-bottom: 40px;
+  font-weight: 800;
+}
+
+.material-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.material-card {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border-left: 5px solid #c98544; /* பக்கவாட்டில் ஒரு ஸ்டைலான கோடு */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.material-card h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.material-card p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+/* மொபைல் வியூ */
+@media (max-width: 768px) {
+  .material-heading {
+    font-size: 24px;
+  }
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "rev-2",
+    "name": "Deepika R",
+    "rating": 5,
+    "comment": "Highly satisfied with the modular kitchen installation. Very professional team and timely delivery.",
+    "date": "2026-07-02"
+  },
+  {
+    "id": "rev-3",
+    "name": "Arun Kumar",
+    "rating": 4,
+    "comment": "The study table fits perfectly in my room. Assembly was quick and easy. Highly recommended.",
+    "date": "2026-07-10"
+  },
+  {
+    "id": "rev-4",
+    "name": "Priya Lakshmi",
+    "rating": 5,
+    "comment": "Memory foam pillow has completely cured my neck pain. Will buy more for my family.",
+    "date": "2026-07-12"
+  }
+]

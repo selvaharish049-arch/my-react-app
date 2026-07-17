@@ -1,0 +1,267 @@
+/* Dash-border grid card for admin triggers */
+.add-product-grid-card {
+  border: 2px dashed #c98544 !important;
+  background: #fdfbf9 !important;
+  cursor: pointer;
+  transition: all 0.3s ease !important;
+  box-shadow: none !important;
+}
+
+.add-product-grid-card:hover {
+  background: #fdf6ee !important;
+  border-color: #b57335 !important;
+  transform: translateY(-5px) !important;
+  box-shadow: 0 8px 24px rgba(201, 133, 68, 0.15) !important;
+}
+
+.add-product-img-placeholder {
+  transition: all 0.3s ease;
+}
+
+.add-product-grid-card:hover .add-product-img-placeholder {
+  background: #f0e6dd !important;
+  border-color: #b57335 !important;
+}
+
+/* Modal Overlay Styling */
+.add-prod-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100000;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+/* Modal Container Box */
+.add-prod-modal-container {
+  background: #ffffff;
+  width: 90%;
+  max-width: 650px;
+  max-height: 90vh;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow-y: auto;
+  padding: 35px;
+  animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.add-prod-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.add-prod-close-btn:hover {
+  color: #d32f2f;
+}
+
+.add-prod-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #222;
+  margin: 0 0 5px 0;
+}
+
+.add-prod-subtitle {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+/* Form Styles */
+.add-prod-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: left;
+}
+
+/* Image Picker Styling */
+.add-prod-image-picker {
+  border: 2px dashed #ddd;
+  background: #fafaf9;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.add-prod-image-picker:hover {
+  border-color: #c98544;
+  background: #fdfbf9;
+}
+
+.add-prod-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.photo-icon {
+  font-size: 26px;
+}
+
+.picker-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: #444;
+}
+
+.picker-subtext {
+  font-size: 11px;
+  color: #888;
+}
+
+.add-prod-preview-wrap {
+  width: 100%;
+  height: 150px;
+  position: relative;
+}
+
+.add-prod-preview-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.preview-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.add-prod-preview-wrap:hover .preview-overlay {
+  opacity: 1;
+}
+
+/* Form inputs & grid structures */
+.add-prod-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.add-prod-form label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.add-prod-form input,
+.add-prod-form textarea,
+.add-prod-form select {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: #333;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.add-prod-form input:focus,
+.add-prod-form textarea:focus,
+.add-prod-form select:focus {
+  border-color: #c98544;
+  outline: none;
+  background: #fdfbf9;
+  box-shadow: 0 0 0 3px rgba(201, 133, 68, 0.1);
+}
+
+.add-prod-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.add-prod-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+}
+
+/* Submit Button */
+.add-prod-submit-btn {
+  background: #c98544;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(201, 133, 68, 0.2);
+  margin-top: 10px;
+}
+
+.add-prod-submit-btn:hover {
+  background: #b57335;
+  box-shadow: 0 6px 16px rgba(201, 133, 68, 0.35);
+}
+
+.add-prod-submit-btn:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Animations */
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  .add-prod-row-2, .add-prod-row-3 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
