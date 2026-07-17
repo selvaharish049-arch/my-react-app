@@ -2,7 +2,7 @@
 
 export const getAllProducts = async () => {
   try {
-    const res = await fetch('http://localhost:5000/api/products');
+    const res = await fetch('https://selvaharish-interior-back.onrender.com/api/products');
     if (!res.ok) throw new Error("Backend response error");
     return await res.json();
   } catch (e) {
@@ -13,7 +13,7 @@ export const getAllProducts = async () => {
 
 export const addCustomProduct = async (formData) => {
   try {
-    const res = await fetch('http://localhost:5000/api/products', {
+    const res = await fetch('https://selvaharish-interior-back.onrender.com/api/products', {
       method: 'POST',
       body: formData // Send as multipart/form-data for file upload
     });
@@ -27,7 +27,7 @@ export const addCustomProduct = async (formData) => {
 
 export const deleteCustomProduct = async (id) => {
   try {
-    const res = await fetch(`http://localhost:5000/api/products/${id}`, {
+    const res = await fetch(`https://selvaharish-interior-back.onrender.com/api/products/${id}`, {
       method: 'DELETE'
     });
     if (!res.ok) throw new Error("Failed to delete product");

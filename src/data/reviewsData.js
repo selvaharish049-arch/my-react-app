@@ -2,7 +2,7 @@
 
 export const getAllReviews = async () => {
   try {
-    const res = await fetch('http://localhost:5000/api/reviews');
+    const res = await fetch('https://selvaharish-interior-back.onrender.com/api/reviews');
     if (!res.ok) throw new Error("Backend reviews response error");
     return await res.json();
   } catch (e) {
@@ -13,7 +13,7 @@ export const getAllReviews = async () => {
 
 export const deleteReview = async (id) => {
   try {
-    const res = await fetch(`http://localhost:5000/api/reviews/${id}`, {
+    const res = await fetch(`https://selvaharish-interior-back.onrender.com/api/reviews/${id}`, {
       method: 'DELETE'
     });
     if (!res.ok) throw new Error("Failed to delete review");
@@ -26,7 +26,7 @@ export const deleteReview = async (id) => {
 
 export const addReview = async (review) => {
   try {
-    const res = await fetch('http://localhost:5000/api/reviews', {
+    const res = await fetch('https://selvaharish-interior-back.onrender.com/api/reviews', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
