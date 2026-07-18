@@ -259,7 +259,11 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .add-prod-modal-container {
+    padding: 20px 15px;
+    width: 95%;
+  }
   .add-prod-row-2, .add-prod-row-3 {
     grid-template-columns: 1fr;
     gap: 12px;
