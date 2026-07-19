@@ -111,6 +111,24 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, userRole, currentUser, onLogout, on
         <Link to="/woodendoors" className="bottom-nav-link">Wooden Doors</Link>
         <Link to="/furniture" className="bottom-nav-link">Furniture</Link>
         <Link to="/woodenwork" className="bottom-nav-link">Wooden Work</Link>
+        
+        {/* Mobile-only menu items */}
+        <Link to="/homedecor" className="bottom-nav-link mobile-only">Home Decor</Link>
+        {!isLoggedIn && (
+          <span className="bottom-nav-link mobile-only" onClick={onLoginClick} style={{ cursor: 'pointer' }}>
+            Login
+          </span>
+        )}
+        {isLoggedIn && userRole === 'admin' && (
+          <Link to="/admin" className="bottom-nav-link mobile-only">
+            Admin Panel
+          </Link>
+        )}
+        {isLoggedIn && (
+          <span className="bottom-nav-link mobile-only" onClick={onLogout} style={{ cursor: 'pointer', color: '#c53929' }}>
+            Logout
+          </span>
+        )}
       </div>
     </nav>
   );

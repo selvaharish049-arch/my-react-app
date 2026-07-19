@@ -16,7 +16,7 @@ const Bottom = () => {
             <span> Grievance Cell</span>
           </div>
           <p className="copyright">
-            © 2015-2026 Woodenstreet.com All rights reserved.
+            © 2015-2026 luxe interior. All rights reserved.
           </p>
           <p className="company-name">The luxe interior Furnitures Private Limited</p>
         </div>
