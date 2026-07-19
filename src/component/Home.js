@@ -1,9 +1,9 @@
 import React from 'react';
 import Banner from './Banner';
 import HomeDecor from './HomeDecor';
-import Offer from './Offer';
+import Portfolio from './Portfolio';
 import Material from './Material';
-import Choose from './Choose';
+import OurServices from './OurServices';
 import Bottom from './Bottom';
 import CustomerReviews from './CustomerReviews';
 
@@ -12,9 +12,9 @@ const Home = ({ isLoggedIn, userRole }) => {
     <div>
       <Banner />
       <HomeDecor />
-      <Offer />
+      <Portfolio />
       <Material />
-      <Choose />
+      <OurServices />
       <CustomerReviews isLoggedIn={isLoggedIn} userRole={userRole} />
       <Bottom />
     </div>

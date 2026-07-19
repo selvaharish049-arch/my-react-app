@@ -1,93 +1,287 @@
 .decor-grid-container {
-  padding: 40px;
-  background-color: #ffffff;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding: 80px 0 20px 0;
+  background-color: #fdfcfb;
+  border-top: 1px solid #f2ece4;
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
   text-align: center;
+  overflow: hidden; /* Crucial to prevent page layout scrollbars due to moving track */
+  position: relative;
 }
 
+/* Title matching "Our Services" and "Customer Testimonials" layout */
 .decor-grid-title {
-  font-size: 24px;
-  font-weight: 800;
-  color: #222;
-  margin-bottom: 30px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.decor-grid {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 30px 40px;
-  max-width: 1200px;
-  margin: 0 auto;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 40px auto;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
-.decor-card {
+.decor-grid-title::before,
+.decor-grid-title::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e1d8cf;
+}
+
+.decor-grid-title::before {
+  margin-right: 25px;
+}
+
+.decor-grid-title::after {
+  margin-left: 25px;
+}
+
+.decor-grid-title h2 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 24px;
+  color: #3e322d;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Category Tabs Navigation above slider */
+.decor-tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 5px 20px 20px 20px;
+  margin-bottom: 30px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.decor-tabs::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.decor-tab {
+  background: transparent;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #a09088;
+  cursor: pointer;
+  letter-spacing: 0.8px;
+  transition: all 0.3s ease;
+  padding: 6px 12px;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.decor-tab:hover {
+  color: #3e322d;
+}
+
+.decor-tab.active {
+  color: #c98544;
+  font-size: 15px;
+  font-weight: 700;
+  background-color: #FAF8F5;
+  box-shadow: 0 4px 10px rgba(62, 50, 45, 0.03);
+  border: 1px solid #f0e6dd;
+}
+
+/* Slider viewport and track */
+.decor-slider-viewport {
+  width: 100%;
+  overflow: visible; /* Allows side cards to remain visible */
+  position: relative;
+  padding: 30px 0;
+  cursor: grab;
+  user-select: none;
+}
+
+.decor-slider-viewport:active {
+  cursor: grabbing;
+}
+
+.decor-slider-track {
+  display: flex;
+  gap: 30px;
+  transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+/* Curved box cards styling */
+.decor-slider-card {
+  width: 320px;
+  height: 330px;
+  border-radius: 16px; /* Lightly curved borders */
+  padding: 25px 20px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  position: relative;
+}
+
+/* Inactive card styling: background white, faded, scaled down */
+.decor-slider-card.inactive {
+  background-color: #ffffff;
+  border: 1px solid #f2ece4;
+  opacity: 0.45;
+  transform: scale(0.85);
+}
+
+.decor-slider-card.inactive:hover {
+  opacity: 0.75;
+  transform: scale(0.88);
+}
+
+/* Active card styling: highlighted scale, soft shadow, warm beige background */
+.decor-slider-card.active {
+  background-color: #FAF8F5; /* Warm beige box style background */
+  border: 1px solid #e1d8cf;
+  box-shadow: 0 20px 45px rgba(62, 50, 45, 0.08);
+  transform: scale(1.05);
+  opacity: 1;
+  z-index: 10;
+}
+
+/* Card Header info block */
+.decor-card-header {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 8px;
   text-align: center;
-  cursor: pointer;
-  width: 140px;
 }
 
-/* Circle image wrapper */
-.decor-circle-wrapper {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 4px solid #fff;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  background-color: #faf9f6;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+.decor-card-name {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c211e;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+.decor-card-meta {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8c7d78;
 }
 
-.decor-circle-wrapper img {
+.decor-meta-price {
+  color: #c98544;
+  font-weight: 700;
+}
+
+.decor-meta-deal {
+  background: #ffffff;
+  border: 1px solid #e5dfd8;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #5c4e48;
+}
+
+.decor-meta-quality {
+  font-size: 11px;
+}
+
+/* Card image positioning and clean cutout scaling */
+.decor-card-image-wrapper {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15px;
+  overflow: hidden;
+  border-radius: 12px; /* Curved edges for the image box */
+  background-color: #ffffff;
+  border: 1px solid #f2ece4;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.decor-slider-card.active .decor-card-image-wrapper {
+  background-color: #ffffff;
+  border-color: #e1d8cf;
+}
+
+.decor-slider-card.inactive .decor-card-image-wrapper {
+  background-color: #fcfbf9;
+  border-color: #f5ede6;
+}
+
+.decor-card-image-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Covers the box container completely */
   transition: transform 0.4s ease;
 }
 
-.decor-card p {
-  margin-top: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #444;
-  letter-spacing: 0.5px;
-  transition: color 0.2s;
+.decor-slider-card.active:hover .decor-card-image-wrapper img {
+  transform: scale(1.08);
 }
 
-/* Hover effects */
-.decor-card:hover .decor-circle-wrapper {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 28px rgba(201, 133, 68, 0.2);
-  border-color: #f0e6dd;
+/* Bottom slider dots pagination */
+.decor-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 40px;
 }
 
-.decor-card:hover .decor-circle-wrapper img {
-  transform: scale(1.1);
+.decor-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid #bfa895;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.decor-card:hover p {
-  color: #c98544;
+.decor-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: #c98544;
+  border-color: #c98544;
 }
 
-/* Responsive */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .decor-grid {
-    gap: 20px 25px;
+  .decor-grid-container {
+    padding: 60px 0;
   }
-  .decor-circle-wrapper {
-    width: 100px;
-    height: 100px;
+
+  .decor-grid-title h2 {
+    font-size: 20px;
   }
-  .decor-card {
-    width: 110px;
+
+  .decor-slider-card {
+    width: 270px;
+    height: 290px;
+    padding: 20px 15px;
+  }
+
+  .decor-card-image-wrapper {
+    height: 180px;
+  }
+
+  .decor-card-name {
+    font-size: 16px;
   }
 }

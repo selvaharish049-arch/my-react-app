@@ -1,63 +1,57 @@
 import React from 'react';
 import './BannerImage.css';
 
-// Banner imports
-import kitchenBanner from '../assets/kb.avif';
-import bedroomcupboardBanner from '../assets/cbb1.jpg';
-import wardrobeBanner from '../assets/cb1.jpg';
-import tvunitBanner from '../assets/d4.jpg';
-import poojacupboardBanner from '../assets/pb1.webp';
-import showcaseBanner from '../assets/sb3.avif';
-import doorsBanner from '../assets/d0.jpg';
-import furnitureBanner from '../assets/d2.jpg';
-import woodenworkBanner from '../assets/ab.webp';
+// Import the single high-quality banner background image
+import collectionBanner from '../assets/collection_banner_room.jpg';
 
-// Explore banner imports
-import sofaBanner from '../assets/sb3.avif';
-import bedBanner from '../assets/d2.jpg';
-import diningBanner from '../assets/ab2.avif';
-import tvunitExploreBanner from '../assets/d4.jpg';
-import coffeetableBanner from '../assets/cbb1.jpg';
-import mattressBanner from '../assets/mb.jpg';
-import wardrobeExploreBanner from '../assets/d7.jpg';
-import sofaCumBedBanner from '../assets/d8.jpg';
-import bookshelfBanner from '../assets/d9.jpg';
-import studyBanner from '../assets/d1.jpg';
-
-const categoryBanners = {
+const categoryNames = {
   // Navbar categories
-  'modularkitchen': kitchenBanner,
-  'bedroomcupboard': bedroomcupboardBanner,
-  'wardrobe': wardrobeBanner,
-  'tvunit': tvunitBanner,
-  'poojacupboard': poojacupboardBanner,
-  'showcase': showcaseBanner,
-  'woodendoors': doorsBanner,
-  'furniture': furnitureBanner,
-  'woodenwork': woodenworkBanner,
+  'modularkitchen': 'Modular Kitchen',
+  'bedroomcupboard': 'Bedroom Cupboard',
+  'wardrobes': 'Wardrobes',
+  'wardrobe': 'Wardrobes',
+  'tvunit': 'TV Unit',
+  'poojacupboard': 'Pooja Cupboard',
+  'showcase': 'Showcase',
+  'woodendoors': 'Wooden Doors',
+  'furniture': 'Home Furniture',
+  'woodenwork': 'Wooden Work',
 
   // Explore categories
-  'explore-sofa': sofaBanner,
-  'explore-bed': bedBanner,
-  'explore-dining': diningBanner,
-  'explore-tvunit': tvunitExploreBanner,
-  'explore-coffeetable': coffeetableBanner,
-  'explore-mattress': mattressBanner,
-  'explore-wardrobe': wardrobeExploreBanner,
-  'explore-sofacumbed': sofaCumBedBanner,
-  'explore-bookshelf': bookshelfBanner,
-  'explore-study': studyBanner,
+  'explore-sofa': 'Luxury Sofa',
+  'explore-bed': 'Comfort Bed',
+  'explore-dining': 'Elegant Dining',
+  'explore-tvunit': 'TV Unit Console',
+  'explore-coffeetable': 'Coffee Table',
+  'explore-mattress': 'Cozy Mattress',
+  'explore-wardrobe': 'Designer Wardrobe',
+  'explore-sofacumbed': 'Sofa Cum Bed',
+  'explore-bookshelf': 'Bookshelf Cabinet',
+  'explore-study': 'Study Desk',
 };
 
 const BannerImage = ({ category }) => {
   const query = (category || '').trim().toLowerCase();
-  const bannerImg = categoryBanners[query];
-
-  if (!bannerImg) return null;
+  const displayName = categoryNames[query] || 'Home Interior';
 
   return (
     <div className="category-banner-container">
-      <img src={bannerImg} alt={`${query} Banner`} className="category-banner-image" />
+      <img src={collectionBanner} alt="Collection Banner" className="category-banner-image" />
+      <div className="category-banner-overlay">
+        <p className="category-banner-shipping">Free shipping for all orders over ₹10,000</p>
+        <h1 className="category-banner-title">Limited Edition {displayName} Design Collection</h1>
+        <button 
+          className="category-banner-shop-btn"
+          onClick={() => {
+            window.scrollTo({
+              top: window.innerHeight * 0.85,
+              behavior: 'smooth'
+            });
+          }}
+        >
+          Shop all
+        </button>
+      </div>
     </div>
   );
 };

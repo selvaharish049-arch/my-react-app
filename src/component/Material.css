@@ -1,46 +1,85 @@
 .material-wrapper {
-  padding: 50px 20px;
-  max-width: 1000px;
+  padding: 60px 20px;
+  max-width: 1200px;
   margin: 0 auto;
+  box-sizing: border-box;
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
 }
 
+/* Header style with left/right lines */
 .material-heading {
-  text-align: center; /* தலைப்பை மையப்படுத்த */
-  font-size: 32px;
-  color: #222;
-  margin-bottom: 40px;
-  font-weight: 800;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 45px;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 24px;
+  color: #3e322d;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.material-heading::before,
+.material-heading::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e1d8cf;
+}
+
+.material-heading::before {
+  margin-right: 25px;
+}
+
+.material-heading::after {
+  margin-left: 25px;
 }
 
 .material-container {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 20px;
+  width: 100%;
 }
 
 .material-card {
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  border-left: 5px solid #c98544; /* பக்கவாட்டில் ஒரு ஸ்டைலான கோடு */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  padding: 22px 25px;
+  background-color: #FAF8F5; /* Warm off-white card style */
+  border-radius: 12px; /* Curved edges */
+  border: 1px solid #f2ece4;
+  border-left: 5px solid #c98544; /* side stylish accent border */
+  box-shadow: 0 4px 15px rgba(62, 50, 45, 0.02);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.material-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(201, 133, 68, 0.08);
+  border-color: #c98544;
 }
 
 .material-card h3 {
   margin-top: 0;
-  color: #333;
-  font-size: 20px;
+  margin-bottom: 8px;
+  color: #2c211e;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .material-card p {
-  color: #666;
-  line-height: 1.6;
+  color: #8c7d78;
+  line-height: 1.65;
   margin-bottom: 0;
+  font-size: 14px;
 }
 
-/* மொபைல் வியூ */
+/* Responsive adjustments */
 @media (max-width: 768px) {
+  .material-wrapper {
+    padding: 40px 20px;
+  }
+  
   .material-heading {
-    font-size: 24px;
+    font-size: 20px;
   }
 }

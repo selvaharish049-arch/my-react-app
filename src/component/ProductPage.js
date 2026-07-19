@@ -6,6 +6,7 @@ import { getPriceDetails, renderStars } from '../utils/priceHelper';
 import './ProductPage.css';
 
 import BannerImage from './BannerImage';
+import CollectionSplit from './CollectionSplit';
 
 const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
   const { name } = useParams();
@@ -321,7 +322,14 @@ const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
           ← Back
         </button>
 
-        <h1 className="page-heading">{pageTitle}</h1>
+        {categories.includes(query) ? (
+          <>
+            <p className="collection-grid-sub" style={{ textAlign: 'center', marginTop: '10px' }}>FIND A FIT FOR YOUR HOUSE</p>
+            <h2 className="collection-grid-title" style={{ textAlign: 'center', marginBottom: '40px', fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#3e322d', fontWeight: '500' }}>Discover Our Collections</h2>
+          </>
+        ) : (
+          <h1 className="page-heading">{pageTitle}</h1>
+        )}
 
         {renderedContent}
 
@@ -335,6 +343,8 @@ const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
           />
         )}
       </div>
+
+      {categories.includes(query) && <CollectionSplit />}
     </div>
   );
 };

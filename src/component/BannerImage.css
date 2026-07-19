@@ -1,8 +1,9 @@
 .category-banner-container {
+  position: relative;
   width: 100%;
-  height: 350px;
+  height: 480px; /* luxurious banner height */
   overflow: hidden;
-  margin-bottom: 40px;
+  margin-bottom: 50px;
 }
 
 .category-banner-image {
@@ -11,3 +12,88 @@
   object-fit: cover;
   display: block;
 }
+
+/* Text Overlay Block matching mockup styling */
+.category-banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(253, 252, 251, 0.22); /* soft overlay tint */
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.category-banner-shipping {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #3e322d;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 0 0 14px 0;
+}
+
+.category-banner-title {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 36px;
+  color: #2c211e;
+  font-weight: 600;
+  margin: 0 0 25px 0;
+  max-width: 650px;
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+}
+
+.category-banner-shop-btn {
+  background: transparent;
+  border: 1.5px solid #3e322d;
+  color: #3e322d;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+}
+
+.category-banner-shop-btn:hover {
+  background: #3e322d;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(62, 50, 45, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Mobile responsive banner styling */
+@media (max-width: 768px) {
+  .category-banner-container {
+    height: 380px;
+    margin-bottom: 35px;
+  }
+
+  .category-banner-shipping {
+    font-size: 11px;
+    letter-spacing: 1.2px;
+  }
+
+  .category-banner-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+    max-width: 90%;
+  }
+
+  .category-banner-shop-btn {
+    padding: 10px 24px;
+    font-size: 13px;
+  }
+}
+

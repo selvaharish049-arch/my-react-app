@@ -1,67 +1,70 @@
 import React from 'react';
 import './Banner.css';
 
-// Left slider-ku matum Swiper component matrum required modules
+// Import Swiper components & modules
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Autoplay } from 'swiper/modules'; 
+import { Navigation, Autoplay, Pagination, EffectFade } from 'swiper/modules'; 
 
 // Core Swiper styles CSS imports
 import 'swiper/css';
 import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 
-// --- LEFT SIDE SLIDER IMAGES (3 Images) ---
-import leftImg1 from '../assets/a1.jpg'; 
-import leftImg2 from '../assets/a2.jpg'; 
-import leftImg3 from '../assets/a3.webp'; 
+// Import our high-quality generated assets as slides
+import slide1 from '../assets/collection_banner_room.jpg'; 
+import slide2 from '../assets/portfolio_penthouse.jpg'; 
+import slide3 from '../assets/portfolio_townhouse.jpg'; 
 
-// --- RIGHT SIDE STATIC IMAGES (Single Image Each) ---
-import rightTopChair from '../assets/a5.webp'; 
-import rightBottomLamp from '../assets/ab.webp'; 
+const bannerSlides = [
+  {
+    img: slide1,
+    title: 'Elevated Living Spaces, Timeless Design',
+    desc: 'Customized premium home interiors made for modern living.'
+  },
+  {
+    img: slide2,
+    title: 'Curated Luxury, Personalized Comfort',
+    desc: 'Handcrafted furniture and designer woodwork to elevate your home aesthetics.'
+  },
+  {
+    img: slide3,
+    title: 'Inspiring Layouts, Tailored Spaces',
+    desc: 'Innovative space planning and bespoke architectural interior solutions.'
+  }
+];
 
 const Banner = () => {
-  // Left side slider array list
-  const leftSliderImages = [leftImg1, leftImg2, leftImg3];
-
   return (
-    <div className="banner-grid-container">
-      
-      {/* LEFT SIDE: 3-Seconds Automatic Image Slider */}
-      <div className="left-banner">
-        <Swiper
-          modules={[Navigation, Autoplay]}
-          navigation={true} 
-          autoplay={{ 
-            delay: 3000,                  // 3 seconds auto rotation
-            disableOnInteraction: false,   
-            pauseOnMouseEnter: true       
-          }}
-          loop={true}                     
-          speed={800}                     
-          className="mySwiper"
-        >
-          {leftSliderImages.map((image, index) => (
-            <SwiperSlide key={index}>
-              <img src={image} alt={`Left Banner Slide ${index + 1}`} className="responsive-img" />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
-
-      {/* RIGHT SIDE: Static Top and Bottom Single Images */}
-      <div className="right-banner-container">
-        
-        {/* Right Top Area (Single Chair Image) */}
-        <div className="right-box-wrapper">
-          <img src={rightTopChair} alt="Featured Chair" className="responsive-img" />
-        </div>
-        
-        {/* Right Bottom Area (Single Lamp Grid Image) */}
-        <div className="right-box-wrapper">
-          <img src={rightBottomLamp} alt="Modern Lamps" className="responsive-img" />
-        </div>
-
-      </div>
-
+    <div className="banner-slider-container">
+      <Swiper
+        modules={[Navigation, Autoplay, Pagination, EffectFade]}
+        effect={'fade'} // Use fade transition instead of sliding
+        navigation={true} 
+        pagination={{ clickable: true }}
+        autoplay={{ 
+          delay: 5000,                  // 5 seconds auto rotation
+          disableOnInteraction: false,   
+          pauseOnMouseEnter: true       
+        }}
+        loop={true}                     
+        speed={1000}                     
+        className="bannerSwiper"
+      >
+        {bannerSlides.map((slide, index) => (
+          <SwiperSlide key={index}>
+            <div className="banner-slide-wrapper">
+              <img src={slide.img} alt={`Banner Slide ${index + 1}`} className="banner-slide-image" />
+              <div className="banner-slide-overlay">
+                <div className="banner-slide-content">
+                  <h1 className="banner-slide-title">{slide.title}</h1>
+                  <p className="banner-slide-desc">{slide.desc}</p>
+                </div>
+              </div>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </div>
   );
 };

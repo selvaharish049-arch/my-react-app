@@ -1,181 +1,299 @@
 .customer-reviews-section {
-  padding: 60px 40px;
-  background-color: #faf9f6;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding: 80px 20px;
+  background-color: #fdfcfb;
+  border-top: 1px solid #f2ece4;
+  border-bottom: 1px solid #f2ece4;
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  color: #3e322d;
 }
 
 .section-header {
+  display: flex;
+  align-items: center;
   text-align: center;
-  margin-bottom: 40px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 50px auto;
+}
+
+.section-header::before,
+.section-header::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e1d8cf;
+}
+
+.section-header::before {
+  margin-right: 25px;
+}
+
+.section-header::after {
+  margin-left: 25px;
 }
 
 .section-header h2 {
-  font-size: 28px;
-  color: #222;
-  font-weight: 800;
-  margin: 0 0 10px 0;
-}
-
-.section-header p {
-  color: #666;
-  font-size: 15px;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 24px;
+  color: #3e322d;
+  font-weight: 500;
   margin: 0;
+  letter-spacing: 0.5px;
 }
 
-.no-reviews {
-  text-align: center;
-  color: #888;
-  font-style: italic;
-  padding: 40px;
-}
-
-/* Layout splits reviews and submission form */
+/* Layout Container */
 .reviews-main-layout {
   display: grid;
-  grid-template-columns: 2fr 1.1fr;
-  gap: 40px;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 30px;
   max-width: 1200px;
   margin: 0 auto;
   align-items: start;
 }
 
-/* Reviews List */
-.reviews-list-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-height: 600px;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-.review-card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-  border: 1px solid #f4f3f0;
-  display: flex;
-  flex-direction: column;
+/* Testimonial Slider Container */
+.testimonial-slider-container {
+  width: 100%;
   position: relative;
-  transition: transform 0.2s;
+  background: #FAF8F5; /* Warm off-white card background */
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(62, 50, 45, 0.05);
+  border: 1px solid #f3ebe1;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-.review-card:hover {
+.testimonial-slider-container:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 15px 50px rgba(62, 50, 45, 0.08);
 }
 
-.review-card-header {
+/* Flex layout card split */
+.testimonial-card {
+  display: flex;
+  min-height: 420px;
+  width: 100%;
+}
+
+/* Left panel for comments, author, pagination */
+.testimonial-left-panel {
+  flex: 1.25;
+  padding: 45px 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+/* Quote mark icon */
+.quote-mark {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 80px;
+  color: #bfa895;
+  line-height: 1;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  user-select: none;
+  font-weight: bold;
+}
+
+/* Testimonial Quote text */
+.testimonial-comment {
+  font-size: 18px;
+  line-height: 1.65;
+  color: #4a3e39;
+  font-style: italic;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  margin: 0 0 30px 0;
+  letter-spacing: 0.2px;
+}
+
+/* Bottom elements alignment */
+.testimonial-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* Author block */
+.testimonial-author-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
 }
 
-.review-user-avatar {
-  width: 40px;
-  height: 40px;
-  background: #f0e6dd;
-  color: #8c6239;
+.author-avatar {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.author-details {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
+  flex-direction: column;
+}
+
+.author-name {
   font-size: 16px;
+  font-weight: 700;
+  color: #2c211e;
+  margin: 0;
 }
 
-.review-user-info h4 {
-  margin: 0 0 2px 0;
-  font-size: 14px;
-  color: #333;
+.author-subtitle {
+  font-size: 13px;
+  color: #8c7d78;
+  margin: 2px 0 0 0;
 }
 
-.review-date {
-  font-size: 11px;
-  color: #999;
-}
-
-.review-stars-row {
+/* Rating Stars */
+.testimonial-stars-container {
   display: flex;
   gap: 3px;
-  margin-bottom: 12px;
 }
 
 .review-star {
   font-size: 16px;
 }
+
 .review-star.filled {
-  color: #ffb400;
+  color: #c98544; /* Premium gold/bronze color */
 }
+
 .review-star.empty {
-  color: #ccc;
+  color: #e5dfd8;
 }
 
-.review-comment {
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: #555;
-  font-style: italic;
-  margin: 0;
+/* Slider indicators/dots */
+.slider-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 30px;
 }
 
-.btn-delete-review {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: #ffebee;
-  color: #c62828;
-  border: 1px solid #ffcdd2;
-  padding: 5px 10px;
+.slider-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid #bfa895;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slider-dot.active {
+  width: 28px;
   border-radius: 4px;
-  font-size: 11px;
+  background: #c98544;
+  border-color: #c98544;
+}
+
+/* Delete review action button */
+.btn-delete-active-review {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  background: #fff5f5;
+  color: #e53e3e;
+  border: 1px solid #feb2b2;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  z-index: 5;
 }
 
-.btn-delete-review:hover {
-  background: #c62828;
+.btn-delete-active-review:hover {
+  background: #e53e3e;
   color: white;
-  border-color: #c62828;
+  border-color: #e53e3e;
 }
 
-/* Submission Form styling */
+/* Right side panel for design imagery */
+.testimonial-right-panel {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  transition: background-image 0.5s ease-in-out;
+}
+
+/* Linear-gradient overlay creating smooth shading transition from left background color */
+.image-shading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    #FAF8F5 0%,
+    rgba(250, 248, 245, 0.95) 15%,
+    rgba(250, 248, 245, 0.7) 35%,
+    rgba(250, 248, 245, 0) 70%
+  );
+  pointer-events: none;
+}
+
+/* Column wrapper for form */
+.form-column-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Testimonial Form Card styling */
 .add-review-form-card {
+  width: 100%;
   background: white;
-  border-radius: 16px;
-  padding: 25px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f0eef9;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(62, 50, 45, 0.04);
+  border: 1px solid #f3ebe1;
+  box-sizing: border-box;
 }
 
-.add-review-form-card h3 {
-  font-size: 18px;
-  margin: 0 0 15px 0;
-  color: #333;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+.form-card-header {
+  border-bottom: 1px solid #f5ede6;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.form-card-header h3 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 19px;
+  margin: 0;
+  color: #2c211e;
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
 .review-success-msg {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #c8e6c9;
-  padding: 10px 12px;
-  border-radius: 6px;
-  font-size: 13px;
+  background-color: #e6f4ea;
+  color: #137333;
+  border: 1px solid #c2e7cc;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .review-submit-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
 .review-submit-form .form-group {
@@ -185,21 +303,24 @@
 }
 
 .review-submit-form label {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
-  color: #555;
+  color: #5c4e48;
 }
 
 .review-submit-form input,
 .review-submit-form select,
 .review-submit-form textarea {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
+  padding: 11px 13px;
+  border: 1px solid #ded6cd;
   border-radius: 8px;
-  font-size: 13.5px;
+  font-size: 14px;
   font-family: inherit;
   box-sizing: border-box;
   width: 100%;
+  background: #fdfdfd;
+  color: #3e322d;
+  transition: all 0.2s;
 }
 
 .review-submit-form textarea {
@@ -211,34 +332,81 @@
 .review-submit-form textarea:focus {
   border-color: #c98544;
   outline: none;
-  background: #fdfbf9;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(201, 133, 68, 0.08);
 }
 
 .btn-submit-review {
   background: #c98544;
   color: white;
   border: none;
-  padding: 12px;
+  padding: 13px;
   border-radius: 8px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
+  margin-top: 5px;
 }
 
 .btn-submit-review:hover {
   background: #b57335;
-  box-shadow: 0 4px 12px rgba(201, 133, 68, 0.2);
+  box-shadow: 0 4px 15px rgba(201, 133, 68, 0.2);
 }
 
-@media (max-width: 900px) {
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .reviews-main-layout {
+    grid-template-columns: 1.5fr 1.1fr;
+    gap: 20px;
+  }
+  .testimonial-left-panel {
+    padding: 35px 40px;
+  }
+}
+
+@media (max-width: 868px) {
   .reviews-main-layout {
     grid-template-columns: 1fr;
+    gap: 30px;
   }
 }
 
 @media (max-width: 768px) {
   .customer-reviews-section {
-    padding: 40px 20px;
+    padding: 60px 15px;
+  }
+
+  .testimonial-card {
+    flex-direction: column-reverse; /* Put image on top for mobile layout */
+    min-height: auto;
+  }
+
+  .testimonial-right-panel {
+    height: 220px;
+    width: 100%;
+  }
+
+  .image-shading-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(250, 248, 245, 0) 30%,
+      rgba(250, 248, 245, 0.8) 75%,
+      #FAF8F5 100%
+    );
+  }
+
+  .testimonial-left-panel {
+    padding: 30px;
+  }
+
+  .testimonial-comment {
+    font-size: 17px;
+    margin-bottom: 25px;
+  }
+
+  .slider-dots {
+    margin-top: 25px;
   }
 }
+

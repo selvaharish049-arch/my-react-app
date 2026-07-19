@@ -1,85 +1,175 @@
-/* Container Box with exact grid ratios */
-.banner-grid-container {
-  display: grid;
-  grid-template-columns: 1.85fr 1fr; /* Image-il ulla main width split weight ratio */
-  gap: 14px; /* Gaps between columns and blocks */
+/* Homepage Banner Slider Container with consistent left/right spacing */
+.banner-slider-container {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 16px;
+  max-width: 1520px;
+  margin: 20px auto;
+  padding: 0 20px;
+  height: 600px;
   box-sizing: border-box;
+  position: relative;
+  background-color: #faf9f8;
 }
 
-/* Common Image Control styles */
-.responsive-img {
+.bannerSwiper {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Stretch aagama perfect crop layout layout view structure */
+  border-radius: 16px; /* Curved edges for the slider container */
+  overflow: hidden;
+}
+
+.banner-slide-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.banner-slide-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
-/* Left Section Slider Design */
-.left-banner {
-  width: 100%;
-  height: 460px; /* Over-all layout standard view height */
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.left-banner .swiper {
+/* Semi-transparent Overlay to make text legible */
+.banner-slide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  background: rgba(0, 0, 0, 0.28); /* Dark tint to lift white text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
-/* Right Section Container Layout */
-.right-banner-container {
+.banner-slide-content {
+  max-width: 580px;
+  text-align: center;
+  color: #ffffff;
+  animation: fadeInUp 0.8s ease-out;
   display: flex;
   flex-direction: column;
-  gap: 14px; /* Gap between Top chair image and bottom lamp image */
-  height: 460px; /* Matches left slider height exactly */
+  align-items: center;
 }
 
-/* Right side elements sharing equal 50%-50% height dynamically */
-.right-box-wrapper {
-  flex: 1; 
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
-  width: 100%;
+.banner-slide-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.35;
+  margin: 0 0 12px 0;
+  letter-spacing: 0.5px;
 }
 
-/* Mobile Devices view stack configuration */
-@media (max-width: 768px) {
-  .banner-grid-container {
-    grid-template-columns: 1fr; /* Responsive horizontal row collapse */
-    gap: 10px;
-  }
-  .left-banner {
-    height: 280px;
-  }
-  .right-banner-container {
-    height: 380px;
-    gap: 10px;
-  }
+.banner-slide-desc {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0 0 24px 0;
+  letter-spacing: 0.5px;
 }
 
-/* Customize Swiper slider elements to be white instead of default blue */
-.left-banner .mySwiper {
-  --swiper-navigation-color: #ffffff;
-  --swiper-pagination-color: #ffffff;
+/* Button style matching mockup */
+.banner-consultation-btn {
+  background-color: #bfa895; /* Warm beige solid tone matching mockup */
+  border: none;
+  color: #3e322d;
+  padding: 14px 32px;
+  border-radius: 6px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  letter-spacing: 0.5px;
 }
 
-.left-banner .swiper-button-next,
-.left-banner .swiper-button-prev {
+.banner-consultation-btn:hover {
+  background-color: #3e322d;
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Customize Swiper Navigation Buttons */
+.bannerSwiper .swiper-button-next,
+.bannerSwiper .swiper-button-prev {
   color: #ffffff !important;
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
-.left-banner .swiper-pagination-bullet {
-  background: #ffffff !important;
-  opacity: 0.6;
+.bannerSwiper .swiper-button-next:after,
+.bannerSwiper .swiper-button-prev:after {
+  font-size: 18px !important;
+  font-weight: bold;
 }
 
-.left-banner .swiper-pagination-bullet-active {
+.bannerSwiper .swiper-button-next:hover,
+.bannerSwiper .swiper-button-prev:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Customize Swiper Pagination Dots */
+.bannerSwiper .swiper-pagination-bullet {
   background: #ffffff !important;
+  width: 10px;
+  height: 10px;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.bannerSwiper .swiper-pagination-bullet-active {
+  background: #ffffff !important;
+  width: 24px;
+  border-radius: 5px;
   opacity: 1;
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjust for mobile screens */
+@media (max-width: 768px) {
+  .banner-slider-container {
+    height: 380px;
+  }
+
+  .banner-slide-overlay {
+    padding: 0 30px;
+  }
+
+  .banner-slide-title {
+    font-size: 28px;
+  }
+
+  .banner-slide-desc {
+    font-size: 14px;
+    margin-bottom: 25px;
+  }
+
+  .banner-consultation-btn {
+    padding: 12px 24px;
+    font-size: 13px;
+  }
+  
+  .bannerSwiper .swiper-button-next,
+  .bannerSwiper .swiper-button-prev {
+    display: none; /* Hide navigation arrows on small mobile devices for cleaner look */
+  }
 }
