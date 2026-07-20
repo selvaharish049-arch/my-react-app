@@ -1,9 +1,11 @@
 .category-banner-container {
   position: relative;
-  width: 100%;
-  height: 480px; /* luxurious banner height */
+  width: 92%;
+  max-width: 1380px;
+  height: 440px; /* luxurious banner height */
   overflow: hidden;
-  margin-bottom: 50px;
+  margin: 20px auto 40px auto;
+  border-radius: 14px;
 }
 
 .category-banner-image {

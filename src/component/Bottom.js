@@ -26,9 +26,9 @@ const Bottom = () => {
           <h3>Registered Office</h3>
           <p>
             The luxe interior Furniture's Pvt.Ltd----Tuticorin <br />
-            Ashok Marg, C Scheme, Tuticorin--628008,
+            3c/195A vallinayaga puram 5th street, Tuticorin--628008,
           </p>
-          <p>Corporate Identity Number: U36100RJ2015PTC047992</p>
+          <p>Corporate Identity Number:----------</p>
         </div>
       </div>
     </footer>

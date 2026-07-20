@@ -58,7 +58,7 @@ const Banner = () => {
               <div className="banner-slide-overlay">
                 <div className="banner-slide-content">
                   <h1 className="banner-slide-title">{slide.title}</h1>
-                  <p className="banner-slide-desc">{slide.desc}</p>
+                  <button className="banner-consultation-btn">Luxe Interior</button>
                 </div>
               </div>
             </div>
