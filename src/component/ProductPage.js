@@ -56,9 +56,6 @@ const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
     return (
       <div className="product-page-container" style={{ textAlign: 'center', padding: '100px' }}>
         <h3>Loading Collections...</h3>
-        <p style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>
-          Note: The server is hosted on a free Render instance and may take up to 50 seconds to wake up if it has been inactive. Thank you for your patience!
-        </p>
       </div>
     );
   }

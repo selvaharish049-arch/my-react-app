@@ -12,7 +12,7 @@ const Home = ({ isLoggedIn, userRole }) => {
     <div>
       <Banner />
       <HomeDecor />
-      <Portfolio />
+      <Portfolio isLoggedIn={isLoggedIn} userRole={userRole} />
       <Material />
       <OurServices />
       <CustomerReviews isLoggedIn={isLoggedIn} userRole={userRole} />

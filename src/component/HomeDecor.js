@@ -15,43 +15,96 @@ import img9 from '../assets/d9.jpg';
 import img10 from '../assets/d1.jpg';
 
 const items = [
-  { name: 'SOFAS', img: img1, path: '/product/explore-sofa', price: '₹25,000', deal: 'Best deal', quality: 'Bestseller' },
-  { name: 'BEDS', img: img2, path: '/product/explore-bed', price: '₹45,000', deal: 'Royal comfort', quality: 'Top quality' },
-  { name: 'DINING', img: img3, path: '/product/explore-dining', price: '₹45,000', deal: 'Solid wood', quality: 'Premium grade' },
-  { name: 'TV UNITS', img: img4, path: '/product/explore-tvunit', price: '₹14,500', deal: 'Modern console', quality: 'Approved quality' },
-  { name: 'COFFEE TABLES', img: img5, path: '/product/explore-coffeetable', price: '₹5,200', deal: 'Minimalist oak', quality: 'Best deal' },
-  { name: 'MATTRESSES', img: img6, path: '/product/explore-mattress', price: '₹12,000', deal: 'Orthopedic foam', quality: 'Spine support' },
-  { name: 'WARDROBES', img: img7, path: '/product/explore-wardrobe', price: '₹26,000', deal: 'Spacious sliding', quality: 'Best warranty' },
-  { name: 'SOFA CUM BEDS', img: img8, path: '/product/explore-sofacumbed', price: '₹29,000', deal: 'Double utility', quality: 'Space saver' },
-  { name: 'BOOKSHELVES', img: img9, path: '/product/explore-bookshelf', price: '₹9,800', deal: 'Library showcase', quality: 'Premium finish' },
-  { name: 'ALL STUDY', img: img10, path: '/product/explore-study', price: '₹8,500', deal: 'Ergo desk', quality: 'Top choice' },
+  { 
+    title: 'Modern Minimalist Home', 
+    category: 'SOFAS', 
+    location: 'Mumbai, India', 
+    img: img1, 
+    path: '/product/explore-sofa' 
+  },
+  { 
+    title: 'Warm Contemporary Villa', 
+    category: 'BEDS', 
+    location: 'Bangalore, India', 
+    img: img2, 
+    path: '/product/explore-bed' 
+  },
+  { 
+    title: 'Luxury Bedroom Suite', 
+    category: 'DINING', 
+    location: 'Delhi, India', 
+    img: img3, 
+    path: '/product/explore-dining' 
+  },
+  { 
+    title: 'Urban Chic Lounge', 
+    category: 'TV UNITS', 
+    location: 'Hyderabad, India', 
+    img: img4, 
+    path: '/product/explore-tvunit' 
+  },
+  { 
+    title: 'Minimalist Coffee Table', 
+    category: 'COFFEE TABLES', 
+    location: 'Chennai, India', 
+    img: img5, 
+    path: '/product/explore-coffeetable' 
+  },
+  { 
+    title: 'Royal Comfort Suite', 
+    category: 'MATTRESSES', 
+    location: 'Pune, India', 
+    img: img6, 
+    path: '/product/explore-mattress' 
+  },
+  { 
+    title: 'Spacious Sliding Wardrobe', 
+    category: 'WARDROBES', 
+    location: 'Kolkata, India', 
+    img: img7, 
+    path: '/product/explore-wardrobe' 
+  },
+  { 
+    title: 'Double Utility Sofa Bed', 
+    category: 'SOFA CUM BEDS', 
+    location: 'Ahmedabad, India', 
+    img: img8, 
+    path: '/product/explore-sofacumbed' 
+  },
+  { 
+    title: 'Library Showcase Shelf', 
+    category: 'BOOKSHELVES', 
+    location: 'Jaipur, India', 
+    img: img9, 
+    path: '/product/explore-bookshelf' 
+  },
+  { 
+    title: 'Ergonomic Study Workspace', 
+    category: 'ALL STUDY', 
+    location: 'Kochi, India', 
+    img: img10, 
+    path: '/product/explore-study' 
+  },
 ];
 
 const HomeDecor = () => {
   const navigate = useNavigate();
-  const [activeIndex, setActiveIndex] = useState(2); // Start highlighted on the 3rd item (Dining)
+  const [currentIndex, setCurrentIndex] = useState(0);
   const trackRef = useRef(null);
-  
-  // Refs for tracking drag/swipe coords
+
+  // Swipe / Drag handling
   const dragStartX = useRef(0);
   const dragEndX = useRef(0);
   const isDragging = useRef(false);
 
-
-
-  const handleTabClick = (index) => {
-    setActiveIndex(index);
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? items.length - 1 : prev - 1));
   };
 
-  const handleCardClick = (index, path) => {
-    if (index === activeIndex) {
-      navigate(path);
-    } else {
-      setActiveIndex(index);
-    }
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev === items.length - 1 ? 0 : prev + 1));
   };
 
-  // Swipe Handlers for Touch and Mouse Dragging
   const handleTouchStart = (e) => {
     dragStartX.current = e.touches[0].clientX;
     dragEndX.current = e.touches[0].clientX;
@@ -88,93 +141,91 @@ const HomeDecor = () => {
 
   const processSwipe = () => {
     const diffX = dragStartX.current - dragEndX.current;
-    const threshold = 60; // minimum drag distance in pixels to count as swipe
+    const threshold = 50;
     if (Math.abs(diffX) > threshold) {
       if (diffX > 0) {
-        // Dragged left -> show next slide
-        setActiveIndex((prev) => (prev + 1) % items.length);
+        handleNext();
       } else {
-        // Dragged right -> show prev slide
-        setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
+        handlePrev();
       }
     }
   };
 
-  const cardWidth = 320; // Matches CSS width
-  const gap = 30; // Matches CSS gap
-  const trackTransform = `translateX(calc(50% - ${activeIndex * (cardWidth + gap) + cardWidth / 2}px))`;
-
   return (
-    <div className="decor-grid-container">
-      {/* Title Styled in "Our Services" Theme */}
-      <div className="decor-grid-title">
-        <h2>Our Craftsmanship For Home Decor</h2>
-      </div>
-
-      {/* Tabs Navigation (Category selection at the top) */}
-      <div className="decor-tabs">
-        {items.map((item, index) => (
-          <button
-            key={index}
-            className={`decor-tab ${index === activeIndex ? 'active' : ''}`}
-            onClick={() => handleTabClick(index)}
-          >
-            {item.name}
-          </button>
-        ))}
-      </div>
-
-      {/* Testimonial Slider/Carousel Viewport with Swipe Events */}
-      <div 
-        className="decor-slider-viewport"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-      >
-        <div 
-          className="decor-slider-track" 
-          ref={trackRef}
-          style={{ transform: trackTransform }}
-        >
-          {items.map((item, index) => {
-            const isActive = index === activeIndex;
-            return (
-              <div 
-                key={index} 
-                className={`decor-slider-card ${isActive ? 'active' : 'inactive'}`}
-                onClick={() => handleCardClick(index, item.path)}
-              >
-                {/* Header detail block showing only product name */}
-                <div className="decor-card-header">
-                  <h4 className="decor-card-name">{item.name}</h4>
-                </div>
-
-                {/* Card Center: Product Image */}
-                <div className="decor-card-image-wrapper">
-                  <img src={item.img} alt={item.name} />
-                </div>
-              </div>
-            );
-          })}
+    <section className="decor-projects-section">
+      <div className="decor-projects-container">
+        
+        {/* Left Info Panel */}
+        <div className="decor-info-panel">
+          <span className="decor-subtitle">OUR CRAFTSMANSHIP FOR HOME DECOR</span>
+          <h2 className="decor-main-title">
+            Spaces We<br />Are Proud Of
+          </h2>
+          <p className="decor-description">
+            Every project is a reflection of our passion for design and attention to detail.
+          </p>
         </div>
-      </div>
 
-      {/* Dot Indicators below the Slider */}
-      <div className="decor-dots">
-        {items.map((_, index) => (
-          <button
-            key={index}
-            className={`decor-dot ${index === activeIndex ? 'active' : ''}`}
-            onClick={() => setActiveIndex(index)}
-            aria-label={`Go to category ${index + 1}`}
-          />
-        ))}
+        {/* Right Slider Section */}
+        <div className="decor-slider-section">
+          
+          {/* Top Navigation Controls */}
+          <div className="decor-nav-controls">
+            <button className="decor-nav-btn" onClick={handlePrev} aria-label="Previous Slide">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button className="decor-nav-btn" onClick={handleNext} aria-label="Next Slide">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          {/* Cards Track Container */}
+          <div 
+            className="decor-cards-viewport"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
+            <div 
+              className="decor-cards-track"
+              ref={trackRef}
+              style={{
+                transform: `translateX(-${currentIndex * 310}px)`
+              }}
+            >
+              {items.map((item, index) => (
+                <div 
+                  key={index}
+                  className="decor-project-card"
+                  onClick={() => navigate(item.path)}
+                >
+                  <div className="decor-card-image-box">
+                    <img src={item.img} alt={item.title} />
+                  </div>
+                  <div className="decor-card-body">
+                    <div className="decor-card-text">
+                      <h3 className="decor-card-title">{item.title}</h3>
+                      <p className="decor-card-location">{item.location}</p>
+                    </div>
+                    <span className="decor-card-arrow">&rarr;</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
       </div>
-    </div>
+    </section>
   );
 };
 
