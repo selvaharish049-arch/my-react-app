@@ -1,0 +1,123 @@
+.collection-split-wrapper {
+  background-color: #fdfcfb;
+  border-top: 1px solid #f2ece4;
+  padding: 80px 40px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.collection-split-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1.3fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.collection-split-left {
+  width: 100%;
+}
+
+/* Curved Arch Image container */
+.collection-arch-img-box {
+  width: 100%;
+  border-radius: 20px; /* Cozy curved edges for the image box */
+  overflow: hidden;
+  border: 1px solid #f2ece4;
+  box-shadow: 0 10px 30px rgba(62, 50, 45, 0.05);
+}
+
+.collection-arch-img-box img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.collection-split-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.collection-split-shipping {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #c98544;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  margin: 0 0 15px 0;
+}
+
+.collection-split-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  line-height: 1.4;
+  color: #2c211e;
+  font-weight: 500;
+  margin: 0 0 25px 0;
+  letter-spacing: 0.2px;
+}
+
+.collection-split-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 35px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.collection-split-bullets li {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14.5px;
+  color: #5c4e48;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bullet-dot {
+  color: #c98544;
+  font-weight: bold;
+}
+
+.collection-split-learn-btn {
+  background: #FAF8F5;
+  border: 1px solid #3e322d;
+  color: #3e322d;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  letter-spacing: 0.5px;
+}
+
+.collection-split-learn-btn:hover {
+  background: #3e322d;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(62, 50, 45, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Mobile responsive columns */
+@media (max-width: 768px) {
+  .collection-split-wrapper {
+    padding: 50px 20px;
+  }
+
+  .collection-split-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .collection-split-heading {
+    font-size: 22px;
+  }
+}

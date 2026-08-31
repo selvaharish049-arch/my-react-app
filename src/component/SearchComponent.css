@@ -1,0 +1,152 @@
+.search-component-wrapper {
+  position: relative;
+  z-index: 9999;
+}
+
+.search-container {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+}
+
+.search-container form {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 12px 45px 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s;
+  background: #faf9f6;
+}
+
+.search-container input:focus {
+  border-color: #c98544;
+  outline: none;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.search-go-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* Dropdown Menu overlay container */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #eee;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  padding: 20px;
+  z-index: 10000;
+  border-radius: 12px;
+  margin-top: 8px;
+  box-sizing: border-box;
+}
+
+.menu-title {
+  margin: 0 0 10px 0;
+  color: #8c6239;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.empty-msg {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 15px 0;
+}
+
+/* Suggestion matching items */
+.suggestions-section {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f4f3f0;
+  padding-bottom: 15px;
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+  background: #fbf9f6;
+}
+
+.suggestion-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  background: #fafaf9;
+}
+
+.suggestion-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestion-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.suggestion-price {
+  font-size: 12px;
+  color: #c98544;
+  font-weight: 700;
+}
+
+/* Pills trending section */
+.trending-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #f0eef9;
+  background: #faf9f6;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.pill-btn:hover {
+  background: #f0e6dd;
+  color: #8c6239;
+  border-color: #f0e6dd;
+}

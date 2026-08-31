@@ -1,0 +1,105 @@
+.category-banner-container {
+  position: relative;
+  width: 92%;
+  max-width: 1380px;
+  height: 440px; /* luxurious banner height */
+  overflow: hidden;
+  margin: 20px auto 40px auto;
+  border-radius: 14px;
+}
+
+.category-banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: brightness(1.1) contrast(1.02); /* Bright and clear image */
+}
+
+/* Text Overlay Block matching mockup styling */
+.category-banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(15, 12, 11, 0.22); /* soft transparent overlay tint */
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.category-banner-shipping {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 0 0 14px 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.category-banner-title {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 36px;
+  color: #ffffff;
+  font-weight: 600;
+  margin: 0 0 25px 0;
+  max-width: 650px;
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.category-banner-shop-btn {
+  background: #ffffff;
+  border: 1.5px solid #ffffff;
+  color: #2c211e;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.category-banner-shop-btn:hover {
+  background: #2c211e;
+  color: #fff;
+  border-color: #2c211e;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Mobile responsive banner styling */
+@media (max-width: 768px) {
+  .category-banner-container {
+    height: 380px;
+    margin-bottom: 35px;
+  }
+
+  .category-banner-shipping {
+    font-size: 11px;
+    letter-spacing: 1.2px;
+  }
+
+  .category-banner-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+    max-width: 90%;
+  }
+
+  .category-banner-shop-btn {
+    padding: 10px 24px;
+    font-size: 13px;
+  }
+}

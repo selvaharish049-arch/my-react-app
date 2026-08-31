@@ -1,0 +1,129 @@
+.services-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 40px;
+  box-sizing: border-box;
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+}
+
+/* Header style with left/right lines */
+.services-header {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 45px;
+}
+
+.services-header::before,
+.services-header::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e1d8cf;
+}
+
+.services-header::before {
+  margin-right: 25px;
+}
+
+.services-header::after {
+  margin-left: 25px;
+}
+
+.services-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  color: #3e322d;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Container side by side columns */
+.services-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.service-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+/* Vertical divider lines between columns */
+.service-box:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 15%;
+  height: 70%;
+  width: 1px;
+  background-color: #ede7e1;
+}
+
+/* Icon circles */
+.service-icon-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 1px solid #dcd3ca;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #faf9f8;
+  margin-bottom: 18px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.service-box:hover .service-icon-circle {
+  transform: translateY(-3px);
+  border-color: #c98544;
+  background-color: #ffffff;
+  box-shadow: 0 6px 15px rgba(201, 133, 68, 0.08);
+}
+
+.service-icon-circle svg {
+  transition: stroke 0.3s;
+}
+
+.service-box:hover .service-icon-circle svg {
+  stroke: #c98544;
+}
+
+/* Service Title styling */
+.service-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #5c4e48;
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+/* Responsive Stacking */
+@media (max-width: 768px) {
+  .services-wrapper {
+    padding: 40px 20px;
+  }
+
+  .services-container {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .service-box:not(:last-child)::after {
+    right: auto;
+    bottom: -20px;
+    top: auto;
+    height: 1px;
+    width: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ede7e1;
+  }
+}
