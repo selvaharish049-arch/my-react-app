@@ -28,10 +28,30 @@ const orderSchema = new mongoose.Schema({
     required: true, 
     trim: true 
   },
+  email: { 
+    type: String, 
+    default: '' 
+  },
+  address: { 
+    type: String, 
+    default: '' 
+  },
   projectType: { 
     type: String, 
     required: true, 
     default: 'Full Interior'
+  },
+  items: { 
+    type: Array, 
+    default: [] 
+  },
+  totalAmount: { 
+    type: String, 
+    default: '' 
+  },
+  paymentMode: { 
+    type: String, 
+    default: 'Cash on Delivery' 
   },
   currentStep: { 
     type: Number, 

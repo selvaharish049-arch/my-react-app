@@ -112,16 +112,19 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
       }
     } else {
       // Login Logic
-      const isSystemAdmin = formData.email.trim() === 'karthi' && formData.password === 'karthi@123';
+      const inputUser = formData.email.trim().toLowerCase();
+      const isSystemAdmin = (inputUser === 'karthi' || inputUser === 'karthi@gmail.com') && 
+                            (formData.password === 'karthi123' || formData.password === 'karthi@123');
       
       if (activeTab === 'admin') {
         if (isSystemAdmin) {
           setIsLoggedIn(true);
           if (setUserRole) setUserRole('admin');
           if (setCurrentUser) setCurrentUser({ name: 'Karthi', email: 'karthi' });
-          navigate('/');
+          if (typeof onClose === 'function') onClose();
+          navigate('/admin');
         } else {
-          alert("Invalid Admin credentials!");
+          alert("Invalid Admin credentials! Use username: karthi & password: karthi123");
           return;
         }
       } else {
@@ -130,7 +133,8 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
           setIsLoggedIn(true);
           if (setUserRole) setUserRole('admin');
           if (setCurrentUser) setCurrentUser({ name: 'Karthi', email: 'karthi' });
-          navigate('/');
+          if (typeof onClose === 'function') onClose();
+          navigate('/admin');
         } else {
           let customers = [];
           try {
@@ -151,89 +155,122 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
             setIsLoggedIn(true);
             if (setUserRole) setUserRole('customer');
             if (setCurrentUser) setCurrentUser({ name: foundCustomer.name, email: foundCustomer.email });
+            if (typeof onClose === 'function') onClose();
             navigate('/');
           } else {
-            alert("Invalid customer credentials! You can register a new account or use customer@luxe.com / customer123.");
+            alert("Invalid customer credentials! You can register a new account or use admin: karthi / karthi123.");
             return;
           }
         }
       }
       
       if (typeof onClose === 'function') {
-        onClose(); // close modal window
+        onClose();
       }
     }
   };
 
   return (
     <div className="modal-overlay">
-      <div className="modal-container">
+      <div className="modal-container amazon-login-card">
         <span className="close-btn" onClick={onClose}>&times;</span>
         
-        <h2 style={{ marginBottom: '10px' }}>{isRegister ? "Sign Up" : "Sign In"}</h2>
+        {/* Amazon-style Branding Header */}
+        <div className="amazon-brand-logo">
+          <span className="brand-luxe">LUXE</span>
+          <span className="brand-sub">INTERIOR</span>
+        </div>
+
+        <h2 className="amazon-signin-title">{isRegister ? "Create account" : "Sign in"}</h2>
 
         {/* Tab Selection */}
         {!isRegister && (
-          <div className="login-tabs">
+          <div className="login-tabs amazon-tabs">
             <button 
               type="button" 
               className={activeTab === 'customer' ? 'tab-btn active' : 'tab-btn'}
               onClick={() => handleTabChange('customer')}
             >
-              Customer Login
+              Customer
             </button>
             <button 
               type="button" 
               className={activeTab === 'admin' ? 'tab-btn active' : 'tab-btn'}
               onClick={() => handleTabChange('admin')}
             >
-              Admin Login
+              Admin Sign-In
             </button>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ marginTop: '15px' }}>
+        <form onSubmit={handleSubmit} className="amazon-login-form">
           {isRegister && activeTab === 'customer' && (
             <>
-              <input name="name" placeholder="Name" onChange={handleChange} required value={formData.name} />
-              <input name="gender" placeholder="Gender" onChange={handleChange} required value={formData.gender} />
+              <label className="amazon-input-label">Your name</label>
+              <input name="name" placeholder="First and last name" onChange={handleChange} required value={formData.name} />
+              
+              <label className="amazon-input-label">Gender</label>
+              <input name="gender" placeholder="e.g. Male / Female" onChange={handleChange} required value={formData.gender} />
             </>
           )}
+
+          <label className="amazon-input-label">
+            {activeTab === 'admin' ? "Admin Username" : "Email or mobile phone number"}
+          </label>
           <input 
             name="email" 
             type={activeTab === 'admin' ? "text" : "email"} 
-            placeholder={activeTab === 'admin' ? "Username" : "Email"} 
+            placeholder={activeTab === 'admin' ? "e.g. karthi" : "email@domain.com"} 
             onChange={handleChange} 
             required 
             value={formData.email} 
           />
+
+          <label className="amazon-input-label">Password</label>
           <input 
             name="password" 
             type="password" 
-            placeholder="Password" 
+            placeholder="At least 6 characters" 
             onChange={handleChange} 
             required 
             value={formData.password} 
           />
+
           {isRegister && activeTab === 'customer' && (
-            <input 
-              name="confirmPassword" 
-              type="password" 
-              placeholder="Confirm Password" 
-              onChange={handleChange} 
-              required 
-              value={formData.confirmPassword} 
-            />
+            <>
+              <label className="amazon-input-label">Re-enter password</label>
+              <input 
+                name="confirmPassword" 
+                type="password" 
+                placeholder="Confirm password" 
+                onChange={handleChange} 
+                required 
+                value={formData.confirmPassword} 
+              />
+            </>
           )}
-          <button type="submit" className="login-submit-btn">
-            {isRegister ? "Register" : "Sign In"}
+
+          <button type="submit" className="login-submit-btn amazon-btn-primary">
+            {isRegister ? "Create your Luxe account" : "Sign in"}
           </button>
         </form>
-        
+
+        <p className="amazon-terms-text">
+          By continuing, you agree to Luxe Interior's <span>Conditions of Use</span> and <span>Privacy Notice</span>.
+        </p>
+
+        <div className="amazon-divider">
+          <span>{isRegister ? "Already have an account?" : "New to Luxe Interior?"}</span>
+        </div>
+
         {activeTab === 'customer' && (
-          <p onClick={() => setIsRegister(!isRegister)} style={{cursor: 'pointer', color: '#c98544', marginTop: '15px', textAlign: 'center', fontSize: '14px', fontWeight: '500'}}>
-            {isRegister ? "Already have an account? Login" : "Don't have an account? Sign Up"}
-          </p>
+          <button 
+            type="button" 
+            onClick={() => setIsRegister(!isRegister)} 
+            className="amazon-btn-secondary"
+          >
+            {isRegister ? "Sign in to your account" : "Create your Luxe account"}
+          </button>
         )}
       </div>
     </div>

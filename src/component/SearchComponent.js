@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllProducts } from '../data/productsData';
+import { getTranslation } from '../utils/translations';
 import './SearchComponent.css';
 
 const SearchComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [allProducts, setAllProducts] = useState([]);
+  const [currentLang, setCurrentLang] = useState(localStorage.getItem('luxe_lang') || 'en');
   const navigate = useNavigate();
 
   useEffect(() => {
     loadProducts();
-  }, [isOpen]); // Reload products list whenever search box opens
+    const handleLangChange = () => {
+      setCurrentLang(localStorage.getItem('luxe_lang') || 'en');
+    };
+    window.addEventListener('languageChange', handleLangChange);
+    return () => window.removeEventListener('languageChange', handleLangChange);
+  }, [isOpen]);
 
   const loadProducts = async () => {
     const list = await getAllProducts();
     setAllProducts(list);
   };
-
 
   const getSuggestions = () => {
     if (!searchInput.trim()) return [];
@@ -35,7 +41,6 @@ const SearchComponent = () => {
     navigate(`/product/${item.name}`);
   };
 
-
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     const term = searchInput.trim().toLowerCase();
@@ -52,6 +57,7 @@ const SearchComponent = () => {
   };
 
   const suggestions = getSuggestions();
+  const t = (key) => getTranslation(currentLang, key);
 
   return (
     <div className="search-component-wrapper">
@@ -59,13 +65,13 @@ const SearchComponent = () => {
         <form onSubmit={handleSearchSubmit}>
           <input 
             type="text" 
-            placeholder="Search Products, categories & more..." 
+            placeholder={t('searchPlaceholder')} 
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onFocus={() => setIsOpen(true)} 
             onBlur={() => setTimeout(() => setIsOpen(false), 250)}
           />
-          <button type="submit" className="search-go-btn">🔍</button>
+          <button type="submit" className="search-go-btn">{t('searchBtn')}</button>
         </form>
 
         {isOpen && (

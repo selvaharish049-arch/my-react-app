@@ -21,6 +21,7 @@ const TrackOrder = () => {
       setOrderIdInput(queryId);
       fetchOrderStatus(queryId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const fetchOrderStatus = async (idToSearch) => {
@@ -190,7 +191,6 @@ const TrackOrder = () => {
                   const stepNum = step.stepNumber || index + 1;
                   const isCompleted = stepNum < orderData.currentStep;
                   const isActive = stepNum === orderData.currentStep;
-                  const isPending = stepNum > orderData.currentStep;
 
                   let stepClass = 'pending';
                   if (isCompleted) stepClass = 'completed';

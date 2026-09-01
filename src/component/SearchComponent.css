@@ -17,30 +17,43 @@
 
 .search-container input {
   width: 100%;
-  padding: 12px 45px 12px 15px;
-  border: 1px solid #ddd;
-  border-radius: 25px;
+  padding: 10px 80px 10px 15px;
+  border: 1px solid #7a6e67;
+  border-radius: 6px 0 0 6px;
   font-size: 14px;
   font-family: inherit;
   transition: all 0.2s;
-  background: #faf9f6;
+  background: #ffffff;
+  color: #111111;
 }
 
 .search-container input:focus {
-  border-color: #c98544;
+  border-color: #ff9900;
+  box-shadow: 0 0 3px 2px rgba(228, 121, 17, 0.5);
   outline: none;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 .search-go-btn {
   position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  font-size: 16px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, #f3a847, #febd69);
+  border: 1px solid #a88734;
+  border-radius: 0 6px 6px 0;
+  color: #111111;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 0 16px;
   cursor: pointer;
-  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.search-go-btn:hover {
+  background: linear-gradient(to bottom, #e49122, #f5b045);
 }
 
 /* Dropdown Menu overlay container */

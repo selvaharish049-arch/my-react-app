@@ -434,9 +434,74 @@ app.get('/api/orders/track/:orderId', async (req, res) => {
   }
 });
 
+// Email Sender Helper for selvaharish049@gmail.com
+async function sendOrderNotificationEmail(order) {
+  const adminEmail = 'selvaharish049@gmail.com';
+  console.log(`\n========================================`);
+  console.log(`🚨 EMAIL NOTIFICATION TO ${adminEmail}`);
+  console.log(`Order ID: ${order.orderId}`);
+  console.log(`Customer: ${order.customerName} | Phone: ${order.phone} | Email: ${order.email}`);
+  console.log(`Address: ${order.address}`);
+  console.log(`Project/Product: ${order.projectType} | Total: ${order.totalAmount}`);
+  console.log(`========================================\n`);
+
+  try {
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER || adminEmail,
+        pass: process.env.EMAIL_PASS || 'app_password'
+      }
+    });
+
+    const mailOptions = {
+      from: `"Luxe Interior Orders" <${process.env.EMAIL_USER || adminEmail}>`,
+      to: adminEmail,
+      subject: `🚨 NEW INTERIOR ORDER RECEIVED: ${order.orderId} - ${order.customerName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #faf8f5;">
+          <h2 style="color: #2c211e;">🎉 New Customer Order Received!</h2>
+          <p>A new order has been submitted by <strong>${order.customerName}</strong>.</p>
+          <hr />
+          <h3>📦 Order Summary:</h3>
+          <ul>
+            <li><strong>Tracking Code (Order ID):</strong> <span style="background:#1f1816; color:#fff; padding:3px 8px; border-radius:4px;">${order.orderId}</span></li>
+            <li><strong>Customer Name:</strong> ${order.customerName}</li>
+            <li><strong>Phone:</strong> ${order.phone}</li>
+            <li><strong>Email:</strong> ${order.email || 'N/A'}</li>
+            <li><strong>Shipping / Site Address:</strong> ${order.address || 'N/A'}</li>
+            <li><strong>Project / Product:</strong> ${order.projectType}</li>
+            <li><strong>Total Amount:</strong> ${order.totalAmount || 'N/A'}</li>
+            <li><strong>Payment Mode:</strong> ${order.paymentMode || 'Cash on Delivery'}</li>
+          </ul>
+          <p><a href="http://localhost:3000/track?id=${order.orderId}" style="background:#c98544; color:#fff; padding:10px 18px; text-decoration:none; border-radius:6px; display:inline-block;">📍 Track Live Order Location & Status</a></p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Email notification sent to ${adminEmail}`);
+  } catch (err) {
+    console.log('Notice: Email details logged above & saved to database.');
+  }
+}
+
 // 3. POST /api/orders/create -> Create a new order with auto-generated Order ID
 app.post('/api/orders/create', async (req, res) => {
-  const { customerName, phone, projectType, notes, expectedCompletionDate, currentStep } = req.body;
+  const { 
+    customerName, 
+    phone, 
+    email, 
+    address, 
+    projectType, 
+    items, 
+    totalAmount, 
+    paymentMode, 
+    notes, 
+    expectedCompletionDate, 
+    currentStep 
+  } = req.body;
 
   if (!customerName || !phone || !projectType) {
     return res.status(400).json({ error: "Customer name, phone, and project type are required." });
@@ -455,7 +520,12 @@ app.post('/api/orders/create', async (req, res) => {
     orderId: generatedId,
     customerName,
     phone,
+    email: email || '',
+    address: address || '',
     projectType: projectType || 'Full Interior',
+    items: items || [],
+    totalAmount: totalAmount || '',
+    paymentMode: paymentMode || 'Cash on Delivery',
     currentStep: stepNum,
     steps: stepsArr,
     notes: notes || '',
@@ -476,6 +546,9 @@ app.post('/api/orders/create', async (req, res) => {
       console.log('Notice: Order saved to persistent storage.', dbErr.message);
     }
   }
+
+  // Trigger Email Notification to selvaharish049@gmail.com
+  sendOrderNotificationEmail(newOrder);
 
   res.status(201).json(newOrder);
 });

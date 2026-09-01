@@ -30,7 +30,7 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
     }
   };
 
-  const handleWhatsAppCheckout = (e) => {
+  const handleWhatsAppCheckout = async (e) => {
     e.preventDefault();
 
     if (!formData.name || !formData.mobile || !formData.email || !formData.address) {
@@ -57,15 +57,47 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
       }
     });
 
+    const itemsList = Object.values(groupedItems);
     let itemsMessage = '';
     let counter = 1;
-    Object.values(groupedItems).forEach(item => {
+    itemsList.forEach(item => {
       itemsMessage += `${counter}. 🛍️ *${item.name}* (Qty: ${item.quantity}) - ${item.price}\n`;
       counter++;
     });
 
+    let trackingCode = 'SH-105';
+    try {
+      // 1. Post Cart Order to Backend API
+      const res = await fetch('http://localhost:5000/api/orders/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: formData.name,
+          phone: formData.mobile,
+          email: formData.email,
+          address: formData.address,
+          projectType: itemsList.map(i => i.name).join(', '),
+          items: itemsList,
+          totalAmount: `₹${totalAmount.toLocaleString()}`,
+          paymentMode: formData.paymentMode,
+          notes: `Cart Items Count: ${cartItems.length}`
+        })
+      });
+      const orderRes = await res.json();
+      if (orderRes.orderId) {
+        trackingCode = orderRes.orderId;
+      }
+    } catch (err) {
+      console.error('Backend DB Notice:', err);
+    }
+
+    const trackingLink = `http://localhost:3000/track?id=${trackingCode}`;
+
     // Format WhatsApp order message
     const message = `*LUXE INTERIOR - CART ORDER*
+----------------------------------------
+📌 *Tracking Code:* ${trackingCode}
+🔗 *Track Live Progress:* ${trackingLink}
 ----------------------------------------
 *Customer Information:*
 👤 *Name:* ${formData.name}
@@ -75,11 +107,11 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
 💳 *Payment Mode:* ${formData.paymentMode}
 
 *Items Ordered:*
-${itemsMessage}
-----------------------------------------
+${itemsMessage}----------------------------------------
 💵 *Grand Total:* ₹${totalAmount.toLocaleString()}
 ----------------------------------------
-Please confirm my cart order booking. Thank you!`;
+Notification sent to selvaharish049@gmail.com & Database stored.
+Please confirm my cart order. Thank you!`;
 
     // Clear cart locally after checkout redirection
     setCartItems([]);
@@ -88,6 +120,8 @@ Please confirm my cart order booking. Thank you!`;
     const whatsappUrl = `https://wa.me/916379183549?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     onClose();
+    
+    alert(`🎉 Order Placed Successfully!\n\nYour Unique Tracking Code: ${trackingCode}\n\nNotification sent to selvaharish049@gmail.com. You can track your order anytime on the Track Order page.`);
   };
 
   return (

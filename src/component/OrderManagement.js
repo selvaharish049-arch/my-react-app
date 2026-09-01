@@ -278,11 +278,10 @@ const OrderManagement = () => {
               <thead>
                 <tr>
                   <th>Order ID</th>
-                  <th>Customer Name</th>
-                  <th>Phone</th>
-                  <th>Project Type</th>
+                  <th>Customer Info</th>
+                  <th>Project / Items</th>
+                  <th>Total & Payment</th>
                   <th>Current Stage</th>
-                  <th>Expected Completion</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -292,17 +291,24 @@ const OrderManagement = () => {
                     <td>
                       <span className="table-order-id">{ord.orderId}</span>
                     </td>
-                    <td><strong>{ord.customerName}</strong></td>
-                    <td>{ord.phone}</td>
+                    <td>
+                      <strong>{ord.customerName}</strong>
+                      <div style={{ fontSize: '12px', color: '#555' }}>📞 {ord.phone}</div>
+                      {ord.email && <div style={{ fontSize: '11.5px', color: '#888' }}>📧 {ord.email}</div>}
+                      {ord.address && <div style={{ fontSize: '11.5px', color: '#666', fontStyle: 'italic', maxWidth: '180px' }}>📍 {ord.address}</div>}
+                    </td>
                     <td>
                       <span className="table-project-pill">{ord.projectType}</span>
+                    </td>
+                    <td>
+                      <strong>{ord.totalAmount || '₹N/A'}</strong>
+                      <div style={{ fontSize: '11.5px', color: '#888' }}>{ord.paymentMode || 'Cash on Delivery'}</div>
                     </td>
                     <td>
                       <span className={`table-step-pill step-${ord.currentStep}`}>
                         Step {ord.currentStep}: {getStepLabel(ord.currentStep).split('. ')[1]}
                       </span>
                     </td>
-                    <td>{ord.expectedCompletionDate || 'Not set'}</td>
                     <td className="actions-cell">
                       <button 
                         className="btn-action-edit"
