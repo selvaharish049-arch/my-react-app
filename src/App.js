@@ -20,6 +20,7 @@ import CheckOut from './component/CheckOut';
 import ProductPage from './component/ProductPage';
 import AdminPanel from './component/AdminPanel';
 import HomeDecor from './component/HomeDecor';
+import TrackOrder from './component/TrackOrder';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -85,6 +86,7 @@ function App() {
           <Route path="/furniture" element={<Furniture isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
           <Route path="/woodenwork" element={<WoodenWork isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
           <Route path="/homedecor" element={<HomeDecor />} />
+          <Route path="/track" element={<TrackOrder />} />
           <Route path="/success" element={<Success />} />
           <Route path="/checkout" element={<CheckOut />} />
           <Route path="/admin" element={<AdminPanel isLoggedIn={isLoggedIn} userRole={userRole} />} />

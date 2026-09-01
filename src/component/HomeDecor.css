@@ -70,6 +70,22 @@
   border-color: #3e322d;
 }
 
+/* Header Row Layout */
+.decor-header-row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.decor-title-group {
+  flex: 1;
+}
+
+.decor-br-desktop {
+  display: inline;
+}
+
 /* Right Section with Slider */
 .decor-slider-section {
   flex: 1;
@@ -78,12 +94,19 @@
   flex-direction: column;
 }
 
-/* Top Nav Controls */
+/* Nav Controls */
 .decor-nav-controls {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
+}
+
+.decor-nav-controls-desktop {
+  justify-content: flex-end;
   margin-bottom: 24px;
+}
+
+.decor-nav-controls-mobile {
+  display: none;
 }
 
 .decor-nav-btn {
@@ -107,8 +130,13 @@
   border-color: #3e322d;
 }
 
+.decor-nav-btn:active {
+  transform: scale(0.92);
+}
+
 /* Viewport and Cards Track */
 .decor-cards-viewport {
+  position: relative;
   width: 100%;
   overflow: hidden;
   cursor: grab;
@@ -118,6 +146,45 @@
 
 .decor-cards-viewport:active {
   cursor: grabbing;
+}
+
+/* Mobile Overlay Arrows over Cards */
+.decor-overlay-arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(226, 217, 207, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 300;
+  color: #2c211e;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+  padding-bottom: 2px;
+}
+
+.decor-overlay-arrow:active {
+  transform: translateY(-50%) scale(0.9);
+  background: #3e322d;
+  color: #ffffff;
+}
+
+.decor-overlay-arrow-left {
+  left: 6px;
+}
+
+.decor-overlay-arrow-right {
+  right: 6px;
 }
 
 .decor-cards-track {
@@ -191,7 +258,7 @@
 @media (max-width: 992px) {
   .decor-projects-container {
     flex-direction: column;
-    gap: 30px;
+    gap: 20px;
   }
 
   .decor-info-panel {
@@ -199,18 +266,61 @@
     width: 100%;
   }
 
-  .decor-nav-controls {
-    justify-content: flex-start;
+  .decor-header-row {
+    align-items: center;
+  }
+
+  .decor-br-desktop {
+    display: none;
+  }
+
+  .decor-main-title {
+    font-size: 32px;
+    margin: 0 0 10px 0;
+  }
+
+  .decor-description {
+    margin: 0 0 16px 0;
+    max-width: 100%;
+  }
+
+  /* Show nav controls top-right in mobile header */
+  .decor-nav-controls-mobile {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 0;
+  }
+
+  /* Hide desktop nav controls */
+  .decor-nav-controls-desktop {
+    display: none;
+  }
+
+  /* Show floating overlay arrows on mobile */
+  .decor-overlay-arrow {
+    display: flex;
   }
 }
 
 @media (max-width: 576px) {
   .decor-projects-section {
-    padding: 50px 20px;
+    padding: 40px 16px;
   }
 
   .decor-main-title {
-    font-size: 32px;
+    font-size: 26px;
+  }
+
+  .decor-subtitle {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+  }
+
+  .decor-nav-btn {
+    width: 36px;
+    height: 36px;
   }
 
   .decor-project-card {
@@ -218,6 +328,6 @@
   }
 
   .decor-card-image-box {
-    height: 230px;
+    height: 220px;
   }
 }

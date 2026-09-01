@@ -172,10 +172,29 @@ const HomeDecor = () => {
         
         {/* Left Info Panel */}
         <div className="decor-info-panel">
-          <span className="decor-subtitle">OUR CRAFTSMANSHIP FOR HOME DECOR</span>
-          <h2 className="decor-main-title">
-            Spaces We<br />Are Proud Of
-          </h2>
+          <div className="decor-header-row">
+            <div className="decor-title-group">
+              <span className="decor-subtitle">OUR CRAFTSMANSHIP FOR HOME DECOR</span>
+              <h2 className="decor-main-title">
+                Spaces We<br className="decor-br-desktop" /> Are Proud Of
+              </h2>
+            </div>
+
+            {/* Mobile Top Navigation Controls */}
+            <div className="decor-nav-controls decor-nav-controls-mobile">
+              <button className="decor-nav-btn" onClick={handlePrev} aria-label="Previous Slide">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <button className="decor-nav-btn" onClick={handleNext} aria-label="Next Slide">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+
           <p className="decor-description">
             Every project is a reflection of our passion for design and attention to detail.
           </p>
@@ -184,8 +203,8 @@ const HomeDecor = () => {
         {/* Right Slider Section */}
         <div className="decor-slider-section">
           
-          {/* Top Navigation Controls */}
-          <div className="decor-nav-controls">
+          {/* Desktop Top Navigation Controls */}
+          <div className="decor-nav-controls decor-nav-controls-desktop">
             <button className="decor-nav-btn" onClick={handlePrev} aria-label="Previous Slide">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6"></polyline>
@@ -209,6 +228,22 @@ const HomeDecor = () => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
           >
+            {/* Overlay Navigation Arrows for Mobile View */}
+            <button 
+              className="decor-overlay-arrow decor-overlay-arrow-left" 
+              onClick={(e) => { e.stopPropagation(); handlePrev(); }} 
+              aria-label="Previous Slide"
+            >
+              ‹
+            </button>
+            <button 
+              className="decor-overlay-arrow decor-overlay-arrow-right" 
+              onClick={(e) => { e.stopPropagation(); handleNext(); }} 
+              aria-label="Next Slide"
+            >
+              ›
+            </button>
+
             <div 
               className="decor-cards-track"
               ref={trackRef}

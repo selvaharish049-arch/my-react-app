@@ -339,6 +339,217 @@ app.get('/api/deleted-reviews', (req, res) => {
   res.json(deletedIds);
 });
 
+// ==================== ORDER TRACKING SYSTEM APIS ====================
+
+// Mongoose MongoDB setup (Optional connection with JSON fallback)
+let mongoose;
+let OrderModel;
+try {
+  mongoose = require('mongoose');
+  OrderModel = require('./models/Order');
+  const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/luxe_interior';
+  mongoose.connect(MONGO_URI)
+    .then(() => console.log('MongoDB Connected for Order Tracking'))
+    .catch((err) => console.log('MongoDB notice: Running in persistent JSON storage mode.'));
+} catch (e) {
+  console.log('Mongoose notice: Using JSON storage mode for Order Tracking.');
+}
+
+// Default 4 Stage Template Helper
+function createDefaultSteps(currentStep = 1, datesMap = {}) {
+  const stageTitles = [
+    { num: 1, title: 'Order Confirmed', desc: 'Initial advance received, site measurement completed, and project scope finalized.' },
+    { num: 2, title: 'Design & Material Selection', desc: '3D renders approved. Wood grade, laminate shade, and hardware selected.' },
+    { num: 3, title: 'Carpentry & Production', desc: 'Precision CNC cutting and edge-banding in progress at factory workshop.' },
+    { num: 4, title: 'Site Installation & Delivery', desc: 'On-site carcass mounting, countertop fitting, and final quality handover.' }
+  ];
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  return stageTitles.map(st => {
+    let status = 'pending';
+    if (st.num < currentStep) status = 'completed';
+    else if (st.num === currentStep) status = 'active';
+
+    const customDate = datesMap[st.num] || (st.num === 1 ? todayStr : (status === 'completed' ? todayStr : `Est. Step ${st.num}`));
+
+    return {
+      stepNumber: st.num,
+      title: st.title,
+      status: status,
+      date: customDate,
+      description: st.desc
+    };
+  });
+}
+
+// 1. GET /api/orders -> List all orders
+app.get('/api/orders', async (req, res) => {
+  try {
+    let orders = [];
+    if (OrderModel && mongoose && mongoose.connection.readyState === 1) {
+      orders = await OrderModel.find().sort({ createdAt: -1 });
+    } else {
+      orders = loadJson('orders.json', []);
+    }
+    res.json(orders);
+  } catch (err) {
+    const orders = loadJson('orders.json', []);
+    res.json(orders);
+  }
+});
+
+// 2. GET /api/orders/track/:orderId -> Public API to fetch order status and timeline steps
+app.get('/api/orders/track/:orderId', async (req, res) => {
+  const searchId = (req.params.orderId || '').trim().toUpperCase();
+  if (!searchId) {
+    return res.status(400).json({ error: "Order ID or Phone number is required" });
+  }
+
+  try {
+    let order = null;
+    if (OrderModel && mongoose && mongoose.connection.readyState === 1) {
+      order = await OrderModel.findOne({ 
+        $or: [{ orderId: searchId }, { phone: searchId }] 
+      });
+    }
+
+    if (!order) {
+      const orders = loadJson('orders.json', []);
+      order = orders.find(o => 
+        (o.orderId && o.orderId.toUpperCase() === searchId) || 
+        (o.phone && o.phone.replace(/\D/g, '') === searchId.replace(/\D/g, ''))
+      );
+    }
+
+    if (!order) {
+      return res.status(404).json({ 
+        error: `No project order found for '${searchId}'. Please verify your Order ID (e.g., SH-101) or registered phone number.` 
+      });
+    }
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error fetching order status" });
+  }
+});
+
+// 3. POST /api/orders/create -> Create a new order with auto-generated Order ID
+app.post('/api/orders/create', async (req, res) => {
+  const { customerName, phone, projectType, notes, expectedCompletionDate, currentStep } = req.body;
+
+  if (!customerName || !phone || !projectType) {
+    return res.status(400).json({ error: "Customer name, phone, and project type are required." });
+  }
+
+  const existingOrders = loadJson('orders.json', []);
+  
+  // Auto-generate unique Order ID (e.g. SH-104)
+  const nextNum = 101 + existingOrders.length;
+  const generatedId = req.body.orderId ? req.body.orderId.trim().toUpperCase() : `SH-${nextNum}`;
+  
+  const stepNum = parseInt(currentStep || 1, 10);
+  const stepsArr = createDefaultSteps(stepNum);
+
+  const newOrder = {
+    orderId: generatedId,
+    customerName,
+    phone,
+    projectType: projectType || 'Full Interior',
+    currentStep: stepNum,
+    steps: stepsArr,
+    notes: notes || '',
+    expectedCompletionDate: expectedCompletionDate || '',
+    createdAt: new Date().toISOString()
+  };
+
+  // Save to JSON storage
+  existingOrders.push(newOrder);
+  saveJson('orders.json', existingOrders);
+
+  // Save to MongoDB if available
+  if (OrderModel && mongoose && mongoose.connection.readyState === 1) {
+    try {
+      const mongoOrder = new OrderModel(newOrder);
+      await mongoOrder.save();
+    } catch (dbErr) {
+      console.log('Notice: Order saved to persistent storage.', dbErr.message);
+    }
+  }
+
+  res.status(201).json(newOrder);
+});
+
+// 4. PUT /api/orders/update-status/:orderId -> Admin API to update currentStep and stage dates
+app.put('/api/orders/update-status/:orderId', async (req, res) => {
+  const searchId = (req.params.orderId || '').trim().toUpperCase();
+  const { currentStep, stageDates, notes, expectedCompletionDate } = req.body;
+
+  let existingOrders = loadJson('orders.json', []);
+  const index = existingOrders.findIndex(o => o.orderId.toUpperCase() === searchId);
+
+  if (index === -1) {
+    return res.status(404).json({ error: `Order ID '${searchId}' not found.` });
+  }
+
+  const targetOrder = existingOrders[index];
+  const newStepNum = parseInt(currentStep !== undefined ? currentStep : targetOrder.currentStep, 10);
+
+  // Re-calculate step statuses based on newStepNum
+  const updatedSteps = (targetOrder.steps && targetOrder.steps.length === 4 ? targetOrder.steps : createDefaultSteps(newStepNum))
+    .map((step, idx) => {
+      const num = step.stepNumber || (idx + 1);
+      let status = 'pending';
+      if (num < newStepNum) status = 'completed';
+      else if (num === newStepNum) status = 'active';
+
+      let stepDate = step.date;
+      if (stageDates && stageDates[num]) {
+        stepDate = stageDates[num];
+      }
+
+      return {
+        ...step,
+        status,
+        date: stepDate
+      };
+    });
+
+  targetOrder.currentStep = newStepNum;
+  targetOrder.steps = updatedSteps;
+  if (notes !== undefined) targetOrder.notes = notes;
+  if (expectedCompletionDate !== undefined) targetOrder.expectedCompletionDate = expectedCompletionDate;
+
+  existingOrders[index] = targetOrder;
+  saveJson('orders.json', existingOrders);
+
+  // Update in MongoDB if available
+  if (OrderModel && mongoose && mongoose.connection.readyState === 1) {
+    try {
+      await OrderModel.findOneAndUpdate({ orderId: searchId }, targetOrder);
+    } catch (e) {}
+  }
+
+  res.json({ success: true, message: `Order ${searchId} updated to Step ${newStepNum}`, order: targetOrder });
+});
+
+// 5. DELETE /api/orders/:orderId -> Admin API to delete an order
+app.delete('/api/orders/:orderId', async (req, res) => {
+  const searchId = (req.params.orderId || '').trim().toUpperCase();
+  let existingOrders = loadJson('orders.json', []);
+  
+  existingOrders = existingOrders.filter(o => o.orderId.toUpperCase() !== searchId);
+  saveJson('orders.json', existingOrders);
+
+  if (OrderModel && mongoose && mongoose.connection.readyState === 1) {
+    try {
+      await OrderModel.deleteOne({ orderId: searchId });
+    } catch (e) {}
+  }
+
+  res.json({ success: true, message: `Order ${searchId} deleted.` });
+});
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {

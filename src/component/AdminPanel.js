@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getAllProducts, addCustomProduct, deleteCustomProduct } from '../data/productsData';
+import OrderManagement from './OrderManagement';
 import './AdminPanel.css';
 
 const AdminPanel = ({ isLoggedIn, userRole }) => {
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'products'
   const [productsList, setProductsList] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
@@ -139,17 +141,58 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
   return (
     <div className="admin-panel-container">
       <div className="admin-header">
-        <h1>Luxe Interior Python Admin Dashboard</h1>
-        <p>Dynamic Python database catalog and image uploads manager.</p>
+        <h1>Luxe Interior Admin Dashboard</h1>
+        <p>Manage customer project order tracking and catalog products.</p>
+      </div>
+
+      {/* Admin Nav Tabs */}
+      <div className="admin-tabs-bar" style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <button 
+          className={`admin-tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
+          onClick={() => setActiveTab('orders')}
+          style={{
+            padding: '12px 24px',
+            borderRadius: '30px',
+            border: 'none',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            background: activeTab === 'orders' ? '#c98544' : '#ffffff',
+            color: activeTab === 'orders' ? '#ffffff' : '#3e322d',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+          }}
+        >
+          📦 Project Orders & Live Tracking
+        </button>
+        <button 
+          className={`admin-tab-btn ${activeTab === 'products' ? 'active' : ''}`}
+          onClick={() => setActiveTab('products')}
+          style={{
+            padding: '12px 24px',
+            borderRadius: '30px',
+            border: 'none',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            background: activeTab === 'products' ? '#c98544' : '#ffffff',
+            color: activeTab === 'products' ? '#ffffff' : '#3e322d',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+          }}
+        >
+          🛋️ Catalog Products Manager
+        </button>
       </div>
 
       {message && <div className="admin-message">{message}</div>}
 
-      <div className="admin-main-grid">
-        {/* Form Column */}
-        <div className="admin-card admin-form-card">
-          <h2>✨ Add New Product</h2>
-          <form onSubmit={handleFormSubmit} className="admin-product-form">
+      {activeTab === 'orders' ? (
+        <OrderManagement />
+      ) : (
+        <div className="admin-main-grid">
+          {/* Form Column */}
+          <div className="admin-card admin-form-card">
+            <h2>✨ Add New Product</h2>
+            <form onSubmit={handleFormSubmit} className="admin-product-form">
             <div className="form-group">
               <label>Product Name *</label>
               <input 
@@ -367,6 +410,7 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 };

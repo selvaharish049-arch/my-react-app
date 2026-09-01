@@ -31,7 +31,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, userRole, currentUser, onLogout, on
           <span>Furniture</span> | <span>Home Interiors</span> | <span>Bulk Order</span>
         </div>
         <div className="top-bar-right">
-          <span>📞 +91 6379183549</span> | <span>Track Order</span> | <span>Help Center</span>
+          <span>📞 +91 6379183549</span> | <Link to="/track" className="top-bar-link" style={{ color: 'inherit', textDecoration: 'none' }}>Track Order</Link> | <span>Help Center</span>
         </div>
       </div>
 
