@@ -122,6 +122,15 @@
   background: #ffffff;
 }
 
+.amazon-login-form input:-webkit-autofill,
+.amazon-login-form input:-webkit-autofill:hover,
+.amazon-login-form input:-webkit-autofill:focus,
+.amazon-login-form input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #111111 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .amazon-login-form input:focus {
   border-color: #e77600;
   box-shadow: 0 0 3px 2px rgba(228, 121, 17, 0.4);
@@ -209,4 +218,39 @@
 
 .login-submit-btn:hover {
   background-color: #b57335;
+}
+
+/* Disable MS Edge, Chrome, and Webkit password reveal eye buttons & autofill popups */
+input[name="luxe_security_key"],
+input[name="luxe_security_confirm_key"],
+input[type="password"],
+input[type="password"]:focus,
+input[type="password"]:hover {
+  -webkit-text-security: disc !important;
+  font-family: caption, monospace !important;
+}
+
+input::-ms-reveal,
+input::-ms-clear,
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-strong-password-auto-fill-button,
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  right: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
 }

@@ -198,6 +198,10 @@ export const addCustomProduct = async (formData) => {
     }
     
     const description = formData.get('description') || 'Premium custom crafted furniture piece.';
+    const discountPercent = parseInt(formData.get('discountPercent') || '26', 10);
+    const cleanPrice = parseInt(price.replace(/[₹,]/g, ''), 10) || 10000;
+    const originalPrice = Math.round(cleanPrice / (1 - Math.min(discountPercent, 90) / 100));
+    const original = `₹${originalPrice.toLocaleString()}`;
     
     let img = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
     const imageFile = formData.get('image');
@@ -213,6 +217,9 @@ export const addCustomProduct = async (formData) => {
       id,
       name,
       price,
+      original,
+      discountPercent,
+      discount: `-${discountPercent}%`,
       category,
       description,
       rating: 5,

@@ -86,7 +86,7 @@ const CategoryLayout = ({ category, isLoggedIn, userRole, addToCart, triggerLogi
                 <h3>{item.name}</h3>
                 {renderStars(item.rating)}
                 {(() => {
-                  const priceInfo = getPriceDetails(item.price);
+                  const priceInfo = getPriceDetails(item.price, item);
                   return (
                     <div className="product-card-price-row">
                       <span className="product-card-current-price">{priceInfo.price}</span>
@@ -134,6 +134,7 @@ const CategoryLayout = ({ category, isLoggedIn, userRole, addToCart, triggerLogi
           onClose={() => setSelectedProduct(null)}
           addToCart={addToCart}
           isLoggedIn={isLoggedIn}
+          userRole={userRole}
           triggerLogin={triggerLogin}
         />
       )}

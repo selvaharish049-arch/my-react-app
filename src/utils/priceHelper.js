@@ -1,18 +1,38 @@
 import React from 'react';
 
-export const getPriceDetails = (priceStr) => {
+export const getPriceDetails = (priceStr, productObj = {}) => {
   if (!priceStr) return { price: '₹0', original: '', discount: '' };
   const cleanPrice = parseInt(priceStr.toString().replace(/[₹,]/g, '')) || 0;
   if (!cleanPrice) return { price: priceStr, original: '', discount: '' };
   
-  // Deterministic fake original price & discount based on price value
-  const discountPercent = 40 + (cleanPrice % 15); // yields between 40% and 54%
+  if (productObj && productObj.discountPercent !== undefined && productObj.discountPercent !== null) {
+    const discNum = parseInt(productObj.discountPercent, 10) || 0;
+    const originalPrice = Math.round(cleanPrice / (1 - Math.min(discNum, 90) / 100));
+    return {
+      price: `₹${cleanPrice.toLocaleString()}`,
+      original: productObj.original || `₹${originalPrice.toLocaleString()}`,
+      discount: `-${discNum}%`
+    };
+  }
+
+  if (productObj && productObj.original) {
+    const origClean = parseInt(productObj.original.toString().replace(/[₹,]/g, '')) || 0;
+    const disc = origClean > cleanPrice ? Math.round(((origClean - cleanPrice) / origClean) * 100) : 26;
+    return {
+      price: `₹${cleanPrice.toLocaleString()}`,
+      original: `₹${origClean.toLocaleString()}`,
+      discount: `-${disc}%`
+    };
+  }
+
+  // Default discount calculation
+  const discountPercent = 26;
   const originalPrice = Math.round(cleanPrice / (1 - discountPercent / 100));
   
   return {
     price: `₹${cleanPrice.toLocaleString()}`,
     original: `₹${originalPrice.toLocaleString()}`,
-    discount: `${discountPercent}% OFF`
+    discount: `-${discountPercent}%`
   };
 };
 

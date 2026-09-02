@@ -65,38 +65,51 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
       counter++;
     });
 
-    let trackingCode = 'SH-105';
+    const trackingCode = 'LX-' + Math.floor(1000 + Math.random() * 9000);
+    const newOrderObj = {
+      orderId: trackingCode,
+      customerName: formData.name,
+      phone: formData.mobile,
+      email: formData.email,
+      address: formData.address,
+      projectType: itemsList.map(i => i.name).join(', '),
+      totalAmount: `₹${totalAmount.toLocaleString()}`,
+      paymentMode: formData.paymentMode,
+      currentStep: 1,
+      expectedCompletionDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      orderDate: new Date().toLocaleDateString(),
+      notes: `Cart Items (${itemsList.length}): ${itemsList.map(i => `${i.name} (x${i.quantity})`).join(', ')}`
+    };
+
+    // Save order to localStorage so Admin Order Database shows it immediately
+    try {
+      const stored = localStorage.getItem('luxe_customer_orders');
+      const list = stored ? JSON.parse(stored) : [];
+      list.unshift(newOrderObj);
+      localStorage.setItem('luxe_customer_orders', JSON.stringify(list));
+    } catch (e) {}
+
     try {
       // 1. Post Cart Order to Backend API
       const res = await fetch('http://localhost:5000/api/orders/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerName: formData.name,
-          phone: formData.mobile,
-          email: formData.email,
-          address: formData.address,
-          projectType: itemsList.map(i => i.name).join(', '),
-          items: itemsList,
-          totalAmount: `₹${totalAmount.toLocaleString()}`,
-          paymentMode: formData.paymentMode,
-          notes: `Cart Items Count: ${cartItems.length}`
-        })
+        body: JSON.stringify(newOrderObj)
       });
       const orderRes = await res.json();
-      if (orderRes.orderId) {
-        trackingCode = orderRes.orderId;
+      if (orderRes && orderRes.orderId) {
+        newOrderObj.orderId = orderRes.orderId;
       }
     } catch (err) {
       console.error('Backend DB Notice:', err);
     }
 
-    const trackingLink = `http://localhost:3000/track?id=${trackingCode}`;
+    const trackingLink = `http://localhost:3000/track?id=${newOrderObj.orderId}`;
 
     // Format WhatsApp order message
     const message = `*LUXE INTERIOR - CART ORDER*
 ----------------------------------------
-📌 *Tracking Code:* ${trackingCode}
+📌 *Tracking Code:* ${newOrderObj.orderId}
 🔗 *Track Live Progress:* ${trackingLink}
 ----------------------------------------
 *Customer Information:*
@@ -110,7 +123,6 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
 ${itemsMessage}----------------------------------------
 💵 *Grand Total:* ₹${totalAmount.toLocaleString()}
 ----------------------------------------
-Notification sent to selvaharish049@gmail.com & Database stored.
 Please confirm my cart order. Thank you!`;
 
     // Clear cart locally after checkout redirection
@@ -121,7 +133,7 @@ Please confirm my cart order. Thank you!`;
     window.open(whatsappUrl, '_blank');
     onClose();
     
-    alert(`🎉 Order Placed Successfully!\n\nYour Unique Tracking Code: ${trackingCode}\n\nNotification sent to selvaharish049@gmail.com. You can track your order anytime on the Track Order page.`);
+    alert(`🎉 Order Placed Successfully!\n\nYour Unique Tracking Code: ${newOrderObj.orderId}\n\nYou can track your order anytime on the Track Order page.`);
   };
 
   return (

@@ -26,12 +26,18 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    setIsRegister(false);
     setFormData({
-      ...formData,
+      name: '',
+      gender: '',
       email: '',
       password: '',
       confirmPassword: ''
     });
+  };
+
+  const removeReadOnly = (e) => {
+    e.target.removeAttribute('readonly');
   };
 
   const handleSubmit = async (e) => {
@@ -42,36 +48,12 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
         alert("Passwords do not match!");
         return;
       }
-      
-      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
-      
-      let registeredOnServer = false;
-      try {
-        const response = await fetch(`${baseUrl}/api/register`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            username: formData.name,
-            email: formData.email,
-            password: formData.password
-          })
-        });
 
-        if (response.ok) {
-          registeredOnServer = true;
-          alert("User registered successfully on server!");
-        } else {
-          const data = await response.json().catch(() => ({}));
-          console.warn("Server registration failed: ", data.message);
-        }
-      } catch (err) {
-        console.warn("Backend server offline or database connection failed. Falling back to local browser storage registration.");
-      }
+      const cleanEmail = formData.email.trim().toLowerCase();
+      const cleanPassword = formData.password.trim();
+      const cleanName = formData.name.trim() || 'Luxe Customer';
 
-      // Save to localStorage as well so they can log in offline/locally
+      // Save / Update to localStorage so customer can always sign in smoothly
       let customers = [];
       try {
         const existing = localStorage.getItem('luxe_customers');
@@ -82,85 +64,101 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
         customers = [];
       }
       
-      const alreadyExists = customers.some(c => c.email.trim().toLowerCase() === formData.email.trim().toLowerCase());
-      if (!alreadyExists) {
-        customers.push({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          gender: formData.gender || 'Other'
-        });
-        localStorage.setItem('luxe_customers', JSON.stringify(customers));
+      const existingIdx = customers.findIndex(c => c.email && c.email.trim().toLowerCase() === cleanEmail);
+      const newCustomer = {
+        name: cleanName,
+        email: cleanEmail,
+        password: cleanPassword,
+        gender: formData.gender || 'Other'
+      };
+
+      if (existingIdx >= 0) {
+        customers[existingIdx] = newCustomer;
+      } else {
+        customers.push(newCustomer);
       }
 
-      if (!registeredOnServer) {
-        alert("User registered successfully locally!");
-      }
-    
+      localStorage.setItem('luxe_customers', JSON.stringify(customers));
+      localStorage.setItem('luxe_user', JSON.stringify({ name: cleanName, email: cleanEmail, role: 'customer' }));
+
+      // Non-blocking server sync if server is online
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+      fetch(`${baseUrl}/api/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: cleanName, email: cleanEmail, password: cleanPassword })
+      }).catch(() => {});
+
+      alert(`Account created successfully! Welcome to Luxe Interior, ${cleanName}.`);
       
       // Auto login customer and redirect
       setIsLoggedIn(true);
       if (setUserRole) setUserRole('customer');
-     if (setCurrentUser) {
-    setCurrentUser({
-        name: formData.name,
-        email: formData.email
-    });
-}
+      if (setCurrentUser) {
+        setCurrentUser({ name: cleanName, email: cleanEmail });
+      }
       if (typeof onClose === 'function') {
         onClose();
       }
+      navigate('/');
     } else {
       // Login Logic
       const inputUser = formData.email.trim().toLowerCase();
-      const isSystemAdmin = (inputUser === 'karthi' || inputUser === 'karthi@gmail.com') && 
-                            (formData.password === 'karthi123' || formData.password === 'karthi@123');
-      
+      const inputPass = formData.password.trim();
+
       if (activeTab === 'admin') {
+        // STRICT ADMIN LOGIN ONLY ON ADMIN TAB
+        const isSystemAdmin = (inputUser === 'karthi' || inputUser === 'karthi@gmail.com') && 
+                              (inputPass === 'karthi123' || inputPass === 'karthi@123');
+
         if (isSystemAdmin) {
           setIsLoggedIn(true);
           if (setUserRole) setUserRole('admin');
           if (setCurrentUser) setCurrentUser({ name: 'Karthi', email: 'karthi' });
+          localStorage.setItem('luxe_user', JSON.stringify({ name: 'Karthi', email: 'karthi', role: 'admin' }));
           if (typeof onClose === 'function') onClose();
           navigate('/admin');
         } else {
-          alert("Invalid Admin credentials! Use username: karthi & password: karthi123");
+          alert("Invalid Admin credentials! Please check your username and password.");
           return;
         }
       } else {
-        // Customer login
-        if (isSystemAdmin) {
+        // STRICT CUSTOMER LOGIN ONLY ON CUSTOMER TAB
+        let customers = [];
+        try {
+          const existing = localStorage.getItem('luxe_customers');
+          if (existing) {
+            customers = JSON.parse(existing);
+          }
+        } catch (err) {
+          customers = [];
+        }
+        
+        let foundCustomer = customers.find(c => {
+          const emailMatch = c.email && c.email.trim().toLowerCase() === inputUser;
+          const nameMatch = c.name && c.name.trim().toLowerCase() === inputUser;
+          const phoneMatch = c.phone && c.phone.trim() === inputUser;
+          const passMatch = c.password && (c.password.trim() === inputPass || c.password === formData.password);
+          return (emailMatch || nameMatch || phoneMatch) && passMatch;
+        });
+
+        // Fallback check for default customer test account
+        if (!foundCustomer && (inputUser === 'customer@luxe.com' || inputUser === 'default customer') && inputPass === 'customer123') {
+          foundCustomer = { name: 'Default Customer', email: 'customer@luxe.com' };
+        }
+        
+        if (foundCustomer) {
           setIsLoggedIn(true);
-          if (setUserRole) setUserRole('admin');
-          if (setCurrentUser) setCurrentUser({ name: 'Karthi', email: 'karthi' });
+          if (setUserRole) setUserRole('customer');
+          if (setCurrentUser) setCurrentUser({ name: foundCustomer.name, email: foundCustomer.email });
+          localStorage.setItem('luxe_user', JSON.stringify({ name: foundCustomer.name, email: foundCustomer.email, role: 'customer' }));
+          alert(`Logged in successfully! Welcome back, ${foundCustomer.name}.`);
           if (typeof onClose === 'function') onClose();
-          navigate('/admin');
+          navigate('/');
         } else {
-          let customers = [];
-          try {
-            const existing = localStorage.getItem('luxe_customers');
-            if (existing) {
-              customers = JSON.parse(existing);
-            }
-          } catch (err) {
-            customers = [];
-          }
-          
-          const foundCustomer = customers.find(
-            c => c.email.trim().toLowerCase() === formData.email.trim().toLowerCase() && 
-                 c.password === formData.password
-          );
-          
-          if (foundCustomer) {
-            setIsLoggedIn(true);
-            if (setUserRole) setUserRole('customer');
-            if (setCurrentUser) setCurrentUser({ name: foundCustomer.name, email: foundCustomer.email });
-            if (typeof onClose === 'function') onClose();
-            navigate('/');
-          } else {
-            alert("Invalid customer credentials! You can register a new account or use admin: karthi / karthi123.");
-            return;
-          }
+          alert("Invalid customer credentials! Please register a new account or check your email and password.");
+          return;
         }
       }
       
@@ -181,7 +179,9 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
           <span className="brand-sub">INTERIOR</span>
         </div>
 
-        <h2 className="amazon-signin-title">{isRegister ? "Create account" : "Sign in"}</h2>
+        <h2 className="amazon-signin-title">
+          {isRegister ? "Create account" : activeTab === 'admin' ? "Admin Portal Sign-In" : "Sign in"}
+        </h2>
 
         {/* Tab Selection */}
         {!isRegister && (
@@ -203,14 +203,36 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="amazon-login-form">
+        <form onSubmit={handleSubmit} className="amazon-login-form" autoComplete="off">
+          {/* Dummy inputs to absorb browser password manager auto-fill */}
+          <input type="text" name="prevent_autofill_username" style={{ display: 'none' }} tabIndex="-1" />
+          <input type="password" name="prevent_autofill_password" style={{ display: 'none' }} tabIndex="-1" />
+
           {isRegister && activeTab === 'customer' && (
             <>
               <label className="amazon-input-label">Your name</label>
-              <input name="name" placeholder="First and last name" onChange={handleChange} required value={formData.name} />
+              <input 
+                name="name" 
+                placeholder="First and last name" 
+                onChange={handleChange} 
+                required 
+                value={formData.name} 
+                autoComplete="off"
+                readOnly
+                onFocus={removeReadOnly}
+              />
               
               <label className="amazon-input-label">Gender</label>
-              <input name="gender" placeholder="e.g. Male / Female" onChange={handleChange} required value={formData.gender} />
+              <input 
+                name="gender" 
+                placeholder="e.g. Male / Female" 
+                onChange={handleChange} 
+                required 
+                value={formData.gender} 
+                autoComplete="off"
+                readOnly
+                onFocus={removeReadOnly}
+              />
             </>
           )}
 
@@ -219,39 +241,66 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
           </label>
           <input 
             name="email" 
-            type={activeTab === 'admin' ? "text" : "email"} 
-            placeholder={activeTab === 'admin' ? "e.g. karthi" : "email@domain.com"} 
+            type="text" 
+            placeholder={activeTab === 'admin' ? "Enter Admin Username" : "Enter Email or Phone Number"} 
             onChange={handleChange} 
             required 
             value={formData.email} 
+            autoComplete="new-password"
+            readOnly
+            onFocus={removeReadOnly}
           />
 
           <label className="amazon-input-label">Password</label>
-          <input 
-            name="password" 
-            type="password" 
-            placeholder="At least 6 characters" 
-            onChange={handleChange} 
-            required 
-            value={formData.password} 
-          />
+          <div style={{ position: 'relative', width: '100%' }}>
+            <input 
+              name="luxe_security_key" 
+              type="text" 
+              placeholder="At least 6 characters" 
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })} 
+              required 
+              value={formData.password} 
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-form-type="other"
+              readOnly
+              onFocus={removeReadOnly}
+              style={{ width: '100%', WebkitTextSecurity: 'disc', fontFamily: 'caption, monospace' }}
+            />
+          </div>
 
           {isRegister && activeTab === 'customer' && (
             <>
               <label className="amazon-input-label">Re-enter password</label>
-              <input 
-                name="confirmPassword" 
-                type="password" 
-                placeholder="Confirm password" 
-                onChange={handleChange} 
-                required 
-                value={formData.confirmPassword} 
-              />
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input 
+                  name="luxe_security_confirm_key" 
+                  type="text" 
+                  placeholder="Confirm password" 
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} 
+                  required 
+                  value={formData.confirmPassword} 
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-form-type="other"
+                  readOnly
+                  onFocus={removeReadOnly}
+                  style={{ width: '100%', WebkitTextSecurity: 'disc', fontFamily: 'caption, monospace' }}
+                />
+              </div>
             </>
           )}
 
           <button type="submit" className="login-submit-btn amazon-btn-primary">
-            {isRegister ? "Create your Luxe account" : "Sign in"}
+            {isRegister ? "Create your Luxe account" : activeTab === 'admin' ? "Sign In as Admin" : "Sign in"}
           </button>
         </form>
 
@@ -259,18 +308,20 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
           By continuing, you agree to Luxe Interior's <span>Conditions of Use</span> and <span>Privacy Notice</span>.
         </p>
 
-        <div className="amazon-divider">
-          <span>{isRegister ? "Already have an account?" : "New to Luxe Interior?"}</span>
-        </div>
-
         {activeTab === 'customer' && (
-          <button 
-            type="button" 
-            onClick={() => setIsRegister(!isRegister)} 
-            className="amazon-btn-secondary"
-          >
-            {isRegister ? "Sign in to your account" : "Create your Luxe account"}
-          </button>
+          <>
+            <div className="amazon-divider">
+              <span>{isRegister ? "Already have an account?" : "New to Luxe Interior?"}</span>
+            </div>
+
+            <button 
+              type="button" 
+              onClick={() => setIsRegister(!isRegister)} 
+              className="amazon-btn-secondary"
+            >
+              {isRegister ? "Sign in to your account" : "Create your Luxe account"}
+            </button>
+          </>
         )}
       </div>
     </div>

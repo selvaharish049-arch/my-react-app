@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { getAllProducts } from '../data/productsData';
 import './HomeDecor.css';
 
-// Import images
 import img1 from '../assets/d1.jpg';
 import img2 from '../assets/d2.jpg';
 import img3 from '../assets/d3.jpg';
@@ -34,6 +33,7 @@ const HomeDecor = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [stepSize, setStepSize] = useState(310);
   const trackRef = useRef(null);
+  const viewportRef = useRef(null);
 
   // Swipe / Drag handling
   const dragStartX = useRef(0);
@@ -44,7 +44,7 @@ const HomeDecor = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const allProducts = await getAllProducts();
+        await getAllProducts();
         
         const categoryConfig = [
           { key: 'explore-sofa', label: 'Sofa', defaultImg: img1, path: '/product/explore-sofa' },
@@ -60,25 +60,6 @@ const HomeDecor = () => {
         ];
 
         const mappedItems = categoryConfig.map(cfg => {
-          const matchingProducts = allProducts.filter(p => p.category === cfg.key);
-          
-          // Check for custom products first (newly added by admin)
-          const customProd = matchingProducts.find(p => String(p.id).startsWith('custom-'));
-          
-          if (customProd) {
-            return {
-              title: cfg.label,
-              img: cfg.defaultImg,
-              path: cfg.path
-            };
-          } else if (matchingProducts.length > 0) {
-            return {
-              title: cfg.label,
-              img: cfg.defaultImg,
-              path: cfg.path
-            };
-          }
-
           return {
             title: cfg.label,
             img: cfg.defaultImg,
@@ -95,8 +76,12 @@ const HomeDecor = () => {
     fetchProducts();
 
     const handleResize = () => {
-      if (window.innerWidth <= 576) {
-        setStepSize(260);
+      if (window.innerWidth <= 768) {
+        if (viewportRef.current) {
+          setStepSize(viewportRef.current.clientWidth);
+        } else {
+          setStepSize(window.innerWidth - 32);
+        }
       } else {
         setStepSize(310);
       }
@@ -156,7 +141,7 @@ const HomeDecor = () => {
 
   const processSwipe = () => {
     const diffX = dragStartX.current - dragEndX.current;
-    const threshold = 70;
+    const threshold = 50;
     if (Math.abs(diffX) > threshold) {
       if (diffX > 0) {
         handleNext();
@@ -178,20 +163,6 @@ const HomeDecor = () => {
               <h2 className="decor-main-title">
                 Spaces We<br className="decor-br-desktop" /> Are Proud Of
               </h2>
-            </div>
-
-            {/* Mobile Top Navigation Controls */}
-            <div className="decor-nav-controls decor-nav-controls-mobile">
-              <button className="decor-nav-btn" onClick={handlePrev} aria-label="Previous Slide">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-              </button>
-              <button className="decor-nav-btn" onClick={handleNext} aria-label="Next Slide">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </button>
             </div>
           </div>
 
@@ -220,6 +191,7 @@ const HomeDecor = () => {
           {/* Cards Track Container */}
           <div 
             className="decor-cards-viewport"
+            ref={viewportRef}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -228,7 +200,7 @@ const HomeDecor = () => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
           >
-            {/* Overlay Navigation Arrows for Mobile View */}
+            {/* Overlay Navigation Arrows */}
             <button 
               className="decor-overlay-arrow decor-overlay-arrow-left" 
               onClick={(e) => { e.stopPropagation(); handlePrev(); }} 

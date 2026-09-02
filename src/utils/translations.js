@@ -26,7 +26,25 @@ export const translations = {
     adminPanel: "Admin Panel",
     logout: "Sign Out",
     welcome: "Welcome",
-    language: "Language"
+    language: "Language",
+    
+    // Categories & Menu
+    home: "Home",
+    modularKitchen: "Modular Kitchen",
+    bedroomCupboard: "Bedroom Cupboard",
+    wardrobes: "Wardrobes",
+    tvUnit: "TV Unit",
+    poojaCupboard: "Pooja Cupboard",
+    showcase: "Showcase",
+    woodenDoors: "Wooden Doors",
+    woodenWork: "Wooden Work",
+    
+    // Homepage & Sections
+    heroTitle: "Bespoke Luxury Interiors & Custom Craftsmanship",
+    heroSub: "Transform your home with German engineered kitchens, luxury wardrobes, and solid teakwood furniture.",
+    exploreCategories: "Explore Popular Categories",
+    viewCollection: "View Collection",
+    customerChoice: "Customer's Top Pick"
   },
   ta: {
     furniture: "பர்னிச்சர்",
@@ -54,7 +72,23 @@ export const translations = {
     adminPanel: "அட்மின் பேனல்",
     logout: "லாக் அவுட்",
     welcome: "வரவேற்கிறோம்",
-    language: "மொழி"
+    language: "மொழி",
+
+    home: "முகப்பு",
+    modularKitchen: "மாடுலார் கிச்சன்",
+    bedroomCupboard: "பெட்ரூம் கபோர்டு",
+    wardrobes: "வார்ட்ரோப்",
+    tvUnit: "டிவி யூனிட்",
+    poojaCupboard: "பூஜை கபோர்டு",
+    showcase: "ஷோகேஸ்",
+    woodenDoors: "மரக் கதவுகள்",
+    woodenWork: "மர வேலைப்பாடுகள்",
+
+    heroTitle: "பிரமிக்க வைக்கும் லக்சுரி இன்டீரியர் & டிசைன்கள்",
+    heroSub: "ஜெர்மன் மாடுலார் கிச்சன், சொகுசு வார்ட்ரோப்கள் மற்றும் தேக்கு மர பர்னிச்சர்கள்.",
+    exploreCategories: "பிரபலமான வகைகளை ஆராயுங்கள்",
+    viewCollection: "பார்வையிடுக",
+    customerChoice: "வாடிக்கையாளர்களின் தேர்வு"
   },
   ml: {
     furniture: "ഫർണിച്ചർ",
@@ -82,7 +116,23 @@ export const translations = {
     adminPanel: "അഡ്മിൻ പാനൽ",
     logout: "ലോഗ് ഔട്ട്",
     welcome: "സ്വാഗതം",
-    language: "ഭാഷ"
+    language: "ഭാഷ",
+
+    home: "ഹോം",
+    modularKitchen: "മോഡുലാർ അടുക്കള",
+    bedroomCupboard: "ബെഡ്റൂം അലമാര",
+    wardrobes: "വാർഡ്രോബ്",
+    tvUnit: "ടിവി യൂണിറ്റ്",
+    poojaCupboard: "പൂജ അലമാര",
+    showcase: "ഷോകേസ്",
+    woodenDoors: "തടി വാതിലുകൾ",
+    woodenWork: "തടി പണികൾ",
+
+    heroTitle: "മനോഹരമായ ലക്ഷ്വറി ഇന്റീരിയറുകൾ",
+    heroSub: "ജർമ്മൻ മോഡുലാർ കിച്ചൻ, ലക്ഷ്വറി വാർഡ്രോബുകൾ, തേക്ക് ഫർണിച്ചറുകൾ.",
+    exploreCategories: "ജനപ്രിയ വിഭാഗങ്ങൾ പരിശോധിക്കുക",
+    viewCollection: "ശേഖരം കാണുക",
+    customerChoice: "ഉപഭോക്താക്കളുടെ മികച്ച തിരഞ്ഞെടുപ്പ്"
   },
   hi: {
     furniture: "फर्नीचर",
@@ -110,7 +160,23 @@ export const translations = {
     adminPanel: "एडमिन पैनल",
     logout: "साइन आउट",
     welcome: "स्वागत है",
-    language: "भाषा"
+    language: "भाषा",
+
+    home: "होम",
+    modularKitchen: "मॉड्यूलर किचन",
+    bedroomCupboard: "बेडरूम अलमारी",
+    wardrobes: "वॉर्डरोब",
+    tvUnit: "टीवी यूनिट",
+    poojaCupboard: "पूजा अलमारी",
+    showcase: "शोकेस",
+    woodenDoors: "लकड़ी के दरवाजे",
+    woodenWork: "लकड़ी का काम",
+
+    heroTitle: "शानदार लग्जरी इंटीरियर और कस्टम डिजाइन",
+    heroSub: "जर्मन मॉड्यूलर किचन, लग्जरी वॉर्डरोब और सागौन की लकड़ी के फर्नीचर से अपने घर को सजाएं।",
+    exploreCategories: "लोकप्रिय श्रेणियां देखें",
+    viewCollection: "संग्रह देखें",
+    customerChoice: "ग्राहकों की पहली पसंद"
   },
   te: {
     furniture: "ఫర్నిచర్",
@@ -138,7 +204,23 @@ export const translations = {
     adminPanel: "అడ్మిన్ ప్యానెల్",
     logout: "సైన్ అవుట్",
     welcome: "స్వాగతం",
-    language: "భాష"
+    language: "భాష",
+
+    home: "హోమ్",
+    modularKitchen: "మాడ్యులర్ కిచెన్",
+    bedroomCupboard: "బెడ్‌రూమ్ కప్‌బోర్డ్",
+    wardrobes: "వార్డ్‌రోబ్స్",
+    tvUnit: "టీవీ యూనిట్",
+    poojaCupboard: "పూజ కప్‌బోర్డ్",
+    showcase: "షోకేస్",
+    woodenDoors: "చెక్క తలుపులు",
+    woodenWork: "చెక్క పనులు",
+
+    heroTitle: "అద్భుతమైన లగ్జరీ ఇంటీరియర్స్",
+    heroSub: "జెర్మన్ మాడ్యులర్ కిచెన్స్, లగ్జరీ వార్డ్‌రోబ్స్ మరియు టేకు కలప ఫర్నిచర్.",
+    exploreCategories: "ప్రసిద్ధ వర్గాలను అన్వేషించండి",
+    viewCollection: "సేకరణను చూడండి",
+    customerChoice: "వినియోగదారుల అగ్ర ఎంపిక"
   },
   kn: {
     furniture: "ಫರ್ನಿಚರ್",
@@ -166,7 +248,23 @@ export const translations = {
     adminPanel: "ಅಡ್ಮಿನ್ ಪ್ಯಾನಲ್",
     logout: "ಸೈನ್ ಔಟ್",
     welcome: "ಸ್ವಾಗತ",
-    language: "ಭಾಷೆ"
+    language: "ಭಾಷೆ",
+
+    home: "ಹೋಮ್",
+    modularKitchen: "ಮಾಡ್ಯುಲರ್ ಅಡುಗೆಮನೆ",
+    bedroomCupboard: "ಬೆಡ್‌ರೂಮ್ ಕಪಾಟು",
+    wardrobes: "ವಾರ್ಡ್‌ರೋಬ್",
+    tvUnit: "ಟಿವಿ ಯುನಿಟ್",
+    poojaCupboard: "ಪೂಜಾ ಕಪಾಟು",
+    showcase: "ಶೋಕೇಸ್",
+    woodenDoors: "ಮರದ ಬಾಗಿಲುಗಳು",
+    woodenWork: "ಮರದ ಕೆಲಸಗಳು",
+
+    heroTitle: "ಅದ್ಭುತ ಲಕ್ಷರಿ ಇಂಟೀರಿಯರ್ಸ್",
+    heroSub: "ಜರ್ಮನ್ ಮಾಡ್ಯುಲರ್ ಕಿಚನ್, ಲಕ್ಷರಿ ವಾರ್ಡ್‌ರೋಬ್‌ಗಳು ಮತ್ತು ತೇಗದ ಮರದ ಫರ್ನಿಚರ್.",
+    exploreCategories: "ಜನಪ್ರಿಯ ವರ್ಗಗಳನ್ನು ಅನ್ವೇಷಿಸಿ",
+    viewCollection: "ಸಂಗ್ರಹವನ್ನು ವೀಕ್ಷಿಸಿ",
+    customerChoice: "ಗ್ರಾಹಕರ ಅತ್ಯುತ್ತಮ ಆಯ್ಕೆ"
   }
 };
 

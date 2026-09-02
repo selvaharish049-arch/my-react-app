@@ -1,20 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SearchComponent from './SearchComponent';
-import { getTranslation } from '../utils/translations';
 import './Navbar.css';
 
 const Navbar = ({ isLoggedIn, setIsLoggedIn, userRole, currentUser, onLogout, onLoginClick, cartCount, onCartClick }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [currentLang, setCurrentLang] = useState(localStorage.getItem('luxe_lang') || 'en');
+  const [hasOrderUpdate, setHasOrderUpdate] = useState(false);
   const navigate = useNavigate();
 
-  const handleLanguageChange = (e) => {
-    const newLang = e.target.value;
-    setCurrentLang(newLang);
-    localStorage.setItem('luxe_lang', newLang);
-    window.dispatchEvent(new Event('languageChange'));
-  };
+  useEffect(() => {
+    const checkNotification = () => {
+      // 1. NEVER show order update notification to Admin
+      if (userRole === 'admin') {
+        setHasOrderUpdate(false);
+        return;
+      }
+
+      // 2. Only show if logged in as customer
+      if (!isLoggedIn) {
+        setHasOrderUpdate(false);
+        return;
+      }
+
+      try {
+        const stored = localStorage.getItem('luxe_has_order_update');
+        if (!stored) {
+          setHasOrderUpdate(false);
+          return;
+        }
+
+        const updateObj = JSON.parse(stored);
+        if (!updateObj) {
+          setHasOrderUpdate(false);
+          return;
+        }
+
+        const userStr = localStorage.getItem('luxe_user');
+        if (!userStr) {
+          setHasOrderUpdate(false);
+          return;
+        }
+
+        const user = JSON.parse(userStr);
+        if (!user || user.role === 'admin') {
+          setHasOrderUpdate(false);
+          return;
+        }
+
+        const custEmail = user.email ? user.email.toLowerCase().trim() : '';
+        const custPhone = user.phone ? user.phone.trim() : '';
+
+        // Match order ID in customer orders database
+        const ordersStr = localStorage.getItem('luxe_customer_orders');
+        if (ordersStr) {
+          const orders = JSON.parse(ordersStr);
+          const matchedOrder = orders.find(o => String(o.orderId) === String(updateObj.orderId));
+          if (matchedOrder) {
+            const ordEmail = matchedOrder.email ? matchedOrder.email.toLowerCase().trim() : '';
+            const ordPhone = matchedOrder.phone ? matchedOrder.phone.trim() : '';
+            
+            // Show badge ONLY if this order belongs to the currently logged in customer
+            if ((custEmail && ordEmail === custEmail) || (custPhone && ordPhone === custPhone)) {
+              setHasOrderUpdate(true);
+              return;
+            }
+          }
+        }
+
+        setHasOrderUpdate(false);
+      } catch (e) {
+        setHasOrderUpdate(false);
+      }
+    };
+
+    checkNotification();
+    window.addEventListener('orderStatusUpdated', checkNotification);
+    return () => window.removeEventListener('orderStatusUpdated', checkNotification);
+  }, [userRole, currentUser, isLoggedIn]);
 
   const handleProfileClick = () => {
     if (!isLoggedIn) {
@@ -28,56 +90,60 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, userRole, currentUser, onLogout, on
     if (currentUser && currentUser.name) {
       return currentUser.name[0].toUpperCase();
     }
-    if (userRole === 'admin') return 'K'; // Admin name is Karthi
-    return 'C'; // Customer
+    if (userRole === 'admin') return 'K';
+    return 'C';
   };
-
-  const t = (key) => getTranslation(currentLang, key);
 
   return (
     <nav className="navbar" onMouseLeave={() => setShowProfileMenu(false)}>
       {/* 1. TOP BAR PANEL */}
       <div className="top-bar">
         <div className="top-bar-left">
-          <span>{t('furniture')}</span> | <span>{t('homeInteriors')}</span> | <span>{t('bulkOrder')}</span>
+          <span>Furniture</span> | <span>Home Interiors</span> | <span>Bulk Order</span>
         </div>
         <div className="top-bar-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span>📞 +91 6379183549</span> | 
-          <Link to="/track" className="top-bar-link" style={{ color: 'inherit', textDecoration: 'none' }}>
-            {t('trackOrder')}
-          </Link> | 
-          <span>{t('helpCenter')}</span> |
           
-          {/* Multi-Language Selector Dropdown */}
-          <div className="lang-select-box" style={{ marginLeft: '6px' }}>
-            <span style={{ fontSize: '13px', marginRight: '4px' }}>🌐</span>
-            <select 
-              value={currentLang} 
-              onChange={handleLanguageChange}
-              className="lang-select-dropdown"
-              style={{
-                background: '#3e322d',
-                color: '#ffffff',
-                border: '1px solid #7a6e67',
-                borderRadius: '4px',
-                padding: '2px 6px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                outline: 'none'
-              }}
-            >
-              <option value="en">English (EN)</option>
-              <option value="ta">தமிழ் (Tamil)</option>
-              <option value="ml">മലയാളം (Malayalam)</option>
-              <option value="hi">हिंदी (Hindi)</option>
-              <option value="te">తెలుగు (Telugu)</option>
-              <option value="kn">ಕನ್ನಡ (Kannada)</option>
-            </select>
-          </div>
+          {/* Permanent Link Name: Update Order (Notification ONLY for matching logged-in customer) */}
+          <Link 
+            to="/track" 
+            className="top-bar-link" 
+            onClick={() => {
+              try { localStorage.removeItem('luxe_has_order_update'); } catch(e){}
+              setHasOrderUpdate(false);
+            }}
+            style={{ 
+              color: 'inherit', 
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+            title="Update Order Status & Tracking"
+          >
+            <span>Update Order</span>
+            {hasOrderUpdate && userRole !== 'admin' && (
+              <span 
+                style={{ 
+                  background: '#d32f2f', 
+                  color: '#ffffff', 
+                  fontSize: '11px', 
+                  fontWeight: 'bold', 
+                  padding: '2px 7px', 
+                  borderRadius: '10px',
+                  boxShadow: '0 0 8px rgba(211, 47, 47, 0.9)'
+                }}
+              >
+                🔔 1
+              </span>
+            )}
+          </Link> | 
+          
+          <span>Help Center</span>
         </div>
       </div>
 
-      {/* 2. MAIN HEADER ROW (Logo left, Search center, Actions right) */}
+      {/* 2. MAIN HEADER ROW */}
       <div className="main-header">
         {/* Left Logo */}
         <div className="logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
@@ -125,7 +191,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, userRole, currentUser, onLogout, on
                       onLogout();
                     }}
                   >
-                    🚪 Logout
+                    🚪 Sign Out
                   </button>
                 </div>
               </div>
@@ -141,7 +207,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn, userRole, currentUser, onLogout, on
         </div>
       </div>
 
-      {/* 3. BOTTOM MENU ROW (Horizontal link categories list) */}
+      {/* 3. BOTTOM MENU ROW */}
       <div className="bottom-menu">
         <Link to="/" className="bottom-nav-link">Home</Link>
         <Link to="/modularkitchen" className="bottom-nav-link">Modular Kitchen</Link>

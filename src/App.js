@@ -30,6 +30,20 @@ function App() {
   const [showCart, setShowCart] = useState(false);
   const [cartItems, setCartItems] = useState([]);
 
+  React.useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem('luxe_user');
+      if (savedUser) {
+        const u = JSON.parse(savedUser);
+        if (u && u.role) {
+          setIsLoggedIn(true);
+          setUserRole(u.role);
+          setCurrentUser({ name: u.name, email: u.email });
+        }
+      }
+    } catch (e) {}
+  }, []);
+
   const addToCart = (product) => {
     setCartItems((prevItems) => [...prevItems, product]);
     alert(`${product.name} added to cart!`);
@@ -39,6 +53,9 @@ function App() {
     setIsLoggedIn(false);
     setUserRole(null);
     setCurrentUser(null);
+    try {
+      localStorage.removeItem('luxe_user');
+    } catch (e) {}
     alert("Logged out successfully!");
   };
 
@@ -86,7 +103,7 @@ function App() {
           <Route path="/furniture" element={<Furniture isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
           <Route path="/woodenwork" element={<WoodenWork isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
           <Route path="/homedecor" element={<HomeDecor />} />
-          <Route path="/track" element={<TrackOrder />} />
+          <Route path="/track" element={<TrackOrder triggerLogin={() => setShowLogin(true)} />} />
           <Route path="/success" element={<Success />} />
           <Route path="/checkout" element={<CheckOut />} />
           <Route path="/admin" element={<AdminPanel isLoggedIn={isLoggedIn} userRole={userRole} />} />

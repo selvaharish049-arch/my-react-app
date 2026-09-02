@@ -105,10 +105,6 @@
   margin-bottom: 24px;
 }
 
-.decor-nav-controls-mobile {
-  display: none;
-}
-
 .decor-nav-btn {
   width: 40px;
   height: 40px;
@@ -148,43 +144,44 @@
   cursor: grabbing;
 }
 
-/* Mobile Overlay Arrows over Cards */
+/* Product Switch Overlay Navigation Arrows */
 .decor-overlay-arrow {
-  display: none;
+  display: flex !important;
   position: absolute;
-  top: 50%;
+  top: 40%;
   transform: translateY(-50%);
-  z-index: 10;
-  width: 36px;
-  height: 36px;
+  z-index: 99;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(226, 217, 207, 0.9);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  font-size: 22px;
+  background: #3e322d;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  font-size: 28px;
   line-height: 1;
-  font-weight: 300;
-  color: #2c211e;
+  font-weight: bold;
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(4px);
-  padding-bottom: 2px;
+  transition: all 0.25s ease;
+  user-select: none;
 }
 
+.decor-overlay-arrow:hover,
 .decor-overlay-arrow:active {
-  transform: translateY(-50%) scale(0.9);
-  background: #3e322d;
+  background: #c98544;
   color: #ffffff;
+  transform: translateY(-50%) scale(1.12);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .decor-overlay-arrow-left {
-  left: 6px;
+  left: 10px;
 }
 
 .decor-overlay-arrow-right {
-  right: 6px;
+  right: 10px;
 }
 
 .decor-cards-track {
@@ -254,20 +251,37 @@
   transform: translateX(4px);
 }
 
-/* Responsive Styles */
+/* Responsive Styles matching user mobile screenshot */
 @media (max-width: 992px) {
   .decor-projects-container {
     flex-direction: column;
     gap: 20px;
+    align-items: center;
+    text-align: center;
   }
 
   .decor-info-panel {
     flex: none;
     width: 100%;
+    align-items: center;
+    text-align: center;
   }
 
   .decor-header-row {
+    justify-content: center;
     align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  .decor-title-group {
+    text-align: center;
+    width: 100%;
+  }
+
+  .decor-subtitle {
+    text-align: center;
+    margin-bottom: 12px;
   }
 
   .decor-br-desktop {
@@ -277,57 +291,91 @@
   .decor-main-title {
     font-size: 32px;
     margin: 0 0 10px 0;
+    text-align: center;
   }
 
   .decor-description {
-    margin: 0 0 16px 0;
+    margin: 0 auto 16px auto;
     max-width: 100%;
+    text-align: center;
   }
 
-  /* Show nav controls top-right in mobile header */
-  .decor-nav-controls-mobile {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin: 0;
-  }
-
-  /* Hide desktop nav controls */
   .decor-nav-controls-desktop {
     display: none;
   }
-
-  /* Show floating overlay arrows on mobile */
-  .decor-overlay-arrow {
-    display: flex;
-  }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .decor-projects-section {
-    padding: 40px 16px;
+    padding: 24px 16px;
   }
 
-  .decor-main-title {
-    font-size: 26px;
+  .decor-cards-viewport {
+    padding: 8px 0;
+    overflow: hidden;
+    margin: 0 auto;
+    width: 100%;
   }
 
-  .decor-subtitle {
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    margin-bottom: 10px;
-  }
-
-  .decor-nav-btn {
-    width: 36px;
-    height: 36px;
+  .decor-cards-track {
+    gap: 0;
   }
 
   .decor-project-card {
-    flex: 0 0 240px;
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 
   .decor-card-image-box {
-    height: 220px;
+    width: 84%;
+    max-width: 280px;
+    height: 210px;
+    border-radius: 14px;
+    margin: 0 auto;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  }
+
+  .decor-card-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .decor-card-body {
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  .decor-card-title {
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .decor-overlay-arrow {
+    display: flex !important;
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+    top: 38%;
+  }
+
+  .decor-overlay-arrow-left {
+    left: 4px;
+  }
+
+  .decor-overlay-arrow-right {
+    right: 4px;
   }
 }

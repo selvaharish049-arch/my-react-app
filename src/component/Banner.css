@@ -155,29 +155,45 @@
 /* Responsive adjust for mobile screens */
 @media (max-width: 768px) {
   .banner-slider-container {
-    height: 380px;
+    height: 360px;
+    padding: 0 10px;
+    margin: 10px auto;
   }
 
   .banner-slide-overlay {
-    padding: 0 30px;
+    padding: 0 24px;
+    background: linear-gradient(to right, rgba(20, 15, 10, 0.45) 0%, rgba(20, 15, 10, 0.2) 60%, transparent 90%);
   }
 
   .banner-slide-title {
-    font-size: 28px;
+    font-size: 26px;
+    margin-bottom: 16px;
   }
 
   .banner-slide-desc {
-    font-size: 14px;
-    margin-bottom: 25px;
+    font-size: 13.5px;
+    margin-bottom: 20px;
   }
 
   .banner-consultation-btn {
-    padding: 12px 24px;
+    padding: 10px 22px;
     font-size: 13px;
   }
   
   .bannerSwiper .swiper-button-next,
   .bannerSwiper .swiper-button-prev {
-    display: none; /* Hide navigation arrows on small mobile devices for cleaner look */
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-slider-container {
+    height: 320px;
+    padding: 0 6px;
+  }
+
+  .banner-slide-title {
+    font-size: 22px;
+    line-height: 1.25;
   }
 }
