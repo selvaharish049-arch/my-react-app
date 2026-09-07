@@ -79,7 +79,9 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
       }
 
       localStorage.setItem('luxe_customers', JSON.stringify(customers));
-      localStorage.setItem('luxe_user', JSON.stringify({ name: cleanName, email: cleanEmail, role: 'customer' }));
+      const userPayload = JSON.stringify({ name: cleanName, email: cleanEmail, role: 'customer' });
+      sessionStorage.setItem('luxe_user', userPayload);
+      localStorage.setItem('luxe_user', userPayload);
 
       // Non-blocking server sync if server is online
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -116,7 +118,9 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
           setIsLoggedIn(true);
           if (setUserRole) setUserRole('admin');
           if (setCurrentUser) setCurrentUser({ name: 'Karthi', email: 'karthi' });
-          localStorage.setItem('luxe_user', JSON.stringify({ name: 'Karthi', email: 'karthi', role: 'admin' }));
+          const adminPayload = JSON.stringify({ name: 'Karthi', email: 'karthi', role: 'admin' });
+          sessionStorage.setItem('luxe_user', adminPayload);
+          localStorage.setItem('luxe_user', adminPayload);
           if (typeof onClose === 'function') onClose();
           navigate('/admin');
         } else {
@@ -152,7 +156,9 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
           setIsLoggedIn(true);
           if (setUserRole) setUserRole('customer');
           if (setCurrentUser) setCurrentUser({ name: foundCustomer.name, email: foundCustomer.email });
-          localStorage.setItem('luxe_user', JSON.stringify({ name: foundCustomer.name, email: foundCustomer.email, role: 'customer' }));
+          const customerPayload = JSON.stringify({ name: foundCustomer.name, email: foundCustomer.email, role: 'customer' });
+          sessionStorage.setItem('luxe_user', customerPayload);
+          localStorage.setItem('luxe_user', customerPayload);
           alert(`Logged in successfully! Welcome back, ${foundCustomer.name}.`);
           if (typeof onClose === 'function') onClose();
           navigate('/');

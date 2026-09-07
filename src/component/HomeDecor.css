@@ -94,42 +94,6 @@
   flex-direction: column;
 }
 
-/* Nav Controls */
-.decor-nav-controls {
-  display: flex;
-  gap: 12px;
-}
-
-.decor-nav-controls-desktop {
-  justify-content: flex-end;
-  margin-bottom: 24px;
-}
-
-.decor-nav-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 1px solid #e2d9cf;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #3e322d;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-}
-
-.decor-nav-btn:hover {
-  background: #3e322d;
-  color: #ffffff;
-  border-color: #3e322d;
-}
-
-.decor-nav-btn:active {
-  transform: scale(0.92);
-}
-
 /* Viewport and Cards Track */
 .decor-cards-viewport {
   position: relative;
@@ -142,46 +106,6 @@
 
 .decor-cards-viewport:active {
   cursor: grabbing;
-}
-
-/* Product Switch Overlay Navigation Arrows */
-.decor-overlay-arrow {
-  display: flex !important;
-  position: absolute;
-  top: 40%;
-  transform: translateY(-50%);
-  z-index: 99;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #3e322d;
-  color: #ffffff;
-  border: 2px solid #ffffff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  font-size: 28px;
-  line-height: 1;
-  font-weight: bold;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s ease;
-  user-select: none;
-}
-
-.decor-overlay-arrow:hover,
-.decor-overlay-arrow:active {
-  background: #c98544;
-  color: #ffffff;
-  transform: translateY(-50%) scale(1.12);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}
-
-.decor-overlay-arrow-left {
-  left: 10px;
-}
-
-.decor-overlay-arrow-right {
-  right: 10px;
 }
 
 .decor-cards-track {
@@ -361,21 +285,5 @@
   .decor-card-title {
     text-align: center;
     font-size: 14px;
-  }
-
-  .decor-overlay-arrow {
-    display: flex !important;
-    width: 36px;
-    height: 36px;
-    font-size: 22px;
-    top: 38%;
-  }
-
-  .decor-overlay-arrow-left {
-    left: 4px;
-  }
-
-  .decor-overlay-arrow-right {
-    right: 4px;
   }
 }

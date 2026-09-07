@@ -33,7 +33,8 @@ function App() {
 
   React.useEffect(() => {
     try {
-      const savedUser = localStorage.getItem('luxe_user');
+      // Use sessionStorage so opening a new session starts fresh as initial state
+      const savedUser = sessionStorage.getItem('luxe_user');
       if (savedUser) {
         const u = JSON.parse(savedUser);
         if (u && u.role) {
@@ -55,7 +56,9 @@ function App() {
     setUserRole(null);
     setCurrentUser(null);
     try {
+      sessionStorage.removeItem('luxe_user');
       localStorage.removeItem('luxe_user');
+      localStorage.removeItem('luxe_has_order_update');
     } catch (e) {}
     alert("Logged out successfully!");
   };

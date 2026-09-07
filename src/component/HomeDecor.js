@@ -182,24 +182,18 @@ const HomeDecor = () => {
           <p className="decor-description">
             Every project is a reflection of our passion for design and attention to detail.
           </p>
+
+          <button 
+            type="button"
+            className="decor-view-all-btn"
+            onClick={() => navigate('/furniture')}
+          >
+            VIEW ALL COLLECTIONS &rarr;
+          </button>
         </div>
 
         {/* Right Slider Section */}
         <div className="decor-slider-section">
-          
-          {/* Desktop Top Navigation Controls */}
-          <div className="decor-nav-controls decor-nav-controls-desktop">
-            <button className="decor-nav-btn" onClick={handlePrev} aria-label="Previous Slide">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
-            <button className="decor-nav-btn" onClick={handleNext} aria-label="Next Slide">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
-          </div>
 
           {/* Cards Track Container */}
           <div 
@@ -213,23 +207,6 @@ const HomeDecor = () => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
           >
-            {/* Overlay Navigation Arrows for Mobile and Laptop/PC */}
-            <button 
-              type="button"
-              className="decor-overlay-arrow decor-overlay-arrow-left" 
-              onClick={(e) => { e.stopPropagation(); handlePrev(); }} 
-              aria-label="Previous Product"
-            >
-              ‹
-            </button>
-            <button 
-              type="button"
-              className="decor-overlay-arrow decor-overlay-arrow-right" 
-              onClick={(e) => { e.stopPropagation(); handleNext(); }} 
-              aria-label="Next Product"
-            >
-              ›
-            </button>
 
             <div 
               className="decor-cards-track"
