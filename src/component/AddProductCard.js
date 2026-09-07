@@ -91,6 +91,7 @@ const AddProductCard = ({ category, onProductAdded }) => {
         if (onProductAdded) {
           onProductAdded();
         }
+        window.dispatchEvent(new Event('productDataUpdated'));
       } else {
         alert("Failed to save product to backend files. Please verify server status.");
       }
@@ -129,13 +130,13 @@ const AddProductCard = ({ category, onProductAdded }) => {
       <div 
         className="product-item add-product-grid-card" 
         onClick={() => setShowModal(true)}
-        title={`Add new ${getCategoryLabel()} item`}
+        title={`Add new ${getCategoryLabel()} reference design`}
         style={{ cursor: 'pointer' }}
       >
         <div className="product-img add-product-img-placeholder" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#faf9f6', border: '2px dashed #c98544', borderRadius: '6px', height: '220px', marginBottom: '12px' }}>
           <span style={{ fontSize: '32px', color: '#c98544' }}>➕</span>
         </div>
-        <h3>Add New {getCategoryLabel()}</h3>
+        <h3>Add Reference Design ({getCategoryLabel()})</h3>
         
         <div className="product-card-rating-row">
           <span className="product-card-star">★</span>
@@ -143,16 +144,16 @@ const AddProductCard = ({ category, onProductAdded }) => {
           <span className="product-card-star">★</span>
           <span className="product-card-star">★</span>
           <span className="product-card-star">★</span>
-          <span className="product-card-rating-count">(99+)</span>
+          <span className="product-card-rating-count">(Inspiration)</span>
         </div>
 
         <div className="product-card-price-row">
-          <span className="product-card-current-price">Manage Catalog</span>
+          <span className="product-card-current-price">Manage Reference Designs</span>
         </div>
         
         <div className="button-group">
           <button className="add-cart" style={{ width: '100%', backgroundColor: '#c98544', color: '#fff', border: 'none' }}>
-            ➕ Add Item
+            ➕ Add Design
           </button>
         </div>
       </div>
@@ -163,8 +164,8 @@ const AddProductCard = ({ category, onProductAdded }) => {
           <div className="add-prod-modal-container">
             <button className="add-prod-close-btn" onClick={() => setShowModal(false)}>&times;</button>
             
-            <h2 className="add-prod-title">✨ Add Premium {getCategoryLabel()}</h2>
-            <p className="add-prod-subtitle">Provide details to save the product to local files and inventory.</p>
+            <h2 className="add-prod-title">✨ Add Reference Design ({getCategoryLabel()})</h2>
+            <p className="add-prod-subtitle">Add inspirational design specs & reference budget for custom client consultations.</p>
 
             <form onSubmit={handleFormSubmit} className="add-prod-form">
               {/* Image Picker Box (Triggers File Explorer) */}

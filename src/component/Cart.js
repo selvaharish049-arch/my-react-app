@@ -7,9 +7,11 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
     name: '',
     mobile: '',
     email: '',
+    panNumber: '',
     address: '',
     paymentMode: 'Cash on Delivery'
   });
+  const [panError, setPanError] = useState('');
 
   const totalAmount = cartItems.reduce((total, item) => {
     const priceValue = parseInt(item.price.replace(/[₹,]/g, '')) || 0;
@@ -17,7 +19,20 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
   }, 0);
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'panNumber') {
+      const upperPan = value.toUpperCase().slice(0, 10);
+      setFormData(prev => ({ ...prev, panNumber: upperPan }));
+
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (upperPan.length === 10 && !panRegex.test(upperPan)) {
+        setPanError('Invalid PAN format! Example: ABCDE1234F');
+      } else {
+        setPanError('');
+      }
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleRemoveItem = (indexToRemove) => {
@@ -32,6 +47,13 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
 
   const handleWhatsAppCheckout = async (e) => {
     e.preventDefault();
+
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    if (!panRegex.test(formData.panNumber)) {
+      setPanError('Please enter a valid 10-character PAN Card Number (e.g. ABCDE1234F).');
+      alert('Please enter a valid 10-character PAN Card Number (e.g., ABCDE1234F)!');
+      return;
+    }
 
     if (!formData.name || !formData.mobile || !formData.email || !formData.address) {
       alert("Please fill in all details!");
@@ -71,6 +93,7 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
       customerName: formData.name,
       phone: formData.mobile,
       email: formData.email,
+      panNumber: formData.panNumber.toUpperCase(),
       address: formData.address,
       projectType: itemsList.map(i => i.name).join(', '),
       totalAmount: `₹${totalAmount.toLocaleString()}`,
@@ -78,7 +101,7 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
       currentStep: 1,
       expectedCompletionDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       orderDate: new Date().toLocaleDateString(),
-      notes: `Cart Items (${itemsList.length}): ${itemsList.map(i => `${i.name} (x${i.quantity})`).join(', ')}`
+      notes: `Cart Items (${itemsList.length}): ${itemsList.map(i => `${i.name} (x${i.quantity})`).join(', ')} | PAN: ${formData.panNumber.toUpperCase()}`
     };
 
     // Save order to localStorage so Admin Order Database shows it immediately
@@ -87,6 +110,7 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
       const list = stored ? JSON.parse(stored) : [];
       list.unshift(newOrderObj);
       localStorage.setItem('luxe_customer_orders', JSON.stringify(list));
+      window.dispatchEvent(new Event('orderStatusUpdated'));
     } catch (e) {}
 
     try {
@@ -116,6 +140,7 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
 👤 *Name:* ${formData.name}
 📞 *Mobile:* ${formData.mobile}
 📧 *Email:* ${formData.email}
+🆔 *PAN Card Number:* ${formData.panNumber.toUpperCase()}
 📍 *Address:* ${formData.address}
 💳 *Payment Mode:* ${formData.paymentMode}
 
@@ -234,6 +259,21 @@ Please confirm my cart order. Thank you!`;
                       onChange={handleInputChange} 
                       required 
                     />
+                  </div>
+
+                  <div className="form-group">
+                    <label>PAN Card Number (Set PAN Num) *</label>
+                    <input 
+                      type="text" 
+                      name="panNumber" 
+                      placeholder="e.g. ABCDE1234F" 
+                      value={formData.panNumber} 
+                      onChange={handleInputChange} 
+                      maxLength="10"
+                      style={{ textTransform: 'uppercase' }}
+                      required 
+                    />
+                    {panError && <span style={{ color: '#d32f2f', fontSize: '11px', fontWeight: 'bold' }}>⚠️ {panError}</span>}
                   </div>
 
                   <div className="form-group">

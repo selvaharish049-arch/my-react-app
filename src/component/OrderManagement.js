@@ -192,15 +192,44 @@ Thank you for choosing Luxe Interior! Please reply if you have any questions.`;
 
     setOrders(updatedOrders);
 
-    // Save to localStorage
+    // Save to localStorage & trigger targeted customer email notification
     try {
       localStorage.setItem('luxe_customer_orders', JSON.stringify(updatedOrders));
-      localStorage.setItem('luxe_has_order_update', JSON.stringify({
+      
+      const targetEmail = (selectedOrder.email || '').toLowerCase().trim();
+      const targetPhone = (selectedOrder.phone || '').trim();
+
+      const storedNotifs = localStorage.getItem('luxe_customer_notifications');
+      const notifMap = storedNotifs ? JSON.parse(storedNotifs) : {};
+
+      const notifItem = {
         orderId: selectedOrder.orderId,
         step: updateStep,
         updatedAt: Date.now()
+      };
+
+      if (targetEmail) {
+        const existing = notifMap[targetEmail] || [];
+        notifMap[targetEmail] = [notifItem, ...existing.filter(n => String(n.orderId) !== String(selectedOrder.orderId))];
+      }
+      if (targetPhone) {
+        const existingP = notifMap[targetPhone] || [];
+        notifMap[targetPhone] = [notifItem, ...existingP.filter(n => String(n.orderId) !== String(selectedOrder.orderId))];
+      }
+
+      localStorage.setItem('luxe_customer_notifications', JSON.stringify(notifMap));
+
+      // Legacy fallback single update object
+      localStorage.setItem('luxe_has_order_update', JSON.stringify({
+        orderId: selectedOrder.orderId,
+        customerEmail: targetEmail,
+        customerPhone: targetPhone,
+        step: updateStep,
+        updatedAt: Date.now()
       }));
+
       window.dispatchEvent(new Event('orderStatusUpdated'));
+      window.dispatchEvent(new Event('storage'));
     } catch (e) {}
 
     // Background sync to server
@@ -299,6 +328,7 @@ Thank you for choosing Luxe Interior! Please reply if you have any questions.`;
                 <tr>
                   <th>Order ID</th>
                   <th>Customer Info</th>
+                  <th>PAN Card</th>
                   <th>Project / Product</th>
                   <th>Total & Payment</th>
                   <th>Current Stage</th>
@@ -320,8 +350,19 @@ Thank you for choosing Luxe Interior! Please reply if you have any questions.`;
                       {ord.address && <div style={{ fontSize: '11.5px', color: '#666', fontStyle: 'italic', maxWidth: '180px' }}>📍 {ord.address}</div>}
                     </td>
                     <td>
+                      <strong style={{ color: '#c98544', fontSize: '13px' }}>🆔 {ord.panNumber || 'N/A'}</strong>
+                    </td>
+                    <td>
                       <span className="table-project-pill">{ord.projectType}</span>
                       {ord.notes && <div style={{ fontSize: '11.5px', color: '#777', marginTop: '4px' }}>{ord.notes}</div>}
+                      {ord.customPic && (
+                        <div style={{ marginTop: '6px' }}>
+                          <a href={ord.customPic} target="_blank" rel="noreferrer">
+                            <img src={ord.customPic} alt="Customer Reference" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #c98544' }} />
+                          </a>
+                          <div style={{ fontSize: '10.5px', color: '#c98544', fontWeight: 'bold' }}>📷 Photo Attached</div>
+                        </div>
+                      )}
                     </td>
                     <td>
                       <strong>{ord.totalAmount || '₹N/A'}</strong>
@@ -390,18 +431,23 @@ Thank you for choosing Luxe Interior! Please reply if you have any questions.`;
 
               {/* Stage Selector */}
               <div className="form-group">
-                <label>Select Current Stage Progress (1 to 4):</label>
+                <label>Select Current Project Progress (Process Step 1 to 4):</label>
                 <div className="stage-radio-group">
-                  {[1, 2, 3, 4].map((stepNum) => (
-                    <label key={stepNum} className={`stage-radio-label ${updateStep === stepNum ? 'selected' : ''}`}>
+                  {[
+                    { num: 1, label: 'Step 1: Order Confirmed & Site Survey' },
+                    { num: 2, label: 'Step 2: 3D Design & Material Finalized' },
+                    { num: 3, label: 'Step 3: Carpentry & Factory Production' },
+                    { num: 4, label: 'Step 4: Site Installation & Final Delivery' }
+                  ].map((st) => (
+                    <label key={st.num} className={`stage-radio-label ${updateStep === st.num ? 'selected' : ''}`}>
                       <input 
                         type="radio" 
                         name="stageStep"
-                        value={stepNum}
-                        checked={updateStep === stepNum}
-                        onChange={() => setUpdateStep(stepNum)}
+                        value={st.num}
+                        checked={updateStep === st.num}
+                        onChange={() => setUpdateStep(st.num)}
                       />
-                      <span>{getStepLabel(stepNum)}</span>
+                      <span>{st.label}</span>
                     </label>
                   ))}
                 </div>

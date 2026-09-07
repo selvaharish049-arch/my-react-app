@@ -323,6 +323,105 @@
   color: #555555;
 }
 
+/* Horizontal 4-Step Process Bar Styling */
+.horizontal-process-wrapper {
+  background: #fbf9f6;
+  border: 1px solid #eee7df;
+  border-radius: 12px;
+  padding: 22px 24px;
+  margin-bottom: 32px;
+}
+
+.process-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c211e;
+  margin: 0 0 20px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.process-steps-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  gap: 10px;
+}
+
+.process-step-node {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.process-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e2d9cf;
+  color: #6e615a;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.process-step-node.completed .process-circle {
+  background: #2e7d32;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+}
+
+.process-step-node.active .process-circle {
+  background: #f57c00;
+  color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(245, 124, 0, 0.4);
+}
+
+.process-step-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2c211e;
+  margin-bottom: 2px;
+}
+
+.process-step-label {
+  font-size: 12px;
+  color: #7a6b65;
+}
+
+.process-step-node.active .process-step-title {
+  color: #f57c00;
+}
+
+.process-step-node.completed .process-step-title {
+  color: #2e7d32;
+}
+
+.process-line {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 100%;
+  height: 3px;
+  background: #e2d9cf;
+  z-index: -1;
+}
+
+.process-line.filled {
+  background: #2e7d32;
+}
+
 .timeline-heading {
   font-size: 18px;
   font-weight: 600;

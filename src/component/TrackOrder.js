@@ -58,24 +58,108 @@ const TrackOrder = ({ triggerLogin }) => {
   const [orderIdInput, setOrderIdInput] = useState(searchParams.get('id') || '');
   const [phoneInput, setPhoneInput] = useState('');
   const [orderData, setOrderData] = useState(null);
+  const [userOrdersList, setUserOrdersList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const loadAccountOrders = () => {
+    try {
+      const userStr = localStorage.getItem('luxe_user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (user && user.role !== 'admin') {
+          const email = (user.email || '').toLowerCase().trim();
+          const phone = (user.phone || '').trim();
+
+          let storedOrders = [];
+          const stored = localStorage.getItem('luxe_customer_orders');
+          if (stored) storedOrders = JSON.parse(stored);
+
+          const allOrders = [...storedOrders, ...DEMO_ORDERS];
+          const userMatches = allOrders.filter(o => {
+            const ordEmail = (o.email || '').toLowerCase().trim();
+            const ordPhone = (o.phone || '').trim();
+            return (email && ordEmail === email) || (phone && ordPhone === phone);
+          });
+
+          // De-duplicate by orderId
+          const uniqueMap = new Map();
+          userMatches.forEach(o => {
+            if (o && o.orderId) uniqueMap.set(String(o.orderId), o);
+          });
+          setUserOrdersList(Array.from(uniqueMap.values()));
+        }
+      }
+    } catch (e) {}
+  };
+
   useEffect(() => {
+    loadAccountOrders();
+
     const queryId = searchParams.get('id');
     if (queryId) {
       setOrderIdInput(queryId);
       performSearch(queryId, '');
+    } else {
+      try {
+        const userStr = localStorage.getItem('luxe_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          if (user && user.role !== 'admin') {
+            const email = (user.email || '').toLowerCase().trim();
+            const phone = (user.phone || '').trim();
+            
+            // Only set phoneInput if it is an actual phone number, never email
+            if (phone) {
+              setPhoneInput(phone);
+            }
+
+            const searchKey = phone || email;
+            if (searchKey) {
+              performSearch('', searchKey);
+            }
+          }
+        }
+      } catch (e) {}
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // Live Sync Listener: Auto-refresh when Admin updates order status
+  useEffect(() => {
+    const handleStatusUpdate = () => {
+      loadAccountOrders();
+      const currentQuery = orderIdInput || searchParams.get('id') || phoneInput;
+      if (currentQuery) {
+        performSearch(currentQuery, phoneInput);
+      }
+    };
+
+    window.addEventListener('orderStatusUpdated', handleStatusUpdate);
+    window.addEventListener('storage', handleStatusUpdate);
+    return () => {
+      window.removeEventListener('orderStatusUpdated', handleStatusUpdate);
+      window.removeEventListener('storage', handleStatusUpdate);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderIdInput, phoneInput, searchParams]);
+
+  const getStepTitle = (stepNum) => {
+    switch(stepNum) {
+      case 1: return 'Order Confirmed & Site Survey';
+      case 2: return '3D Design & Material Finalized';
+      case 3: return 'Carpentry & Factory Production';
+      case 4: return 'Site Installation & Final Delivery';
+      default: return 'Order Placed';
+    }
+  };
 
   const performSearch = async (orderIdVal, phoneVal) => {
     const cleanOrderId = (orderIdVal !== undefined ? orderIdVal : orderIdInput).trim();
     const cleanPhone = (phoneVal !== undefined ? phoneVal : phoneInput).trim();
 
     if (!cleanOrderId && !cleanPhone) {
-      setError('Please enter your Order ID or registered Phone Number.');
+      setError('Please enter your Order / Consultation ID, Phone Number, or Email.');
       setOrderData(null);
       return;
     }
@@ -114,9 +198,13 @@ const TrackOrder = ({ triggerLogin }) => {
     const allLocalOrders = [...localCustomOrders, ...DEMO_ORDERS];
 
     const match = allLocalOrders.find(o => {
-      const matchId = cleanOrderId && o.orderId && o.orderId.toLowerCase() === cleanOrderId.toLowerCase();
-      const matchPhone = cleanPhone && o.phone && o.phone.replace(/[\s-]/g, '').includes(cleanPhone.replace(/[\s-]/g, ''));
-      return matchId || matchPhone;
+      const targetQuery = (cleanOrderId || cleanPhone).toLowerCase().trim();
+      const matchId = o.orderId && o.orderId.toLowerCase().trim() === targetQuery;
+      const matchPhone = o.phone && o.phone.replace(/[\s-]/g, '').includes(targetQuery.replace(/[\s-]/g, ''));
+      const matchEmail = o.email && o.email.toLowerCase().trim() === targetQuery;
+      const matchPan = o.panNumber && o.panNumber.toLowerCase().trim() === targetQuery;
+      const matchNotesPan = o.notes && o.notes.toLowerCase().includes(targetQuery);
+      return matchId || matchPhone || matchEmail || matchPan || matchNotesPan;
     });
 
     if (match) {
@@ -124,7 +212,7 @@ const TrackOrder = ({ triggerLogin }) => {
       setError('');
     } else {
       setOrderData(null);
-      setError(`No active project found for "${cleanOrderId || cleanPhone}". Please check your Order ID or phone number.`);
+      setError(`No active project or consultation found for "${cleanOrderId || cleanPhone}". Please check your Order ID, Phone Number, or Email.`);
     }
 
     setLoading(false);
@@ -192,6 +280,39 @@ const TrackOrder = ({ triggerLogin }) => {
               </span>
             </div>
           </form>
+
+          {/* User Account Specific Orders */}
+          {userOrdersList.length > 0 && (
+            <div style={{ marginTop: '20px', background: '#faf6f0', border: '1px solid #e8decb', padding: '14px', borderRadius: '10px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#c98544', display: 'block', marginBottom: '8px' }}>
+                📋 Your Account Orders & Consultations ({userOrdersList.length}):
+              </span>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {userOrdersList.map(o => (
+                  <button 
+                    key={o.orderId}
+                    type="button" 
+                    onClick={() => {
+                      setOrderIdInput(o.orderId);
+                      performSearch(o.orderId, '');
+                    }}
+                    style={{
+                      background: orderData?.orderId === o.orderId ? '#c98544' : '#ffffff',
+                      color: orderData?.orderId === o.orderId ? '#ffffff' : '#3e322d',
+                      border: '1px solid #c98544',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      fontSize: '12.5px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {o.orderId} — {o.projectType}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Quick Demo Chips */}
           <div className="quick-demo-chips">
@@ -309,6 +430,30 @@ const TrackOrder = ({ triggerLogin }) => {
 
         {orderData && !loading && (
           <div className="track-status-card track-details-card">
+            {/* Live Notification Callout Banner */}
+            <div style={{
+              background: 'linear-gradient(135deg, #fff9f2 0%, #fff4e5 100%)',
+              border: '2px solid #e09853',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '14px',
+              boxShadow: '0 4px 14px rgba(201, 133, 68, 0.15)'
+            }}>
+              <div style={{ fontSize: '28px', lineHeight: 1 }}>🔔</div>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: '16px', color: '#8c4b12', fontWeight: '700' }}>
+                  Live Order Notification for {orderData.customerName} ({orderData.email || orderData.phone})
+                </h4>
+                <p style={{ margin: 0, fontSize: '14px', color: '#4a3828', lineHeight: '1.5' }}>
+                  Current Stage: <strong>Step {orderData.currentStep || 1} of 4 — {getStepTitle(orderData.currentStep || 1)}</strong>
+                  {orderData.notes && <span><br/>📝 <em>Note from Admin:</em> "{orderData.notes}"</span>}
+                </p>
+              </div>
+            </div>
+
             <div className="project-header-row">
               <div className="project-id-badge">
                 <span className="badge-tag">ORDER ID</span>
@@ -330,16 +475,38 @@ const TrackOrder = ({ triggerLogin }) => {
                 <strong className="info-value">📞 {orderData.phone}</strong>
               </div>
               <div className="info-item">
-                <span className="info-label">Current Progress</span>
-                <strong className="info-value highlight">
-                  Step {orderData.currentStep} of 4 — {getStepStatusText(orderData.currentStep, orderData.currentStep)}
-                </strong>
+                <span className="info-label">PAN Card Number</span>
+                <strong className="info-value" style={{ color: '#c98544', fontWeight: 'bold' }}>🆔 {orderData.panNumber || 'Not provided'}</strong>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Payment Option</span>
+                <strong className="info-value">💳 {orderData.paymentMode || 'Cash on Delivery'}</strong>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Total Amount</span>
+                <strong className="info-value" style={{ color: '#2e7d32' }}>{orderData.totalAmount || '₹0'}</strong>
               </div>
               <div className="info-item">
                 <span className="info-label">Estimated Delivery</span>
                 <strong className="info-value">{orderData.expectedCompletionDate || 'On Schedule'}</strong>
               </div>
+              {orderData.address && (
+                <div className="info-item" style={{ gridColumn: 'span 2' }}>
+                  <span className="info-label">Site / Shipping Address</span>
+                  <strong className="info-value" style={{ fontWeight: 'normal' }}>📍 {orderData.address}</strong>
+                </div>
+              )}
             </div>
+
+            {orderData.customPic && (
+              <div style={{ background: '#faf6f0', border: '1px dashed #c98544', padding: '16px', borderRadius: '10px', margin: '16px 0', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <img src={orderData.customPic} alt="Customer Reference" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #c98544' }} />
+                <div>
+                  <h4 style={{ margin: '0 0 4px 0', color: '#1f1816', fontSize: '14px' }}>📷 Customer Reference Photo Attached</h4>
+                  <p style={{ margin: 0, fontSize: '12.5px', color: '#6e615a' }}>Uploaded design blueprint / custom room layout for technicians.</p>
+                </div>
+              </div>
+            )}
 
             {orderData.notes && (
               <div className="project-notes-box">
@@ -350,6 +517,36 @@ const TrackOrder = ({ triggerLogin }) => {
                 </div>
               </div>
             )}
+
+            {/* Horizontal 4-Step Process Progress Bar */}
+            <div className="horizontal-process-wrapper">
+              <h3 className="process-heading">Project Progress Stages</h3>
+              <div className="process-steps-row">
+                {[
+                  { num: 1, title: 'Step 1', label: 'Order Confirmed' },
+                  { num: 2, title: 'Step 2', label: '3D Design & Materials' },
+                  { num: 3, title: 'Step 3', label: 'Factory Production' },
+                  { num: 4, title: 'Step 4', label: 'Site Delivery & Handover' }
+                ].map((st, idx) => {
+                  const isCompleted = st.num < orderData.currentStep;
+                  const isActive = st.num === orderData.currentStep;
+                  let stepState = 'pending';
+                  if (isCompleted) stepState = 'completed';
+                  if (isActive) stepState = 'active';
+
+                  return (
+                    <div key={st.num} className={`process-step-node ${stepState}`}>
+                      <div className="process-circle">
+                        {isCompleted ? '✓' : st.num}
+                      </div>
+                      <span className="process-step-title">{st.title}</span>
+                      <span className="process-step-label">{st.label}</span>
+                      {idx < 3 && <div className={`process-line ${isCompleted ? 'filled' : ''}`}></div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* Stepper Timeline */}
             <div className="timeline-section">

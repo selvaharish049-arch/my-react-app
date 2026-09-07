@@ -41,15 +41,36 @@ const CategoryLayout = ({ category, isLoggedIn, userRole, addToCart, triggerLogi
 
       {/* 2. Products Grid List */}
       <div className="product-page-container">
-        <p className="collection-grid-sub" style={{ textAlign: 'center', marginTop: '20px' }}>FIND A FIT FOR YOUR HOUSE</p>
-        <h2 className="collection-grid-title" style={{ textAlign: 'center', marginBottom: '40px', fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#3e322d', fontWeight: '500' }}>Discover Our Collections</h2>
+        <p className="collection-grid-sub" style={{ textAlign: 'center', marginTop: '20px', letterSpacing: '2px', textTransform: 'uppercase', color: '#c98544', fontWeight: '700', fontSize: '11.5px' }}>
+          INSPIRATION & REFERENCE DESIGNS
+        </p>
+        <h2 className="collection-grid-title" style={{ textAlign: 'center', marginBottom: '14px', fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#3e322d', fontWeight: '500' }}>
+          Customized Interior Space Collections
+        </h2>
+
+        {/* Customization Callout Box */}
+        <div style={{
+          maxWidth: '860px',
+          margin: '0 auto 36px auto',
+          background: '#faf6f0',
+          border: '1px solid #e8decb',
+          borderRadius: '12px',
+          padding: '18px 24px',
+          textAlign: 'center',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.03)'
+        }}>
+          <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#5c4e48' }}>
+            💡 <strong>Love any of these interior designs?</strong> We can create a similar look specifically for your home. Every design is customized according to your home space, layout, style, colour preferences, storage requirements, materials, and budget.
+          </p>
+        </div>
+
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <p>Loading products...</p>
+            <p>Loading inspiration designs...</p>
           </div>
         ) : products.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <p style={{ color: '#8c7d78' }}>No products found in this category.</p>
+            <p style={{ color: '#8c7d78' }}>No reference designs found in this category.</p>
           </div>
         ) : (
           <div className="product-grid">
@@ -89,33 +110,35 @@ const CategoryLayout = ({ category, isLoggedIn, userRole, addToCart, triggerLogi
                   const priceInfo = getPriceDetails(item.price, item);
                   return (
                     <div className="product-card-price-row">
-                      <span className="product-card-current-price">{priceInfo.price}</span>
-                      {priceInfo.original && (
-                        <span className="product-card-original-price">{priceInfo.original}</span>
-                      )}
-                      {priceInfo.discount && (
-                        <span className="product-card-discount-tag">{priceInfo.discount}</span>
-                      )}
+                      <span className="product-card-current-price" style={{ fontSize: '13px', color: '#7a6b65' }}>
+                        Est. Budget: <strong style={{ color: '#3e322d', fontSize: '15px' }}>{priceInfo.price}</strong>
+                      </span>
                     </div>
                   );
                 })()}
-                <div className="button-group">
+                
+                {/* Customization Action Buttons */}
+                <div className="button-group" style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
                   <button 
                     className="add-cart" 
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!isLoggedIn) {
-                        alert("⚠️ Access Restricted: Please login to your account first before adding items to your cart.");
-                        if (triggerLogin) triggerLogin();
-                      } else {
-                        addToCart({ id: item.id, name: item.name, price: item.price, img: item.img });
-                      }
+                      setSelectedProduct(item);
                     }}
+                    style={{ background: '#3e322d', color: '#fff', flex: 1, fontSize: '12px', padding: '9px 8px', borderRadius: '6px' }}
                   >
-                    Add to Cart
+                    ✨ Customize
                   </button>
-                  <button className="buy-now" onClick={(e) => { e.stopPropagation(); setSelectedProduct(item); }}>
-                    Buy Now
+
+                  <button 
+                    className="add-cart" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedProduct(item);
+                    }}
+                    style={{ background: '#c98544', color: '#fff', flex: 1, fontSize: '12px', padding: '9px 8px', borderRadius: '6px', fontWeight: 'bold' }}
+                  >
+                    📅 Book Consult
                   </button>
                 </div>
               </div>

@@ -21,6 +21,7 @@ import ProductPage from './component/ProductPage';
 import AdminPanel from './component/AdminPanel';
 import HomeDecor from './component/HomeDecor';
 import TrackOrder from './component/TrackOrder';
+import HelpCenter from './component/HelpCenter';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -102,8 +103,10 @@ function App() {
           <Route path="/woodendoors" element={<WoodenDoors isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
           <Route path="/furniture" element={<Furniture isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
           <Route path="/woodenwork" element={<WoodenWork isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
-          <Route path="/homedecor" element={<HomeDecor />} />
+          <Route path="/homedecor" element={<HomeDecor isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
+          <Route path="/craftsmanship" element={<HomeDecor isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
           <Route path="/track" element={<TrackOrder triggerLogin={() => setShowLogin(true)} />} />
+          <Route path="/help" element={<HelpCenter />} />
           <Route path="/success" element={<Success />} />
           <Route path="/checkout" element={<CheckOut />} />
           <Route path="/admin" element={<AdminPanel isLoggedIn={isLoggedIn} userRole={userRole} />} />

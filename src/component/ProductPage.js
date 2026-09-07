@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getAllProducts, deleteCustomProduct } from '../data/productsData';
 import ProductModal from './ProductModal';
 import { getPriceDetails, renderStars } from '../utils/priceHelper';
-import { getTranslation } from '../utils/translations';
 import './ProductPage.css';
 
 import BannerImage from './BannerImage';
@@ -15,17 +14,6 @@ const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
   const [productsList, setProductsList] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentLang, setCurrentLang] = useState(localStorage.getItem('luxe_lang') || 'en');
-
-  useEffect(() => {
-    const handleLangChange = () => {
-      setCurrentLang(localStorage.getItem('luxe_lang') || 'en');
-    };
-    window.addEventListener('languageChange', handleLangChange);
-    return () => window.removeEventListener('languageChange', handleLangChange);
-  }, []);
-
-  const t = (key) => getTranslation(currentLang, key);
 
   // Normalize inputs
   const query = (name || '').trim().toLowerCase();
@@ -150,23 +138,16 @@ const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
                     </div>
                   );
                 })()}
-                <div className="button-group">
+                <div className="button-group" style={{ marginTop: '12px' }}>
                   <button 
                     className="add-cart" 
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!isLoggedIn) {
-                        alert("⚠️ Access Restricted: Please login to your account first before adding items to your cart.");
-                        if (triggerLogin) triggerLogin();
-                      } else {
-                        addToCart({ id: item.id, name: item.name, price: item.price, img: item.img });
-                      }
+                      setSelectedProduct(item);
                     }}
+                    style={{ background: '#3e322d', color: '#fff', width: '100%', fontSize: '13px', padding: '10px 12px', borderRadius: '6px' }}
                   >
-                    Add to Cart
-                  </button>
-                  <button className="buy-now" onClick={(e) => { e.stopPropagation(); setSelectedProduct(item); }}>
-                    Buy Now
+                    ✨ Customize Design
                   </button>
                 </div>
               </div>
@@ -289,33 +270,22 @@ const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
                     const priceInfo = getPriceDetails(item.price, item);
                     return (
                       <div className="product-card-price-row">
-                        <span className="product-card-current-price">{priceInfo.price}</span>
-                        {priceInfo.original && (
-                          <span className="product-card-original-price">{priceInfo.original}</span>
-                        )}
-                        {priceInfo.discount && (
-                          <span className="product-card-discount-tag">{priceInfo.discount}</span>
-                        )}
+                        <span className="product-card-current-price" style={{ fontSize: '13px', color: '#7a6b65' }}>
+                          Est. Budget: <strong style={{ color: '#3e322d', fontSize: '15px' }}>{priceInfo.price}</strong>
+                        </span>
                       </div>
                     );
                   })()}
-                  <div className="button-group">
+                  <div className="button-group" style={{ marginTop: '12px' }}>
                     <button 
                       className="add-cart" 
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (!isLoggedIn) {
-                          alert("⚠️ Access Restricted: Please login to your account first before adding items to your cart.");
-                          if (triggerLogin) triggerLogin();
-                        } else {
-                          addToCart({ id: item.id, name: item.name, price: item.price, img: item.img });
-                        }
+                        setSelectedProduct(item);
                       }}
+                      style={{ background: '#3e322d', color: '#fff', width: '100%', fontSize: '13px', padding: '10px 12px', borderRadius: '6px' }}
                     >
-                      {t('addToCart')}
-                    </button>
-                    <button className="buy-now" onClick={(e) => { e.stopPropagation(); setSelectedProduct(item); }}>
-                      {t('buyNow')}
+                      ✨ Customize Design
                     </button>
                   </div>
                 </div>

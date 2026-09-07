@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllProducts } from '../data/productsData';
+import { getAllProducts, getStoredCraftsmanshipCategories, getDeletedCraftsmanshipCategorySlugs } from '../data/productsData';
 import './HomeDecor.css';
 
 import img1 from '../assets/d1.jpg';
@@ -59,37 +59,50 @@ const HomeDecor = () => {
           { key: 'explore-study', label: 'Study', defaultImg: img10, path: '/product/explore-study' }
         ];
 
-        const mappedItems = categoryConfig.map(cfg => {
-          return {
-            title: cfg.label,
-            img: cfg.defaultImg,
-            path: cfg.path
-          };
-        });
+        const deletedSlugs = getDeletedCraftsmanshipCategorySlugs();
 
-        setSliderItems(mappedItems);
+        const baseMapped = categoryConfig
+          .filter(cfg => !deletedSlugs.includes(cfg.key))
+          .map(cfg => {
+            return {
+              title: cfg.label,
+              img: cfg.defaultImg,
+              path: cfg.path
+            };
+          });
+
+        const customCats = getStoredCraftsmanshipCategories().filter(c => !deletedSlugs.includes(c.slug));
+        const customMapped = customCats.map(c => ({
+          title: c.title,
+          img: c.img,
+          path: c.path || `/product/${c.slug}`
+        }));
+
+        setSliderItems([...baseMapped, ...customMapped]);
       } catch (err) {
         console.error("Failed to load dynamic Home Decor slider items:", err);
       }
     };
 
     fetchProducts();
+    window.addEventListener('craftsmanshipCategoryUpdated', fetchProducts);
 
     const handleResize = () => {
-      if (window.innerWidth <= 768) {
-        if (viewportRef.current) {
+      if (viewportRef.current) {
+        if (window.innerWidth <= 768) {
           setStepSize(viewportRef.current.clientWidth);
         } else {
-          setStepSize(window.innerWidth - 32);
+          setStepSize(310);
         }
-      } else {
-        setStepSize(310);
       }
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('craftsmanshipCategoryUpdated', fetchProducts);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const handlePrev = () => {
@@ -141,7 +154,7 @@ const HomeDecor = () => {
 
   const processSwipe = () => {
     const diffX = dragStartX.current - dragEndX.current;
-    const threshold = 50;
+    const threshold = 40;
     if (Math.abs(diffX) > threshold) {
       if (diffX > 0) {
         handleNext();
@@ -200,18 +213,20 @@ const HomeDecor = () => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
           >
-            {/* Overlay Navigation Arrows */}
+            {/* Overlay Navigation Arrows for Mobile and Laptop/PC */}
             <button 
+              type="button"
               className="decor-overlay-arrow decor-overlay-arrow-left" 
               onClick={(e) => { e.stopPropagation(); handlePrev(); }} 
-              aria-label="Previous Slide"
+              aria-label="Previous Product"
             >
               ‹
             </button>
             <button 
+              type="button"
               className="decor-overlay-arrow decor-overlay-arrow-right" 
               onClick={(e) => { e.stopPropagation(); handleNext(); }} 
-              aria-label="Next Slide"
+              aria-label="Next Product"
             >
               ›
             </button>

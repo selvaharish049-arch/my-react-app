@@ -24,7 +24,6 @@ const DEFAULT_REVIEWS = [
 
 const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, triggerLogin }) => {
   const navigate = useNavigate();
-  const [quantity, setQuantity] = useState(1);
   const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [currentLang, setCurrentLang] = useState(localStorage.getItem('luxe_lang') || 'en');
 
@@ -34,6 +33,29 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
   const [newRating, setNewRating] = useState(5);
   const [newHeadline, setNewHeadline] = useState('');
   const [newText, setNewText] = useState('');
+
+  // Lightbox Modal state for expanded view
+  const [showLightbox, setShowLightbox] = useState(false);
+
+  // Book a Consultation Modal State
+  const [showConsultModal, setShowConsultModal] = useState(false);
+  const [modalOrderId, setModalOrderId] = useState('');
+  const [consultForm, setConsultForm] = useState({
+    name: '',
+    phone: '',
+    whatsappNumber: '',
+    email: '',
+    panNumber: '',
+    address: '',
+    paymentMode: 'Cash on Delivery',
+    quantity: 1,
+    notes: ''
+  });
+
+  const handleOpenConsultModal = () => {
+    setModalOrderId('CON-' + Math.floor(1000 + Math.random() * 9000));
+    setShowConsultModal(true);
+  };
 
   useEffect(() => {
     const handleLangChange = () => {
@@ -58,6 +80,30 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
       setReviews(DEFAULT_REVIEWS);
     }
   }, [product]);
+
+  const productImages = (product && product.images && product.images.length > 0)
+    ? product.images
+    : [product?.img, product?.img, product?.img];
+
+  // Keyboard Arrow Keys (Left & Right) and Escape Key navigation for Lightbox Pop-up
+  useEffect(() => {
+    if (!showLightbox) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setActiveImgIndex((prev) => (prev > 0 ? prev - 1 : productImages.length - 1));
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setActiveImgIndex((prev) => (prev < productImages.length - 1 ? prev + 1 : 0));
+      } else if (e.key === 'Escape') {
+        setShowLightbox(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showLightbox, productImages.length]);
 
   const saveReviewsForProduct = (updatedList) => {
     setReviews(updatedList);
@@ -117,56 +163,95 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
     }
   };
 
+  const handleCustomizeClick = () => {
+    onClose();
+    navigate('/checkout', { state: { product, action: 'customize' } });
+  };
+
+  const handleConsultSubmit = async (e) => {
+    e.preventDefault();
+    if (!consultForm.name.trim() || !consultForm.phone.trim() || !consultForm.whatsappNumber.trim() || !consultForm.address.trim()) {
+      alert("Please fill in your Full Name, Phone Number, WhatsApp Number, and Delivery Address!");
+      return;
+    }
+
+    const trackingCode = modalOrderId || ('CON-' + Math.floor(1000 + Math.random() * 9000));
+    const priceNum = parseInt((product.price || '₹0').replace(/[₹,]/g, '')) || 0;
+    const qty = parseInt(consultForm.quantity) || 1;
+    const totalCalcPrice = priceNum * qty;
+
+    const consultationObj = {
+      orderId: trackingCode,
+      customerName: consultForm.name,
+      phone: consultForm.phone,
+      whatsappNumber: consultForm.whatsappNumber,
+      email: consultForm.email || 'consultation@customer.com',
+      panNumber: consultForm.panNumber ? consultForm.panNumber.toUpperCase() : 'N/A',
+      address: consultForm.address,
+      projectType: product.name,
+      totalAmount: totalCalcPrice > 0 ? `₹${totalCalcPrice.toLocaleString()}` : product.price,
+      paymentMode: consultForm.paymentMode,
+      currentStep: 1,
+      expectedCompletionDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      orderDate: new Date().toLocaleDateString(),
+      notes: `Consultation Booking for ${product.name} (Qty: ${qty}) | PAN: ${consultForm.panNumber ? consultForm.panNumber.toUpperCase() : 'N/A'} | Notes: ${consultForm.notes || 'None'}`
+    };
+
+    try {
+      const stored = localStorage.getItem('luxe_customer_orders');
+      const list = stored ? JSON.parse(stored) : [];
+      list.unshift(consultationObj);
+      localStorage.setItem('luxe_customer_orders', JSON.stringify(list));
+      window.dispatchEvent(new Event('orderStatusUpdated'));
+    } catch (err) {}
+
+    try {
+      await fetch('http://localhost:5000/api/orders/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(consultationObj)
+      });
+    } catch (err) {}
+
+    const trackingLink = `http://localhost:3000/track?id=${trackingCode}`;
+    const msg = `*LUXE INTERIORS - NEW BOOK A CONSULTATION*
+----------------------------------------
+📌 *Tracking Order ID:* ${trackingCode}
+🔗 *Track Live Progress:* ${trackingLink}
+----------------------------------------
+*Customer Information:*
+👤 *Full Name:* ${consultForm.name}
+📞 *Phone Number:* ${consultForm.phone}
+💬 *WhatsApp Number:* ${consultForm.whatsappNumber}
+🆔 *PAN Card Number:* ${consultForm.panNumber ? consultForm.panNumber.toUpperCase() : 'Not provided'}
+📍 *Site / Delivery Address:* ${consultForm.address}
+💳 *Payment Mode:* ${consultForm.paymentMode}
+
+*Product & Order Details:*
+🛋️ *Product Name:* ${product.name}
+💰 *Price Per Unit:* ${product.price}
+🔢 *Quantity:* ${qty}
+💵 *Grand Total:* ${totalCalcPrice > 0 ? `₹${totalCalcPrice.toLocaleString()}` : product.price}
+
+📝 *Special Requirements / Notes:*
+${consultForm.notes || 'None provided'}
+----------------------------------------
+Please contact me to schedule our consultation. Thank you!`;
+
+    window.open(`https://wa.me/916379183549?text=${encodeURIComponent(msg)}`, '_blank');
+    setShowConsultModal(false);
+    onClose();
+    navigate(`/track?id=${trackingCode}`);
+  };
+
   if (!product) return null;
 
   const t = (key) => getTranslation(currentLang, key);
 
   // Price calculations
   const priceRaw = parseInt((product.price || '₹10,000').replace(/[₹,]/g, ''), 10) || 10000;
-  let discountPercent = 26;
-  if (product.discountPercent !== undefined && product.discountPercent !== null) {
-    discountPercent = parseInt(product.discountPercent, 10) || 0;
-  } else if (product.original) {
-    const origClean = parseInt(product.original.replace(/[₹,]/g, ''), 10) || Math.round(priceRaw * 1.35);
-    discountPercent = origClean > priceRaw ? Math.round(((origClean - priceRaw) / origClean) * 100) : 26;
-  }
-  const originalPriceRaw = product.original ? parseInt(product.original.replace(/[₹,]/g, ''), 10) : Math.round(priceRaw / (1 - Math.min(discountPercent, 90) / 100));
 
-  // Multiple image thumbnails generator for gallery
-  const productImages = [
-    product.img,
-    product.img, // gallery view
-    product.img
-  ];
 
-  const handleAddToCart = () => {
-    if (!isLoggedIn) {
-      alert("⚠️ Access Restricted: Please sign in to your Luxe account first before adding items to cart.");
-      if (triggerLogin) triggerLogin();
-      onClose();
-      return;
-    }
-    for (let i = 0; i < quantity; i++) {
-      addToCart({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        img: product.img
-      });
-    }
-    onClose();
-  };
-
-  const handleBuyNow = () => {
-    if (!isLoggedIn) {
-      alert("⚠️ Access Restricted: Please sign in to your Luxe account first to buy products.");
-      if (triggerLogin) triggerLogin();
-      onClose();
-      return;
-    }
-    onClose();
-    navigate('/checkout', { state: { product, quantity } });
-  };
 
   const renderStars = (rating = 4.8) => {
     return (
@@ -182,10 +267,10 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
       <div className="product-modal-container amazon-modal-layout" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close-x" onClick={onClose}>&times;</button>
         
-        {/* Amazon Header Ribbon */}
+        {/* Header Ribbon */}
         <div className="amazon-modal-top-ribbon">
-          <span className="bestseller-badge">#1 Best Seller</span>
-          <span className="bestseller-cat">in {product.category ? product.category.toUpperCase() : 'HOME INTERIORS'}</span>
+          <span className="bestseller-badge">✨ Reference Design Inspiration</span>
+          <span className="bestseller-cat">in {(product.category || 'HOME INTERIORS').toUpperCase()}</span>
         </div>
 
         <div className="amazon-product-grid">
@@ -199,11 +284,19 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
                   src={imgSrc} 
                   alt="Thumbnail" 
                   className={`amazon-thumb-img ${activeImgIndex === idx ? 'active' : ''}`}
-                  onClick={() => setActiveImgIndex(idx)}
+                  onClick={() => {
+                    setActiveImgIndex(idx);
+                    setShowLightbox(true);
+                  }}
+                  style={{ cursor: 'pointer' }}
                 />
               ))}
             </div>
-            <div className="amazon-main-image-box">
+            <div 
+              className="amazon-main-image-box" 
+              onClick={() => setShowLightbox(true)}
+              style={{ cursor: 'pointer' }}
+            >
               <img src={productImages[activeImgIndex]} alt={product.name} className="amazon-main-img" />
               <span className="amazon-zoom-hover-tag">🔍 Touch to expand view</span>
             </div>
@@ -212,30 +305,34 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
           {/* Center Column: Product Specifications & Details */}
           <div className="amazon-details-column">
             <h1 className="amazon-product-title">{product.name}</h1>
-            <p className="amazon-brand-link">Visit the Luxe Interiors Store</p>
+            <p className="amazon-brand-link">Customized by Luxe Interiors Studio</p>
             
             {renderStars(product.rating)}
             
             <div className="amazon-divider-line"></div>
 
-            {/* Amazon Price Block */}
+            {/* Professional Design Callout Box */}
+            <div className="custom-design-callout-box">
+              <p>
+                💡 <strong>Love this design?</strong> We can create a similar look specifically for your home. Every design is customized according to your space, lifestyle, preferences, and requirements.
+              </p>
+            </div>
+
+            {/* Estimated Price Range Block */}
             <div className="amazon-price-box">
               <div className="price-main-row">
-                <span className="discount-tag">-{discountPercent}%</span>
+                <span className="est-budget-label">Est. Reference Budget:</span>
                 <span className="currency-symbol">₹</span>
                 <span className="current-price-num">{priceRaw.toLocaleString()}</span>
               </div>
-              <div className="mrp-row">
-                <span>M.R.P.: <del>₹{originalPriceRaw.toLocaleString()}</del></span>
-              </div>
-              <p className="taxes-note">Inclusive of all taxes</p>
+              <p className="taxes-note">Fully customizable based on materials, layout & fittings</p>
             </div>
 
             <div className="amazon-divider-line"></div>
 
-            {/* Product Specifications Table */}
+            {/* Specifications Table */}
             <div className="amazon-specs-section">
-              <h3>{t('specifications')}</h3>
+              <h3>Design Specifications & Options</h3>
               <table className="amazon-specs-table">
                 <tbody>
                   {product.specifications ? (
@@ -252,12 +349,16 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
                         <td className="spec-val">Luxe Interiors</td>
                       </tr>
                       <tr>
-                        <td className="spec-label">Material</td>
-                        <td className="spec-val">Solid Teak Wood & Premium Upholstery</td>
+                        <td className="spec-label">Material Options</td>
+                        <td className="spec-val">BWP 710 Plywood, HDMR, German Laminate, Acrylic & PU Matte/Gloss</td>
                       </tr>
                       <tr>
-                        <td className="spec-label">Assembly Required</td>
-                        <td className="spec-val">No (Free installation on delivery)</td>
+                        <td className="spec-label">Customization</td>
+                        <td className="spec-val">100% Tailored to your home space & layout</td>
+                      </tr>
+                      <tr>
+                        <td className="spec-label">Warranty</td>
+                        <td className="spec-val">10-Year Flat Warranty on Woodwork & Hardware</td>
                       </tr>
                     </>
                   )}
@@ -267,68 +368,56 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
 
             {/* Description */}
             <div className="amazon-about-item">
-              <h3>About this item</h3>
+              <h3>About this reference design</h3>
               <ul>
-                <li>{product.description || "Premium designer furniture engineered for modern comfort, durability, and luxury aesthetics."}</li>
-                <li>Made with high-density polyurethane foam and kiln-dried solid hardwood frame.</li>
-                <li>Includes scratch-resistant coating and fade-resistant fabric finish.</li>
+                <li>{product.description || "Premium reference interior design engineered for modern space utilization, durability, and luxury aesthetics."}</li>
+                <li>Made with high-grade moisture resistant core boards and precision German fittings.</li>
+                <li>Includes anti-scratch coating, soft-close hardware, and custom lighting integration.</li>
               </ul>
             </div>
 
           </div>
 
-          {/* Right Column: Amazon Buying Box */}
+          {/* Right Column: Customization Consultation Box */}
           <div className="amazon-buybox-column">
             <div className="buybox-card">
               
               <div className="buybox-price-row">
-                <span className="currency">₹</span>
-                <span className="buybox-price">{priceRaw.toLocaleString()}</span>
+                <span>Custom Solution</span>
               </div>
 
               <div className="buybox-stock-status">
-                <span className="stock-green">{t('inStock')}</span>
+                <span className="stock-green">✓ Designers Available for Consultation</span>
               </div>
 
-              <div className="buybox-qty-row">
-                <label>Quantity:</label>
-                <select 
-                  value={quantity} 
-                  onChange={(e) => setQuantity(parseInt(e.target.value, 10))}
-                  className="qty-dropdown"
-                >
-                  {[1, 2, 3, 4, 5].map(n => (
-                    <option key={n} value={n}>{n}</option>
-                  ))}
-                </select>
+              {/* Consultation Action Buttons */}
+              <div className="modal-consultation-btn-group">
+                <button type="button" className="btn-customize-design" onClick={handleCustomizeClick}>
+                  ✨ Customize This Design
+                </button>
+
+                <button type="button" className="btn-book-consultation" onClick={handleOpenConsultModal}>
+                  📅 Book a Consultation
+                </button>
               </div>
-
-              {/* Amazon CTAs */}
-              <button className="amazon-btn-add-cart" onClick={handleAddToCart}>
-                🛒 {t('addToCart')}
-              </button>
-
-              <button className="amazon-btn-buy-now" onClick={handleBuyNow}>
-                ⚡ {t('buyNow')}
-              </button>
 
               <div className="buybox-seller-info">
                 <div className="seller-row">
-                  <span>Ships from</span>
-                  <strong>Luxe Interior Direct</strong>
+                  <span>Design Studio</span>
+                  <strong>Luxe Interior Works</strong>
                 </div>
                 <div className="seller-row">
-                  <span>Sold by</span>
-                  <strong>Luxe Craftsmans Studio</strong>
+                  <span>Site Visit</span>
+                  <strong>Free 3D Laser Measurement</strong>
                 </div>
                 <div className="seller-row">
-                  <span>Payment</span>
-                  <strong>Secure Transaction</strong>
+                  <span>Execution</span>
+                  <strong>Certified Master Carpenters</strong>
                 </div>
               </div>
 
               <div className="buybox-guarantees">
-                <span>🔒 100% Purchase Protection</span>
+                <span>🔒 10-Year Flat Warranty Included</span>
               </div>
 
             </div>
@@ -338,8 +427,8 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
 
         {/* Customer Reviews Section */}
         <div className="amazon-reviews-container">
-          <div className="reviews-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
-            <h2 style={{ margin: 0 }}>{t('customerReviews')} ({reviews.length})</h2>
+          <div className="reviews-header-bar">
+            <h2>{t('customerReviews')} ({reviews.length})</h2>
             <button 
               className="btn-write-review"
               onClick={() => {
@@ -350,16 +439,6 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
                   setShowReviewForm(!showReviewForm);
                 }
               }}
-              style={{
-                background: '#c98544',
-                color: '#fff',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '20px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '13px'
-              }}
             >
               ✍️ Write a Customer Review
             </button>
@@ -367,15 +446,14 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
 
           {/* Write Customer Review Form */}
           {showReviewForm && (
-            <form onSubmit={handleAddReview} className="add-review-form-card" style={{ background: '#f9f6f0', padding: '20px', borderRadius: '12px', marginBottom: '24px', border: '1px solid #e2d9cd' }}>
-              <h3 style={{ marginTop: 0, marginBottom: '12px', fontSize: '16px', color: '#3e322d' }}>Submit Your Product Review</h3>
+            <form onSubmit={handleAddReview} className="add-review-form-card">
+              <h3>Submit Your Product Review</h3>
               
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>Rating:</label>
+              <div className="form-group-item">
+                <label>Rating:</label>
                 <select 
                   value={newRating} 
                   onChange={(e) => setNewRating(e.target.value)}
-                  style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #ccc' }}
                 >
                   <option value={5}>★★★★★ (5 Stars - Excellent)</option>
                   <option value={4}>★★★★☆ (4 Stars - Very Good)</option>
@@ -385,35 +463,33 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
                 </select>
               </div>
 
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>Review Headline:</label>
+              <div className="form-group-item">
+                <label>Review Headline:</label>
                 <input 
                   type="text" 
                   value={newHeadline} 
                   onChange={(e) => setNewHeadline(e.target.value)} 
                   placeholder="e.g. Superior wood quality and comfortable design!"
                   required
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontWeight: '600', fontSize: '13px', marginBottom: '4px' }}>Review Details:</label>
+              <div className="form-group-item">
+                <label>Review Details:</label>
                 <textarea 
                   value={newText} 
                   onChange={(e) => setNewText(e.target.value)} 
                   placeholder="Share your experience regarding material, delivery, and craftsmanship..."
                   rows="3"
                   required
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button type="submit" style={{ background: '#3e322d', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+              <div className="form-btn-row">
+                <button type="submit" className="btn-submit-rev">
                   Submit Review
                 </button>
-                <button type="button" onClick={() => setShowReviewForm(false)} style={{ background: '#e0e0e0', color: '#333', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>
+                <button type="button" onClick={() => setShowReviewForm(false)} className="btn-cancel-rev">
                   Cancel
                 </button>
               </div>
@@ -434,28 +510,15 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
 
             <div className="reviews-cards-list">
               {reviews.length === 0 ? (
-                <p style={{ color: '#888', fontStyle: 'italic' }}>No customer reviews yet. Be the first to leave a review!</p>
+                <p className="no-reviews-note">No customer reviews yet. Be the first to leave a review!</p>
               ) : (
                 reviews.map(rev => (
-                  <div key={rev.id} className="review-item-card" style={{ position: 'relative' }}>
+                  <div key={rev.id} className="review-item-card">
                     {isLoggedIn && userRole === 'admin' && (
                       <button 
                         onClick={() => handleDeleteReview(rev.id)}
                         className="btn-delete-review-admin"
                         title="Delete Review (Admin Only)"
-                        style={{
-                          position: 'absolute',
-                          top: '12px',
-                          right: '12px',
-                          background: '#ffebee',
-                          color: '#c62828',
-                          border: '1px solid #ffcdd2',
-                          padding: '4px 10px',
-                          borderRadius: '4px',
-                          fontSize: '11px',
-                          fontWeight: 'bold',
-                          cursor: 'pointer'
-                        }}
                       >
                         🗑️ Delete Review
                       </button>
@@ -467,7 +530,7 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
                     </div>
                     <div className="review-stars">
                       {'★'.repeat(rev.rating || 5)}{'☆'.repeat(5 - (rev.rating || 5))} 
-                      <strong className="review-headline" style={{ marginLeft: '8px' }}>{rev.headline}</strong>
+                      <strong className="review-headline">{rev.headline}</strong>
                     </div>
                     <p className="review-text">{rev.text}</p>
                   </div>
@@ -478,6 +541,366 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
         </div>
 
       </div>
+
+      {/* Book a Consultation Modal Dialog Overlay */}
+      {showConsultModal && (
+        <div 
+          className="consult-modal-overlay" 
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowConsultModal(false);
+          }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '20px'
+          }}
+        >
+          <div 
+            className="consult-modal-card" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#ffffff',
+              borderRadius: '16px',
+              maxWidth: '480px',
+              width: '100%',
+              padding: '28px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+              position: 'relative'
+            }}
+          >
+            <button 
+              onClick={() => setShowConsultModal(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#777'
+              }}
+            >
+              &times;
+            </button>
+
+            <h2 style={{ margin: '0 0 4px 0', fontSize: '22px', color: '#2c211e', fontFamily: "'Playfair Display', serif" }}>
+              📅 Book a Design Consultation
+            </h2>
+            <p style={{ margin: '0 0 14px 0', fontSize: '13px', color: '#6e615a', lineHeight: '1.4' }}>
+              Please provide your details below to schedule an expert interior design consultation for <strong>{product.name}</strong>.
+            </p>
+
+            {/* Generated Order ID & Product Details Banner */}
+            <div style={{ background: '#faf8f5', border: '1px dashed #c98544', padding: '12px 16px', borderRadius: '10px', marginBottom: '16px', textAlign: 'left' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: '#8c7d78', letterSpacing: '0.8px' }}>TRACKING ORDER ID</span>
+                <span style={{ fontSize: '14px', fontWeight: '800', color: '#c98544' }}>{modalOrderId || 'CON-1001'}</span>
+              </div>
+              <div style={{ fontSize: '13.5px', color: '#1f1816', fontWeight: '700', marginTop: '4px' }}>
+                🛋️ Product: {product.name} ({product.price})
+              </div>
+            </div>
+
+            <form onSubmit={handleConsultSubmit}>
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontWeight: '700', fontSize: '12.5px', color: '#3e322d', marginBottom: '4px' }}>
+                  Full Name *
+                </label>
+                <input 
+                  type="text"
+                  value={consultForm.name}
+                  onChange={(e) => setConsultForm({ ...consultForm, name: e.target.value })}
+                  placeholder="e.g. Ananya Sharma"
+                  required
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #dcd4c8', boxSizing: 'border-box', fontSize: '13.5px' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', fontSize: '12.5px', color: '#3e322d', marginBottom: '4px' }}>
+                    Phone Number *
+                  </label>
+                  <input 
+                    type="tel"
+                    value={consultForm.phone}
+                    onChange={(e) => setConsultForm({ ...consultForm, phone: e.target.value })}
+                    placeholder="+91 9876543210"
+                    required
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #dcd4c8', boxSizing: 'border-box', fontSize: '13.5px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '700', fontSize: '12.5px', color: '#3e322d', marginBottom: '4px' }}>
+                    WhatsApp Number *
+                  </label>
+                  <input 
+                    type="tel"
+                    value={consultForm.whatsappNumber}
+                    onChange={(e) => setConsultForm({ ...consultForm, whatsappNumber: e.target.value })}
+                    placeholder="+91 9876543210"
+                    required
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #dcd4c8', boxSizing: 'border-box', fontSize: '13.5px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontWeight: '700', fontSize: '12.5px', color: '#3e322d', marginBottom: '4px' }}>
+                  Payment Option *
+                </label>
+                <select
+                  value={consultForm.paymentMode}
+                  onChange={(e) => setConsultForm({ ...consultForm, paymentMode: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #dcd4c8', boxSizing: 'border-box', fontSize: '13.5px' }}
+                >
+                  <option value="Cash on Delivery">Cash on Delivery / Pay on Site</option>
+                  <option value="Online Payment">Online Payment (UPI / Card)</option>
+                  <option value="Net Banking">Net Banking</option>
+                  <option value="Flexible EMI">Flexible EMI Option</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontWeight: '700', fontSize: '12.5px', color: '#3e322d', marginBottom: '4px' }}>
+                  Site / Delivery Address *
+                </label>
+                <textarea 
+                  value={consultForm.address}
+                  onChange={(e) => setConsultForm({ ...consultForm, address: e.target.value })}
+                  placeholder="Full Delivery Address, City, State, PIN..."
+                  rows="2"
+                  required
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #dcd4c8', boxSizing: 'border-box', fontSize: '13px' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontWeight: '700', fontSize: '12.5px', color: '#3e322d', marginBottom: '4px' }}>
+                  Preferred Date & Special Requirements
+                </label>
+                <textarea 
+                  value={consultForm.notes}
+                  onChange={(e) => setConsultForm({ ...consultForm, notes: e.target.value })}
+                  placeholder="Mention preferred site visit date, room measurements, or special requests..."
+                  rows="2"
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #dcd4c8', boxSizing: 'border-box', fontSize: '13px' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button 
+                  type="submit"
+                  style={{
+                    background: '#25d366',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 20px',
+                    fontWeight: '700',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    flex: 1
+                  }}
+                >
+                  🚀 Confirm & Send to WhatsApp
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setShowConsultModal(false)}
+                  style={{
+                    background: '#e0e0e0',
+                    color: '#333333',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 18px',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Expanded Medium/Large Image Lightbox Modal Pop-up */}
+      {showLightbox && (
+        <div 
+          className="lightbox-modal-overlay" 
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowLightbox(false);
+          }} 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.88)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '20px'
+          }}
+        >
+          <div 
+            className="lightbox-modal-card" 
+            onClick={(e) => e.stopPropagation()} 
+            style={{
+              position: 'relative',
+              maxWidth: '850px',
+              width: '92%',
+              maxHeight: '90vh',
+              background: '#ffffff',
+              borderRadius: '18px',
+              padding: '24px',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              boxSizing: 'border-box'
+            }}
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => setShowLightbox(false)}
+              style={{
+                position: 'absolute',
+                top: '14px',
+                right: '16px',
+                background: '#3c312e',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '50%',
+                width: '38px',
+                height: '38px',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                zIndex: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Main Pop-up Image Box with Prev/Next Arrow Buttons */}
+            <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Prev Button */}
+              <button
+                onClick={() => setActiveImgIndex((prev) => (prev > 0 ? prev - 1 : productImages.length - 1))}
+                style={{
+                  position: 'absolute',
+                  left: '10px',
+                  background: 'rgba(60, 49, 46, 0.75)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '42px',
+                  height: '42px',
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  zIndex: 5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Previous Image"
+              >
+                ‹
+              </button>
+
+              {/* Display Active Image */}
+              <img 
+                src={productImages[activeImgIndex]} 
+                alt={`${product.name} View ${activeImgIndex + 1}`} 
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '68vh',
+                  objectFit: 'contain',
+                  borderRadius: '12px'
+                }} 
+              />
+
+              {/* Next Button */}
+              <button
+                onClick={() => setActiveImgIndex((prev) => (prev < productImages.length - 1 ? prev + 1 : 0))}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  background: 'rgba(60, 49, 46, 0.75)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '42px',
+                  height: '42px',
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  zIndex: 5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                title="Next Image"
+              >
+                ›
+              </button>
+            </div>
+
+            {/* Pop-up 3 Thumbnails Switcher */}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '14px', justifyContent: 'center' }}>
+              {productImages.map((imgSrc, idx) => (
+                <img 
+                  key={idx}
+                  src={imgSrc}
+                  alt={`View ${idx + 1}`}
+                  onClick={() => setActiveImgIndex(idx)}
+                  style={{
+                    width: '56px',
+                    height: '56px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    border: activeImgIndex === idx ? '3px solid #c98544' : '1px solid #ddd',
+                    opacity: activeImgIndex === idx ? 1 : 0.5,
+                    transition: 'all 0.2s ease',
+                    transform: activeImgIndex === idx ? 'scale(1.08)' : 'scale(1)'
+                  }}
+                />
+              ))}
+            </div>
+
+            <div style={{ marginTop: '12px', fontSize: '18px', fontWeight: '700', color: '#1f1816', fontFamily: "'Playfair Display', serif" }}>
+              {product.name} (View {activeImgIndex + 1} of {productImages.length})
+            </div>
+            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#7a6b65' }}>
+              Touch background, ✕ button, or use ‹ › arrows to navigate images
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

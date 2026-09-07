@@ -116,17 +116,19 @@
   flex: 1;
   border: 1px solid #e7e7e7;
   border-radius: 8px;
-  padding: 12px;
+  padding: 8px;
   text-align: center;
   background: #ffffff;
   position: relative;
+  align-self: start;
 }
 
 .amazon-main-img {
   width: 100%;
-  max-height: 380px;
-  object-fit: contain;
+  height: 250px;
+  object-fit: cover;
   border-radius: 6px;
+  display: block;
 }
 
 .amazon-zoom-hover-tag {
@@ -330,6 +332,76 @@
   line-height: 1.6;
 }
 
+.custom-design-callout-box {
+  background: #faf6f0;
+  border: 1px solid #e8decb;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+.custom-design-callout-box p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #4a3c36;
+}
+
+.est-budget-label {
+  font-size: 13px;
+  color: #7a6b65;
+  font-weight: 600;
+}
+
+.modal-consultation-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.btn-customize-design {
+  background: #3c312e;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(60, 49, 46, 0.18);
+}
+
+.btn-customize-design:hover {
+  background: #231b19;
+}
+
+.btn-get-quote {
+  display: none;
+}
+
+.btn-book-consultation {
+  background: #18d35d;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(24, 211, 93, 0.22);
+}
+
+.btn-book-consultation:hover {
+  background: #15b951;
+}
+
 /* Right Column: Buy Box */
 .amazon-buybox-column {
   position: sticky;
@@ -337,7 +409,7 @@
 }
 
 .buybox-card {
-  border: 1px solid #d5d9d9;
+  border: 2px solid #c98544;
   border-radius: 8px;
   padding: 18px;
   background: #ffffff;
@@ -348,9 +420,16 @@
 }
 
 .buybox-price-row {
-  font-size: 24px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #ab3615;
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+.stock-green {
+  color: #169931;
+  font-size: 16px;
   font-weight: 700;
-  color: #b12704;
 }
 
 .buybox-delivery {

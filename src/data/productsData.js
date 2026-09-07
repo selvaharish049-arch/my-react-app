@@ -79,7 +79,8 @@ const DELETED_PRODUCTS_KEY = 'luxe_deleted_products_v2';
 const getStoredCustomProducts = () => {
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    const parsed = stored ? JSON.parse(stored) : [];
+    return Array.isArray(parsed) ? parsed.map(sanitizeProduct) : [];
   } catch (e) {
     console.error("Error reading products from localStorage:", e);
     return [];
@@ -117,6 +118,42 @@ const saveDeletedProductIds = (deletedIds) => {
   }
 };
 
+export const fileToBase64 = (file) => {
+  return new Promise((resolve) => {
+    if (!file || !(file instanceof File)) {
+      resolve('');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result || '');
+    reader.onerror = () => resolve('');
+    reader.readAsDataURL(file);
+  });
+};
+
+const DEFAULT_FALLBACK_IMG = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
+
+const sanitizeImage = (url) => {
+  if (!url || typeof url !== 'string' || url.startsWith('blob:')) {
+    return DEFAULT_FALLBACK_IMG;
+  }
+  return url;
+};
+
+export const sanitizeProduct = (product) => {
+  if (!product) return product;
+  const cleanImg = sanitizeImage(product.img);
+  const cleanImages = (Array.isArray(product.images) && product.images.length > 0)
+    ? product.images.map(sanitizeImage)
+    : [cleanImg, cleanImg, cleanImg];
+
+  return {
+    ...product,
+    img: cleanImg,
+    images: cleanImages
+  };
+};
+
 /**
  * Fetch all products instantly from local defaults + localStorage.
  * Performs a fast non-blocking background check with 1.2s timeout if server is up.
@@ -149,16 +186,16 @@ export const getAllProducts = async () => {
       const combinedDeletedIds = Array.from(new Set([...deletedIds, ...serverDeletedIds]));
 
       // Construct local products excluding deleted ones
-      const allLocal = [...defaultProducts, ...customItems].filter(
-        p => p && p.id !== undefined && p.id !== null && !combinedDeletedIds.includes(String(p.id))
-      );
+      const allLocal = [...defaultProducts, ...customItems]
+        .filter(p => p && p.id !== undefined && p.id !== null && !combinedDeletedIds.includes(String(p.id)))
+        .map(sanitizeProduct);
 
       if (Array.isArray(serverProducts) && serverProducts.length > 0) {
         // Merge server products with local ones, eliminating duplicates by ID
         const map = new Map();
         [...allLocal, ...serverProducts].forEach(p => {
           if (p && p.id !== undefined && p.id !== null && !combinedDeletedIds.includes(String(p.id))) {
-            map.set(String(p.id), p);
+            map.set(String(p.id), sanitizeProduct(p));
           }
         });
         return Array.from(map.values());
@@ -170,9 +207,9 @@ export const getAllProducts = async () => {
   }
 
   // Construct local products excluding deleted ones
-  const allLocal = [...defaultProducts, ...customItems].filter(
-    p => p && p.id !== undefined && p.id !== null && !deletedIds.includes(String(p.id))
-  );
+  const allLocal = [...defaultProducts, ...customItems]
+    .filter(p => p && p.id !== undefined && p.id !== null && !deletedIds.includes(String(p.id)))
+    .map(sanitizeProduct);
 
   return allLocal;
 };
@@ -186,16 +223,8 @@ export const addCustomProduct = async (formData) => {
     formData.append('id', id);
     const name = formData.get('name') || 'New Custom Product';
     const price = formData.get('price') || '₹20,000';
-    const category = formData.get('category') || 'modularkitchen';
-    
-    const validCategories = [
-      'modularkitchen', 'bedroomcupboard', 'wardrobe', 'tvunit', 'poojacupboard', 'showcase', 'woodendoors', 'furniture', 'woodenwork',
-      'explore-sofa', 'explore-bed', 'explore-dining', 'explore-tvunit', 'explore-coffeetable', 'explore-mattress', 'explore-wardrobe', 'explore-sofacumbed', 'explore-bookshelf', 'explore-study'
-    ];
-
-    if (!validCategories.includes(category.trim().toLowerCase())) {
-      throw new Error(`Invalid category: "${category}"`);
-    }
+    const categoryRaw = formData.get('category') || 'modularkitchen';
+    const category = categoryRaw.trim().toLowerCase();
     
     const description = formData.get('description') || 'Premium custom crafted furniture piece.';
     const discountPercent = parseInt(formData.get('discountPercent') || '26', 10);
@@ -208,9 +237,33 @@ export const addCustomProduct = async (formData) => {
     const imageUrl = formData.get('imageUrl');
 
     if (imageFile && imageFile instanceof File) {
-      img = URL.createObjectURL(imageFile);
+      const b64 = await fileToBase64(imageFile);
+      if (b64) img = b64;
     } else if (imageUrl) {
       img = imageUrl;
+    }
+
+    let imagesList = [img];
+    const imageFile2 = formData.get('image2');
+    const imageUrl2 = formData.get('imageUrl2');
+    if (imageFile2 && imageFile2 instanceof File) {
+      const b64_2 = await fileToBase64(imageFile2);
+      if (b64_2) imagesList.push(b64_2);
+    } else if (imageUrl2) {
+      imagesList.push(imageUrl2);
+    }
+
+    const imageFile3 = formData.get('image3');
+    const imageUrl3 = formData.get('imageUrl3');
+    if (imageFile3 && imageFile3 instanceof File) {
+      const b64_3 = await fileToBase64(imageFile3);
+      if (b64_3) imagesList.push(b64_3);
+    } else if (imageUrl3) {
+      imagesList.push(imageUrl3);
+    }
+
+    while (imagesList.length < 3) {
+      imagesList.push(img);
     }
 
     const newProduct = {
@@ -224,6 +277,7 @@ export const addCustomProduct = async (formData) => {
       description,
       rating: 5,
       img,
+      images: imagesList,
       specifications: {
         Material: formData.get('material') || 'Premium Wood',
         Dimensions: formData.get('dimensions') || 'Custom Size',
@@ -290,5 +344,79 @@ export const deleteCustomProduct = async (id) => {
   } catch (e) {
     console.error(`Failed to delete product ${id}:`, e);
     return { success: false };
+  }
+};
+
+/**
+ * Custom Craftsmanship Category Storage & Management
+ */
+const CUSTOM_CAT_KEY = 'luxe_custom_craftsmanship_cats';
+
+export const getStoredCraftsmanshipCategories = () => {
+  try {
+    const raw = localStorage.getItem(CUSTOM_CAT_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+};
+
+const DELETED_CAT_KEY = 'luxe_deleted_craftsmanship_cats';
+
+export const getDeletedCraftsmanshipCategorySlugs = () => {
+  try {
+    const raw = localStorage.getItem(DELETED_CAT_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+};
+
+export const saveCraftsmanshipCategory = (catObj) => {
+  try {
+    const list = getStoredCraftsmanshipCategories();
+    const rawSlug = catObj.slug || catObj.title || 'custom-category';
+    let slug = rawSlug.toLowerCase().replace(/\s+/g, '-');
+    if (!slug.startsWith('explore-')) {
+      slug = `explore-${slug}`;
+    }
+
+    // Remove from deleted list if re-adding
+    const deletedSlugs = getDeletedCraftsmanshipCategorySlugs().filter(s => s !== slug);
+    localStorage.setItem(DELETED_CAT_KEY, JSON.stringify(deletedSlugs));
+
+    const newCat = {
+      id: 'cat-' + Date.now(),
+      title: catObj.title,
+      slug: slug,
+      img: catObj.img || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80',
+      path: `/product/${slug}`
+    };
+
+    const updated = [newCat, ...list.filter(c => c.slug !== slug)];
+    localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event('craftsmanshipCategoryUpdated'));
+    return newCat;
+  } catch (e) {
+    console.error("Failed to save custom craftsmanship category:", e);
+    return null;
+  }
+};
+
+export const deleteCraftsmanshipCategory = (slug) => {
+  try {
+    const deletedSlugs = getDeletedCraftsmanshipCategorySlugs();
+    if (!deletedSlugs.includes(slug)) {
+      deletedSlugs.push(slug);
+      localStorage.setItem(DELETED_CAT_KEY, JSON.stringify(deletedSlugs));
+    }
+
+    const list = getStoredCraftsmanshipCategories();
+    const updated = list.filter(c => c.slug !== slug);
+    localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event('craftsmanshipCategoryUpdated'));
+    return true;
+  } catch (e) {
+    return false;
   }
 };
