@@ -1,6 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getAllProducts, getStoredCraftsmanshipCategories, getDeletedCraftsmanshipCategorySlugs } from '../data/productsData';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { 
+  getStoredCraftsmanshipCategories, 
+  getDeletedCraftsmanshipCategorySlugs,
+  sanitizeImage
+} from '../data/productsData';
 import './HomeDecor.css';
 
 import img1 from '../assets/d1.jpg';
@@ -14,78 +18,91 @@ import img8 from '../assets/d8.jpg';
 import img9 from '../assets/d9.jpg';
 import img10 from '../assets/d1.jpg';
 
-const items = [
-  { title: 'Sofa', img: img1, path: '/product/explore-sofa' },
-  { title: 'Bed', img: img2, path: '/product/explore-bed' },
-  { title: 'Dining', img: img3, path: '/product/explore-dining' },
-  { title: 'TV Unit', img: img4, path: '/product/explore-tvunit' },
-  { title: 'Coffee Table', img: img5, path: '/product/explore-coffeetable' },
-  { title: 'Mattress', img: img6, path: '/product/explore-mattress' },
-  { title: 'Wardrobe', img: img7, path: '/product/explore-wardrobe' },
-  { title: 'Sofa Cum Bed', img: img8, path: '/product/explore-sofacumbed' },
-  { title: 'Bookshelf', img: img9, path: '/product/explore-bookshelf' },
-  { title: 'Study', img: img10, path: '/product/explore-study' },
+const baseItems = [
+  { id: 'explore-sofa', title: 'Sofa', img: img1, path: '/product/explore-sofa' },
+  { id: 'explore-bed', title: 'Bed', img: img2, path: '/product/explore-bed' },
+  { id: 'explore-dining', title: 'Dining', img: img3, path: '/product/explore-dining' },
+  { id: 'explore-tvunit', title: 'TV Unit', img: img4, path: '/product/explore-tvunit' },
+  { id: 'explore-coffeetable', title: 'Coffee Table', img: img5, path: '/product/explore-coffeetable' },
+  { id: 'explore-mattress', title: 'Mattress', img: img6, path: '/product/explore-mattress' },
+  { id: 'explore-wardrobe', title: 'Wardrobe', img: img7, path: '/product/explore-wardrobe' },
+  { id: 'explore-sofacumbed', title: 'Sofa Cum Bed', img: img8, path: '/product/explore-sofacumbed' },
+  { id: 'explore-bookshelf', title: 'Bookshelf', img: img9, path: '/product/explore-bookshelf' },
+  { id: 'explore-study', title: 'Study', img: img10, path: '/product/explore-study' },
 ];
 
 const HomeDecor = () => {
   const navigate = useNavigate();
-  const [sliderItems, setSliderItems] = useState(items);
+  const location = useLocation();
+  const [sliderItems, setSliderItems] = useState(baseItems);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [stepSize, setStepSize] = useState(310);
+  const [searchFilter, setSearchFilter] = useState('');
+  
   const trackRef = useRef(null);
   const viewportRef = useRef(null);
 
-  // Swipe / Drag handling
+  const isStandalonePage = location.pathname === '/homedecor' || location.pathname === '/craftsmanship';
+
+  // Swipe / Drag handling for homepage slider
   const dragStartX = useRef(0);
   const dragEndX = useRef(0);
   const isDragging = useRef(false);
   const isTouchActive = useRef(false);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        await getAllProducts();
-        
-        const categoryConfig = [
-          { key: 'explore-sofa', label: 'Sofa', defaultImg: img1, path: '/product/explore-sofa' },
-          { key: 'explore-bed', label: 'Bed', defaultImg: img2, path: '/product/explore-bed' },
-          { key: 'explore-dining', label: 'Dining', defaultImg: img3, path: '/product/explore-dining' },
-          { key: 'explore-tvunit', label: 'TV Unit', defaultImg: img4, path: '/product/explore-tvunit' },
-          { key: 'explore-coffeetable', label: 'Coffee Table', defaultImg: img5, path: '/product/explore-coffeetable' },
-          { key: 'explore-mattress', label: 'Mattress', defaultImg: img6, path: '/product/explore-mattress' },
-          { key: 'explore-wardrobe', label: 'Wardrobe', defaultImg: img7, path: '/product/explore-wardrobe' },
-          { key: 'explore-sofacumbed', label: 'Sofa Cum Bed', defaultImg: img8, path: '/product/explore-sofacumbed' },
-          { key: 'explore-bookshelf', label: 'Bookshelf', defaultImg: img9, path: '/product/explore-bookshelf' },
-          { key: 'explore-study', label: 'Study', defaultImg: img10, path: '/product/explore-study' }
-        ];
+  const fetchProducts = async () => {
+    try {
+      const deletedSlugs = getDeletedCraftsmanshipCategorySlugs();
 
-        const deletedSlugs = getDeletedCraftsmanshipCategorySlugs();
+      // 1. Exactly 10 Base Craftsmanship Categories
+      const categoryConfig = [
+        { key: 'explore-sofa', label: 'Sofa', defaultImg: img1, path: '/product/explore-sofa' },
+        { key: 'explore-bed', label: 'Bed', defaultImg: img2, path: '/product/explore-bed' },
+        { key: 'explore-dining', label: 'Dining', defaultImg: img3, path: '/product/explore-dining' },
+        { key: 'explore-tvunit', label: 'TV Unit', defaultImg: img4, path: '/product/explore-tvunit' },
+        { key: 'explore-coffeetable', label: 'Coffee Table', defaultImg: img5, path: '/product/explore-coffeetable' },
+        { key: 'explore-mattress', label: 'Mattress', defaultImg: img6, path: '/product/explore-mattress' },
+        { key: 'explore-wardrobe', label: 'Wardrobe', defaultImg: img7, path: '/product/explore-wardrobe' },
+        { key: 'explore-sofacumbed', label: 'Sofa Cum Bed', defaultImg: img8, path: '/product/explore-sofacumbed' },
+        { key: 'explore-bookshelf', label: 'Bookshelf', defaultImg: img9, path: '/product/explore-bookshelf' },
+        { key: 'explore-study', label: 'Study', defaultImg: img10, path: '/product/explore-study' }
+      ];
 
-        const baseMapped = categoryConfig
-          .filter(cfg => !deletedSlugs.includes(cfg.key))
-          .map(cfg => {
-            return {
-              title: cfg.label,
-              img: cfg.defaultImg,
-              path: cfg.path
-            };
-          });
-
-        const customCats = getStoredCraftsmanshipCategories().filter(c => !deletedSlugs.includes(c.slug));
-        const customMapped = customCats.map(c => ({
-          title: c.title,
-          img: c.img,
-          path: c.path || `/product/${c.slug}`
+      const baseMapped = categoryConfig
+        .filter(cfg => !deletedSlugs.includes(cfg.key))
+        .map(cfg => ({
+          id: cfg.key,
+          title: cfg.label,
+          img: cfg.defaultImg,
+          path: cfg.path,
+          type: 'category'
         }));
 
-        setSliderItems([...baseMapped, ...customMapped]);
-      } catch (err) {
-        console.error("Failed to load dynamic Home Decor slider items:", err);
-      }
-    };
+      // 2. Custom categories added by Admin in Admin Panel (e.g. Chair, Recliners, Bar Counter, etc.)
+      const customCats = getStoredCraftsmanshipCategories().filter(c => !deletedSlugs.includes(c.slug));
+      const customMapped = customCats.map(c => ({
+        id: c.id || c.slug,
+        title: c.title,
+        img: sanitizeImage(c.img),
+        path: c.path || `/product/${c.slug}`,
+        type: 'customCategory'
+      }));
 
+      // Combine base 10 + Admin custom categories ONLY (no individual product cards on category slider!)
+      const combined = [...baseMapped, ...customMapped];
+
+      setSliderItems(combined);
+    } catch (err) {
+      console.error("Failed to load Home Decor products:", err);
+    }
+  };
+
+  useEffect(() => {
     fetchProducts();
+
     window.addEventListener('craftsmanshipCategoryUpdated', fetchProducts);
+    window.addEventListener('productUpdated', fetchProducts);
+    window.addEventListener('storage', fetchProducts);
 
     const handleResize = () => {
       if (viewportRef.current) {
@@ -101,6 +118,8 @@ const HomeDecor = () => {
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('craftsmanshipCategoryUpdated', fetchProducts);
+      window.removeEventListener('productUpdated', fetchProducts);
+      window.removeEventListener('storage', fetchProducts);
       window.removeEventListener('resize', handleResize);
     };
   }, []);
@@ -164,6 +183,85 @@ const HomeDecor = () => {
     }
   };
 
+  const filteredItems = sliderItems.filter(item => 
+    item.title.toLowerCase().includes(searchFilter.toLowerCase().trim())
+  );
+
+  // If viewing on dedicated standalone page (/homedecor or /craftsmanship)
+  if (isStandalonePage) {
+    return (
+      <div className="decor-standalone-page">
+        {/* Top Breadcrumb & Page Banner */}
+        <div className="decor-page-header">
+          <div className="decor-page-header-container">
+            <span className="decor-page-breadcrumb">HOME &nbsp;/&nbsp; OUR CRAFTSMANSHIP &nbsp;/&nbsp; HOME DECOR</span>
+            <h1 className="decor-page-main-title">Home Decor & Craftsmanship Collections</h1>
+            <p className="decor-page-subtitle">
+              Explore all our bespoke furniture ranges, handcrafted interiors, and specialized decor collections.
+            </p>
+            <div className="decor-page-meta">
+              <span className="decor-count-badge">✨ {sliderItems.length} Collections Available</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Search & Filter Toolbar */}
+        <div className="decor-toolbar-container">
+          <div className="decor-search-wrapper">
+            <svg className="decor-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Search collections (Sofa, Bed, Dining...)..." 
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              className="decor-search-input"
+            />
+            {searchFilter && (
+              <button className="decor-search-clear" onClick={() => setSearchFilter('')}>×</button>
+            )}
+          </div>
+        </div>
+
+        {/* All Products Grid View */}
+        <div className="decor-page-grid-container">
+          {filteredItems.length === 0 ? (
+            <div className="decor-empty-state">
+              <p>No collections found matching "{searchFilter}".</p>
+              <button className="decor-view-all-btn" onClick={() => setSearchFilter('')}>Show All Collections</button>
+            </div>
+          ) : (
+            <div className="decor-grid-view">
+              {filteredItems.map((item, index) => (
+                <div 
+                  key={index}
+                  className="decor-project-card decor-grid-card"
+                  onClick={() => navigate(item.path)}
+                >
+                  <div className="decor-card-image-box">
+                    <img src={item.img} alt={item.title || 'Product'} />
+                    {item.price && (
+                      <span className="decor-card-price-tag">{item.price}</span>
+                    )}
+                  </div>
+                  <div className="decor-card-body">
+                    <div className="decor-card-text">
+                      <h3 className="decor-card-title">{item.title}</h3>
+                    </div>
+                    <span className="decor-card-arrow">&rarr;</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise, render embedded section on Homepage
   return (
     <section className="decor-projects-section">
       <div className="decor-projects-container">
@@ -186,16 +284,15 @@ const HomeDecor = () => {
           <button 
             type="button"
             className="decor-view-all-btn"
-            onClick={() => navigate('/furniture')}
+            onClick={() => navigate('/homedecor')}
           >
-            VIEW ALL COLLECTIONS &rarr;
+            VIEW ALL COLLECTIONS ({sliderItems.length}) &rarr;
           </button>
         </div>
 
         {/* Right Slider Section */}
         <div className="decor-slider-section">
 
-          {/* Cards Track Container */}
           <div 
             className="decor-cards-viewport"
             ref={viewportRef}
@@ -223,6 +320,9 @@ const HomeDecor = () => {
                 >
                   <div className="decor-card-image-box">
                     <img src={item.img} alt={item.title || 'Product'} />
+                    {item.price && (
+                      <span className="decor-card-price-tag">{item.price}</span>
+                    )}
                   </div>
                   <div className="decor-card-body">
                     <div className="decor-card-text">

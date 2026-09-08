@@ -3,6 +3,16 @@ import { useSearchParams } from 'react-router-dom';
 import './TrackOrder.css';
 
 const API_BASE_URL = 'http://localhost:5000/api';
+const DELETED_ORDERS_KEY = 'luxe_deleted_orders_v2';
+
+const getDeletedOrderIds = () => {
+  try {
+    const stored = localStorage.getItem(DELETED_ORDERS_KEY);
+    return stored ? JSON.parse(stored).map(id => String(id).toLowerCase().trim()) : [];
+  } catch (e) {
+    return [];
+  }
+};
 
 // Demo fallback orders if server is offline
 const DEMO_ORDERS = [
@@ -70,12 +80,13 @@ const TrackOrder = ({ triggerLogin }) => {
         if (user && user.role !== 'admin') {
           const email = (user.email || '').toLowerCase().trim();
           const phone = (user.phone || '').trim();
+          const deletedIds = getDeletedOrderIds();
 
           let storedOrders = [];
           const stored = localStorage.getItem('luxe_customer_orders');
           if (stored) storedOrders = JSON.parse(stored);
 
-          const allOrders = [...storedOrders, ...DEMO_ORDERS];
+          const allOrders = [...storedOrders, ...DEMO_ORDERS].filter(o => o && o.orderId && !deletedIds.includes(String(o.orderId).toLowerCase().trim()));
           const userMatches = allOrders.filter(o => {
             const ordEmail = (o.email || '').toLowerCase().trim();
             const ordPhone = (o.phone || '').trim();
@@ -189,13 +200,14 @@ const TrackOrder = ({ triggerLogin }) => {
     }
 
     // 2. Search local storage saved orders or fallback DEMO_ORDERS
+    const deletedIds = getDeletedOrderIds();
     let localCustomOrders = [];
     try {
       const stored = localStorage.getItem('luxe_customer_orders');
       if (stored) localCustomOrders = JSON.parse(stored);
     } catch (e) {}
 
-    const allLocalOrders = [...localCustomOrders, ...DEMO_ORDERS];
+    const allLocalOrders = [...localCustomOrders, ...DEMO_ORDERS].filter(o => o && o.orderId && !deletedIds.includes(String(o.orderId).toLowerCase().trim()));
 
     const match = allLocalOrders.find(o => {
       const targetQuery = (cleanOrderId || cleanPhone).toLowerCase().trim();

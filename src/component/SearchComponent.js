@@ -74,36 +74,32 @@ const SearchComponent = () => {
           <button type="submit" className="search-go-btn">{t('searchBtn')}</button>
         </form>
 
-        {isOpen && (
+        {isOpen && searchInput.trim() !== '' && (
           <div className="dropdown-menu">
             {/* Suggestions list */}
-            {searchInput.trim() !== '' && (
-              <div className="suggestions-section">
-                <h4 className="menu-title">Product Matches</h4>
-                {suggestions.length === 0 ? (
-                  <p className="empty-msg">No products matching "{searchInput}"</p>
-                ) : (
-                  <div className="suggestions-list">
-                    {suggestions.map((item) => (
-                      <div 
-                        key={item.id} 
-                        className="suggestion-item" 
-                        onMouseDown={() => handleSuggestionClick(item)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <img src={item.img} alt={item.name} className="suggestion-thumb" />
-                        <div className="suggestion-info">
-                          <span className="suggestion-name">{item.name}</span>
-                          <span className="suggestion-price">{item.price}</span>
-                        </div>
+            <div className="suggestions-section">
+              <h4 className="menu-title">Product Matches</h4>
+              {suggestions.length === 0 ? (
+                <p className="empty-msg">No products matching "{searchInput}"</p>
+              ) : (
+                <div className="suggestions-list">
+                  {suggestions.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="suggestion-item" 
+                      onMouseDown={() => handleSuggestionClick(item)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <img src={item.img} alt={item.name} className="suggestion-thumb" />
+                      <div className="suggestion-info">
+                        <span className="suggestion-name">{item.name}</span>
+                        <span className="suggestion-price">{item.price}</span>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

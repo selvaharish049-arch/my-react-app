@@ -168,12 +168,18 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
     navigate('/checkout', { state: { product, action: 'customize' } });
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleConsultSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (isSubmitting) return;
+
     if (!consultForm.name.trim() || !consultForm.phone.trim() || !consultForm.whatsappNumber.trim() || !consultForm.address.trim()) {
       alert("Please fill in your Full Name, Phone Number, WhatsApp Number, and Delivery Address!");
       return;
     }
+
+    setIsSubmitting(true);
 
     const trackingCode = modalOrderId || ('CON-' + Math.floor(1000 + Math.random() * 9000));
     const priceNum = parseInt((product.price || '₹0').replace(/[₹,]/g, '')) || 0;
@@ -197,20 +203,30 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
       notes: `Consultation Booking for ${product.name} (Qty: ${qty}) | PAN: ${consultForm.panNumber ? consultForm.panNumber.toUpperCase() : 'N/A'} | Notes: ${consultForm.notes || 'None'}`
     };
 
-    try {
-      const stored = localStorage.getItem('luxe_customer_orders');
-      const list = stored ? JSON.parse(stored) : [];
-      list.unshift(consultationObj);
-      localStorage.setItem('luxe_customer_orders', JSON.stringify(list));
-      window.dispatchEvent(new Event('orderStatusUpdated'));
-    } catch (err) {}
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
 
     try {
-      await fetch('http://localhost:5000/api/orders/create', {
+      const res = await fetch(`${baseUrl}/api/orders/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(consultationObj)
       });
+      if (res.ok) {
+        const orderRes = await res.json();
+        if (orderRes && orderRes.orderId) {
+          consultationObj.orderId = orderRes.orderId;
+        }
+      }
+    } catch (err) {}
+
+    try {
+      const stored = localStorage.getItem('luxe_customer_orders');
+      let list = stored ? JSON.parse(stored) : [];
+      list = list.filter(o => o && String(o.orderId).toLowerCase().trim() !== String(consultationObj.orderId).toLowerCase().trim());
+      list.unshift(consultationObj);
+      localStorage.setItem('luxe_customer_orders', JSON.stringify(list));
+      window.dispatchEvent(new Event('orderStatusUpdated'));
     } catch (err) {}
 
     const trackingLink = `http://localhost:3000/track?id=${trackingCode}`;

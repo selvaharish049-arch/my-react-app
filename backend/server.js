@@ -509,9 +509,37 @@ app.post('/api/orders/create', async (req, res) => {
 
   const existingOrders = loadJson('orders.json', []);
   
+  // Normalize incoming orderId
+  const rawId = req.body.orderId ? req.body.orderId.trim().toUpperCase() : '';
+  const nowMs = Date.now();
+
+  // Check if duplicate order exists by orderId OR by customer+phone+total created within last 60 seconds
+  const existingDuplicate = existingOrders.find(o => {
+    if (!o) return false;
+    const oId = String(o.orderId || '').trim().toUpperCase();
+    if (rawId && oId === rawId) return true;
+
+    const sameCustomer = String(o.customerName || '').toLowerCase().trim() === String(customerName).toLowerCase().trim();
+    const samePhone = String(o.phone || '').replace(/\D/g, '') === String(phone).replace(/\D/g, '');
+    const sameProject = String(o.projectType || '').toLowerCase().trim() === String(projectType).toLowerCase().trim();
+    
+    if (sameCustomer && samePhone && sameProject) {
+      const createdMs = o.createdAt ? new Date(o.createdAt).getTime() : 0;
+      if (nowMs - createdMs < 60000) { // Created within 60 seconds
+        return true;
+      }
+    }
+    return false;
+  });
+
+  if (existingDuplicate) {
+    console.log(`[DEDUPLICATED] Order duplicate request ignored for ${existingDuplicate.orderId}`);
+    return res.status(200).json(existingDuplicate);
+  }
+
   // Auto-generate unique Order ID (e.g. SH-104)
   const nextNum = 101 + existingOrders.length;
-  const generatedId = req.body.orderId ? req.body.orderId.trim().toUpperCase() : `SH-${nextNum}`;
+  const generatedId = rawId || `SH-${nextNum}`;
   
   const stepNum = parseInt(currentStep || 1, 10);
   const stepsArr = createDefaultSteps(stepNum);
@@ -559,7 +587,7 @@ app.put('/api/orders/update-status/:orderId', async (req, res) => {
   const { currentStep, stageDates, notes, expectedCompletionDate } = req.body;
 
   let existingOrders = loadJson('orders.json', []);
-  const index = existingOrders.findIndex(o => o.orderId.toUpperCase() === searchId);
+  const index = existingOrders.findIndex(o => o && o.orderId && String(o.orderId).trim().toUpperCase() === searchId);
 
   if (index === -1) {
     return res.status(404).json({ error: `Order ID '${searchId}' not found.` });
@@ -608,19 +636,28 @@ app.put('/api/orders/update-status/:orderId', async (req, res) => {
 
 // 5. DELETE /api/orders/:orderId -> Admin API to delete an order
 app.delete('/api/orders/:orderId', async (req, res) => {
-  const searchId = (req.params.orderId || '').trim().toUpperCase();
+  const rawId = (req.params.orderId || '').trim();
+  const searchId = rawId.toUpperCase();
   let existingOrders = loadJson('orders.json', []);
   
-  existingOrders = existingOrders.filter(o => o.orderId.toUpperCase() !== searchId);
+  const beforeCount = existingOrders.length;
+  existingOrders = existingOrders.filter(o => {
+    if (!o || !o.orderId) return false;
+    const oId = String(o.orderId).trim().toUpperCase();
+    return oId !== searchId;
+  });
   saveJson('orders.json', existingOrders);
 
   if (OrderModel && mongoose && mongoose.connection.readyState === 1) {
     try {
-      await OrderModel.deleteOne({ orderId: searchId });
+      await OrderModel.deleteMany({ 
+        orderId: { $regex: new RegExp(`^${searchId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } 
+      });
     } catch (e) {}
   }
 
-  res.json({ success: true, message: `Order ${searchId} deleted.` });
+  console.log(`[DELETE ORDER] Order '${searchId}' removed. (Before: ${beforeCount}, After: ${existingOrders.length})`);
+  res.json({ success: true, message: `Order ${searchId} deleted permanently.` });
 });
 
 // Start server

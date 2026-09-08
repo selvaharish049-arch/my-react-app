@@ -71,7 +71,8 @@ const Checkout = () => {
   };
 
   const handleCheckoutSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (submitting) return;
 
     const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
     if (!panRegex.test(formData.panNumber)) {
@@ -106,29 +107,35 @@ const Checkout = () => {
       notes: `Solution Notes: ${formData.solutionNotes || 'Standard order'} | Quantity: ${quantity} | PAN: ${formData.panNumber.toUpperCase()}`
     };
 
-    // Save to localStorage so admin sees website orders instantly in Order Database
-    try {
-      const stored = localStorage.getItem('luxe_customer_orders');
-      const list = stored ? JSON.parse(stored) : [];
-      list.unshift(newOrderObj);
-      localStorage.setItem('luxe_customer_orders', JSON.stringify(list));
-      window.dispatchEvent(new Event('orderStatusUpdated'));
-    } catch (e) {}
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
 
     try {
-      // 1. Post to Backend DB
-      const response = await fetch('http://localhost:5000/api/orders/create', {
+      // 1. Post to Backend DB first
+      const response = await fetch(`${baseUrl}/api/orders/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOrderObj)
       });
-      const orderResult = await response.json();
-      if (orderResult && orderResult.orderId) {
-        newOrderObj.orderId = orderResult.orderId;
+      if (response.ok) {
+        const orderResult = await response.json();
+        if (orderResult && orderResult.orderId) {
+          newOrderObj.orderId = orderResult.orderId;
+        }
       }
     } catch (err) {
       console.log("Saved order locally.");
     }
+
+    // Save/Update in localStorage with final orderId
+    try {
+      const stored = localStorage.getItem('luxe_customer_orders');
+      let list = stored ? JSON.parse(stored) : [];
+      list = list.filter(o => o && String(o.orderId).toLowerCase().trim() !== String(newOrderObj.orderId).toLowerCase().trim());
+      list.unshift(newOrderObj);
+      localStorage.setItem('luxe_customer_orders', JSON.stringify(list));
+      window.dispatchEvent(new Event('orderStatusUpdated'));
+    } catch (e) {}
 
     setCreatedOrder(newOrderObj);
 

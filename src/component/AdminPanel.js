@@ -153,6 +153,7 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
         imageFile: null,
         imagePreview: ''
       });
+      setFormData(prev => ({ ...prev, category: saved.slug }));
       loadCategories();
       setTimeout(() => setMessage(''), 4000);
     }
@@ -210,32 +211,39 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
     }
     dataToSend.append('price', formattedPrice);
     dataToSend.append('discountPercent', formData.discountPercent || '26');
-    const targetCategory = (showCustomCatInput && customCategory.trim()) 
-      ? customCategory.trim().toLowerCase() 
+    const rawTargetCategory = (showCustomCatInput && customCategory.trim()) 
+      ? customCategory.trim() 
       : formData.category;
+
+    const cleanCat = rawTargetCategory.toLowerCase().trim().replace(/\s+/g, '');
+    const mappedCatMap = {
+      'modularkitchen': 'modularkitchen',
+      'bedroomcupboard': 'bedroomcupboard',
+      'wardrobes': 'wardrobe',
+      'wardrobe': 'wardrobe',
+      'tvunit': 'tvunit',
+      'poojacupboard': 'poojacupboard',
+      'showcase': 'showcase',
+      'woodendoors': 'woodendoors',
+      'furniture': 'furniture',
+      'woodenwork': 'woodenwork'
+    };
+    const targetCategory = mappedCatMap[cleanCat] || rawTargetCategory.toLowerCase().trim();
     dataToSend.append('category', targetCategory);
-    dataToSend.append('description', formData.description);
+    dataToSend.append('description', formData.description || 'Premium custom crafted furniture piece.');
     
     dataToSend.append('material', formData.material || 'BWP 710 Plywood, HDMR, German Laminate, Acrylic & PU Matte/Gloss');
     dataToSend.append('dimensions', formData.dimensions || '100% Tailored to your home space & layout');
     dataToSend.append('color', formData.color || 'As shown');
     dataToSend.append('warranty', formData.warranty || '10-Year Flat Warranty on Woodwork & Hardware');
-    dataToSend.append('assemblyRequired', formData.assemblyRequired);
+    dataToSend.append('assemblyRequired', formData.assemblyRequired || 'No');
 
     if (imageType === 'upload') {
-      if (!imageFile) {
-        alert("Please choose Main Cover Image 1 to upload!");
-        return;
-      }
-      dataToSend.append('image', imageFile);
+      if (imageFile) dataToSend.append('image', imageFile);
       if (imageFile2) dataToSend.append('image2', imageFile2);
       if (imageFile3) dataToSend.append('image3', imageFile3);
     } else {
-      if (!imageUrl) {
-        alert("Please enter Main Cover Image 1 URL!");
-        return;
-      }
-      dataToSend.append('imageUrl', imageUrl);
+      if (imageUrl) dataToSend.append('imageUrl', imageUrl);
       if (imageUrl2) dataToSend.append('imageUrl2', imageUrl2);
       if (imageUrl3) dataToSend.append('imageUrl3', imageUrl3);
     }
@@ -244,18 +252,19 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
     if (res) {
       setMessage("✅ Product added to catalog successfully!");
       
-      setFormData({
+      setFormData(prev => ({
+        ...prev,
         name: '',
         price: '',
         discountPercent: '26',
-        category: activeTab === 'craftsmanship' ? 'explore-sofa' : 'modularkitchen',
+        category: targetCategory || prev.category,
         description: '',
         material: '',
         dimensions: '',
         color: '',
         warranty: '',
         assemblyRequired: 'No',
-      });
+      }));
       setShowCustomCatInput(false);
       setCustomCategory('');
 
@@ -571,66 +580,118 @@ Please review this solution and let us know if you'd like to proceed! Thank you.
             
             <div className="custom-items-list">
               {/* Custom Added Categories */}
-              {activeCustomCraftCats.map(cCat => (
-                <div key={cCat.slug} className="custom-item-row" style={{ borderLeft: '4px solid #c98544', padding: '12px', background: '#fff', borderRadius: '8px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-                  <img 
-                    src={cCat.img} 
-                    alt={cCat.title} 
-                    style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} 
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
-                    }}
-                  />
-                  <div className="custom-item-info" style={{ flex: 1 }}>
-                    <h4 style={{ margin: '0 0 4px 0', fontSize: '15px' }}>{cCat.title} ✨</h4>
-                    <span className="item-cat-badge" style={{ background: '#c98544', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
-                      CUSTOM CATEGORY ({cCat.slug})
-                    </span>
+              {activeCustomCraftCats.map(cCat => {
+                const subCount = craftsmanshipProductsList.filter(p => {
+                  if (!p || !p.category) return false;
+                  const c = String(p.category).toLowerCase().trim();
+                  const slugClean = (cCat.slug || '').toLowerCase().replace('explore-', '').trim();
+                  const titleClean = (cCat.title || '').toLowerCase().trim();
+                  return c === (cCat.slug || '').toLowerCase() || c === titleClean || c.replace('explore-', '').trim() === slugClean;
+                }).length;
+
+                return (
+                  <div key={cCat.slug} className="custom-item-row" style={{ borderLeft: '4px solid #c98544', padding: '12px', background: '#fff', borderRadius: '8px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 2px 6px rgba(0,0,0,0.05)', flexWrap: 'wrap' }}>
+                    <img 
+                      src={cCat.img} 
+                      alt={cCat.title} 
+                      style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
+                      }}
+                    />
+                    <div className="custom-item-info" style={{ flex: 1, minWidth: '160px' }}>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '15px' }}>{cCat.title} ✨</h4>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span className="item-cat-badge" style={{ background: '#c98544', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
+                          CUSTOM CATEGORY ({cCat.slug})
+                        </span>
+                        <span style={{ background: '#e2dad0', color: '#2c211e', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
+                          📦 {subCount} {subCount === 1 ? 'Sub-product' : 'Sub-products'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="custom-item-actions" style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, category: cCat.slug }));
+                          setActiveTab('craftsmanship');
+                          window.scrollTo({ top: 400, behavior: 'smooth' });
+                        }}
+                        style={{ background: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                      >
+                        ➕ Add Sub-product
+                      </button>
+                      <button 
+                        className="btn-delete-item"
+                        onClick={() => handleDeleteCategory(cCat.slug)}
+                        style={{ background: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px' }}
+                        title="Remove Category"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
                   </div>
-                  <div className="custom-item-actions">
-                    <button 
-                      className="btn-delete-item"
-                      onClick={() => handleDeleteCategory(cCat.slug)}
-                      style={{ background: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px' }}
-                      title="Remove Category"
-                    >
-                      🗑️ Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
 
               {/* Base Default Categories */}
-              {activeBaseCraftCats.map(bCat => (
-                <div key={bCat.slug} className="custom-item-row" style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <img 
-                    src={bCat.img} 
-                    alt={bCat.title} 
-                    style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} 
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
-                    }}
-                  />
-                  <div className="custom-item-info" style={{ flex: 1 }}>
-                    <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', color: '#333' }}>{bCat.title}</h4>
-                    <span className="item-cat-badge" style={{ background: '#888', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px' }}>
-                      BASE CATEGORY ({bCat.slug})
-                    </span>
+              {activeBaseCraftCats.map(bCat => {
+                const subCount = craftsmanshipProductsList.filter(p => {
+                  if (!p || !p.category) return false;
+                  const c = String(p.category).toLowerCase().trim();
+                  const slugClean = (bCat.slug || '').toLowerCase().replace('explore-', '').trim();
+                  const titleClean = (bCat.title || '').toLowerCase().trim();
+                  return c === (bCat.slug || '').toLowerCase() || c === titleClean || c.replace('explore-', '').trim() === slugClean;
+                }).length;
+
+                return (
+                  <div key={bCat.slug} className="custom-item-row" style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                    <img 
+                      src={bCat.img} 
+                      alt={bCat.title} 
+                      style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '6px' }} 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
+                      }}
+                    />
+                    <div className="custom-item-info" style={{ flex: 1, minWidth: '160px' }}>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', color: '#333' }}>{bCat.title}</h4>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span className="item-cat-badge" style={{ background: '#888', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px' }}>
+                          BASE CATEGORY ({bCat.slug})
+                        </span>
+                        <span style={{ background: '#e2dad0', color: '#2c211e', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
+                          📦 {subCount} {subCount === 1 ? 'Sub-product' : 'Sub-products'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="custom-item-actions" style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, category: bCat.slug }));
+                          setActiveTab('craftsmanship');
+                          window.scrollTo({ top: 400, behavior: 'smooth' });
+                        }}
+                        style={{ background: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                      >
+                        ➕ Add Sub-product
+                      </button>
+                      <button 
+                        className="btn-delete-item"
+                        onClick={() => handleDeleteCategory(bCat.slug)}
+                        style={{ background: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px' }}
+                        title="Remove Category"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
                   </div>
-                  <div className="custom-item-actions">
-                    <button 
-                      className="btn-delete-item"
-                      onClick={() => handleDeleteCategory(bCat.slug)}
-                      style={{ background: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer', fontSize: '12px' }}
-                      title="Remove Category"
-                    >
-                      🗑️ Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

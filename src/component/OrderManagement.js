@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './OrderManagement.css';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const API_BASE_URL = isLocalhost ? 'http://localhost:5000/api' : 'https://selvaharish-interior-back.onrender.com/api';
 const DELETED_ORDERS_KEY = 'luxe_deleted_orders_v2';
 
 const DEMO_CUSTOMER_ORDERS = [
@@ -88,7 +89,7 @@ const OrderManagement = () => {
   const fetchOrders = async () => {
     setLoading(true);
     let combinedOrders = [];
-    const deletedIds = getDeletedOrderIds().map(id => String(id));
+    const deletedIds = getDeletedOrderIds().map(id => String(id).toLowerCase().trim());
 
     const stored = localStorage.getItem('luxe_customer_orders');
     if (stored !== null) {
@@ -105,7 +106,7 @@ const OrderManagement = () => {
     }
 
     // Filter out deleted IDs
-    combinedOrders = combinedOrders.filter(o => o && o.orderId && !deletedIds.includes(String(o.orderId)));
+    combinedOrders = combinedOrders.filter(o => o && o.orderId && !deletedIds.includes(String(o.orderId).toLowerCase().trim()));
 
     // Fast non-blocking fetch from backend API if available
     try {
@@ -118,8 +119,18 @@ const OrderManagement = () => {
         if (Array.isArray(serverData) && serverData.length > 0) {
           const map = new Map();
           [...combinedOrders, ...serverData].forEach(o => {
-            if (o && o.orderId && !deletedIds.includes(String(o.orderId))) {
-              map.set(String(o.orderId), o);
+            if (o && o.orderId) {
+              const cleanId = String(o.orderId).toLowerCase().trim();
+              if (!deletedIds.includes(cleanId)) {
+                // Deduplicate by clean ID
+                if (!map.has(cleanId)) {
+                  map.set(cleanId, o);
+                } else {
+                  // Prefer server data or object with more fields
+                  const prev = map.get(cleanId);
+                  map.set(cleanId, { ...prev, ...o });
+                }
+              }
             }
           });
           combinedOrders = Array.from(map.values());
@@ -127,7 +138,17 @@ const OrderManagement = () => {
       }
     } catch (err) {}
 
-    setOrders(combinedOrders);
+    // Deduplicate cleanly by normalized Order ID
+    const finalMap = new Map();
+    combinedOrders.forEach(o => {
+      if (!o || !o.orderId) return;
+      const cleanId = String(o.orderId).toLowerCase().trim();
+      if (!deletedIds.includes(cleanId)) {
+        finalMap.set(cleanId, o);
+      }
+    });
+
+    setOrders(Array.from(finalMap.values()));
     setLoading(false);
   };
 
@@ -255,22 +276,25 @@ Thank you for choosing Luxe Interior! Please reply if you have any questions.`;
   const handleDeleteOrder = async (orderId) => {
     if (!window.confirm(`Are you sure you want to delete order '${orderId}'?`)) return;
 
-    const idStr = String(orderId);
+    const idStr = String(orderId).trim();
+    const idClean = idStr.toLowerCase();
 
     // 1. Add to deleted IDs list so it never reappears on refresh
-    const deletedIds = getDeletedOrderIds();
-    if (!deletedIds.includes(idStr)) {
-      deletedIds.push(idStr);
+    const deletedIds = getDeletedOrderIds().map(id => String(id).toLowerCase().trim());
+    if (!deletedIds.includes(idClean)) {
+      deletedIds.push(idClean);
       saveDeletedOrderIds(deletedIds);
     }
 
     // 2. Filter local state
-    const filtered = orders.filter(ord => String(ord.orderId) !== idStr);
+    const filtered = orders.filter(ord => String(ord.orderId).toLowerCase().trim() !== idClean);
     setOrders(filtered);
 
     // 3. Save updated list to localStorage (even if empty [])
     try {
       localStorage.setItem('luxe_customer_orders', JSON.stringify(filtered));
+      window.dispatchEvent(new Event('orderStatusUpdated'));
+      window.dispatchEvent(new Event('storage'));
     } catch (e) {}
 
     // 4. Background server delete

@@ -1,36 +1,45 @@
 .search-component-wrapper {
   position: relative;
   z-index: 9999;
+  width: 100%;
 }
 
 .search-container {
   position: relative;
   width: 100%;
-  max-width: 450px;
+  max-width: 100%;
 }
 
 .search-container form {
   display: flex;
   align-items: center;
   position: relative;
+  width: 100%;
 }
 
 .search-container input {
   width: 100%;
-  padding: 10px 80px 10px 15px;
-  border: 1px solid #7a6e67;
-  border-radius: 6px 0 0 6px;
+  height: 42px;
+  padding: 10px 90px 10px 16px;
+  border: 1.5px solid #d8ceb8;
+  border-radius: 8px;
   font-size: 14px;
-  font-family: inherit;
-  transition: all 0.2s;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  transition: all 0.25s ease;
   background: #ffffff;
-  color: #111111;
+  color: #2c211e;
+  box-sizing: border-box;
 }
 
 .search-container input:focus {
-  border-color: #ff9900;
-  box-shadow: 0 0 3px 2px rgba(228, 121, 17, 0.5);
+  border-color: #c98544;
+  box-shadow: 0 0 0 3px rgba(201, 133, 68, 0.18);
   outline: none;
+}
+
+.search-container input::placeholder {
+  color: #9c8d86;
+  font-size: 13.5px;
 }
 
 .search-go-btn {
@@ -38,44 +47,45 @@
   right: 0;
   top: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, #f3a847, #febd69);
-  border: 1px solid #a88734;
-  border-radius: 0 6px 6px 0;
-  color: #111111;
-  font-weight: 700;
+  height: 42px;
+  background: #c98544;
+  border: 1.5px solid #c98544;
+  border-radius: 0 8px 8px 0;
+  color: #ffffff;
+  font-weight: 600;
   font-size: 13px;
-  padding: 0 16px;
+  padding: 0 18px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .search-go-btn:hover {
-  background: linear-gradient(to bottom, #e49122, #f5b045);
+  background: #b27236;
+  border-color: #b27236;
 }
 
 /* Dropdown Menu overlay container */
 .dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 6px);
   left: 0;
   width: 100%;
-  background: white;
-  border: 1px solid #eee;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e8decb;
+  box-shadow: 0 10px 30px rgba(62, 50, 45, 0.14);
+  padding: 16px;
   z-index: 10000;
   border-radius: 12px;
-  margin-top: 8px;
   box-sizing: border-box;
 }
 
 .menu-title {
   margin: 0 0 10px 0;
-  color: #8c6239;
-  font-size: 12px;
+  color: #c98544;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -83,15 +93,13 @@
 
 .empty-msg {
   font-size: 13px;
-  color: #888;
-  margin: 0 0 15px 0;
+  color: #8c7d78;
+  margin: 0 0 10px 0;
 }
 
 /* Suggestion matching items */
 .suggestions-section {
-  margin-bottom: 20px;
-  border-bottom: 1px solid #f4f3f0;
-  padding-bottom: 15px;
+  margin-bottom: 8px;
 }
 
 .suggestions-list {
@@ -104,22 +112,22 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background 0.2s;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
 }
 
 .suggestion-item:hover {
-  background: #fbf9f6;
+  background: #faf6f0;
 }
 
 .suggestion-thumb {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid #eee;
-  background: #fafaf9;
+  border-radius: 6px;
+  border: 1px solid #e8decb;
+  background: #faf6f0;
 }
 
 .suggestion-info {
@@ -128,9 +136,9 @@
 }
 
 .suggestion-name {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: #333;
+  color: #3e322d;
 }
 
 .suggestion-price {
@@ -139,27 +147,38 @@
   font-weight: 700;
 }
 
-/* Pills trending section */
-.trending-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+/* Mobile Responsive Adjustments for Search Bar */
+@media (max-width: 768px) {
+  .search-component-wrapper {
+    width: 100%;
+  }
 
-.pill-btn {
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid #f0eef9;
-  background: #faf9f6;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  color: #555;
-  transition: all 0.2s;
-}
+  .search-container {
+    max-width: 100%;
+    width: 100%;
+  }
 
-.pill-btn:hover {
-  background: #f0e6dd;
-  color: #8c6239;
-  border-color: #f0e6dd;
+  .search-container input {
+    width: 100%;
+    font-size: 14px;
+    padding: 10px 80px 10px 14px;
+    box-sizing: border-box;
+    height: 42px;
+    border-radius: 8px;
+  }
+
+  .search-go-btn {
+    height: 42px;
+    padding: 0 16px;
+    font-size: 12.5px;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .dropdown-menu {
+    width: 100%;
+    padding: 12px;
+    max-height: 280px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
 }

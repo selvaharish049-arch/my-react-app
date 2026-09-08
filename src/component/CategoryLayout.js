@@ -14,12 +14,30 @@ const CategoryLayout = ({ category, isLoggedIn, userRole, addToCart, triggerLogi
   const loadProducts = useCallback(async () => {
     setLoading(true);
     const all = await getAllProducts();
-    setProducts(all.filter(p => p.category === category));
+    const targetCat = (category || '').toLowerCase().trim();
+    const targetCatClean = targetCat.replace('explore-', '');
+
+    const filtered = all.filter(p => {
+      if (!p || !p.category) return false;
+      const c = String(p.category).toLowerCase().trim();
+      const cClean = c.replace('explore-', '');
+      return c === targetCat || cClean === targetCatClean || c === targetCatClean || cClean === targetCat;
+    });
+
+    setProducts(filtered);
     setLoading(false);
   }, [category]);
 
   useEffect(() => {
     loadProducts();
+    window.addEventListener('productDataUpdated', loadProducts);
+    window.addEventListener('productUpdated', loadProducts);
+    window.addEventListener('storage', loadProducts);
+    return () => {
+      window.removeEventListener('productDataUpdated', loadProducts);
+      window.removeEventListener('productUpdated', loadProducts);
+      window.removeEventListener('storage', loadProducts);
+    };
   }, [loadProducts, isLoggedIn]);
 
   const handleDelete = async (id, e) => {

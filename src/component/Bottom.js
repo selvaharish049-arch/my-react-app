@@ -5,9 +5,8 @@ const Bottom = () => {
   return (
     <footer className="bottom-footer">
       <div className="footer-content">
-        {/* லோகோ மற்றும் லிங்க்ஸ் */}
+        {/* Center: Luxe Links & Copyright */}
         <div className="footer-section">
-          <h2 className="footer-logo">LUXE INTERIOR</h2>
           <div className="footer-links">
             <span>Terms of Use</span> | 
             <span> Security</span> | 
@@ -21,14 +20,17 @@ const Bottom = () => {
           <p className="company-name">The luxe interior Furnitures Private Limited</p>
         </div>
 
-        {/* அலுவலக முகவரி */}
+        {/* Right Office Address */}
         <div className="footer-section address">
           <h3>Registered Office</h3>
           <p>
             The luxe interior Furniture's Pvt.Ltd----Tuticorin <br />
-            3c/195A vallinayaga puram 5th street, Tuticorin--628008,
+            3c/195A vallinayaga puram 5th street, Tuticorin--628008
           </p>
-          <p>Corporate Identity Number:----------</p>
+          <p style={{ marginTop: '8px', fontSize: '12px', color: '#555' }}>
+            📞 <strong>Contact:</strong> +91 6379183549 <br />
+            📧 <strong>Email:</strong> selvaharish049@gmail.com
+          </p>
         </div>
       </div>
     </footer>

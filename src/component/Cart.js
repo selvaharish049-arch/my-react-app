@@ -45,8 +45,11 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
     }
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleWhatsAppCheckout = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (isSubmitting) return;
 
     const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
     if (!panRegex.test(formData.panNumber)) {
@@ -64,6 +67,8 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
       alert("Your cart is empty!");
       return;
     }
+
+    setIsSubmitting(true);
 
     // Group items by name to show quantities
     const groupedItems = {};
@@ -104,29 +109,35 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
       notes: `Cart Items (${itemsList.length}): ${itemsList.map(i => `${i.name} (x${i.quantity})`).join(', ')} | PAN: ${formData.panNumber.toUpperCase()}`
     };
 
-    // Save order to localStorage so Admin Order Database shows it immediately
-    try {
-      const stored = localStorage.getItem('luxe_customer_orders');
-      const list = stored ? JSON.parse(stored) : [];
-      list.unshift(newOrderObj);
-      localStorage.setItem('luxe_customer_orders', JSON.stringify(list));
-      window.dispatchEvent(new Event('orderStatusUpdated'));
-    } catch (e) {}
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
 
     try {
-      // 1. Post Cart Order to Backend API
-      const res = await fetch('http://localhost:5000/api/orders/create', {
+      // 1. Post Cart Order to Backend API first
+      const res = await fetch(`${baseUrl}/api/orders/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOrderObj)
       });
-      const orderRes = await res.json();
-      if (orderRes && orderRes.orderId) {
-        newOrderObj.orderId = orderRes.orderId;
+      if (res.ok) {
+        const orderRes = await res.json();
+        if (orderRes && orderRes.orderId) {
+          newOrderObj.orderId = orderRes.orderId;
+        }
       }
     } catch (err) {
       console.error('Backend DB Notice:', err);
     }
+
+    // Save/Update order to localStorage with final server orderId
+    try {
+      const stored = localStorage.getItem('luxe_customer_orders');
+      let list = stored ? JSON.parse(stored) : [];
+      list = list.filter(o => o && String(o.orderId).toLowerCase().trim() !== String(newOrderObj.orderId).toLowerCase().trim());
+      list.unshift(newOrderObj);
+      localStorage.setItem('luxe_customer_orders', JSON.stringify(list));
+      window.dispatchEvent(new Event('orderStatusUpdated'));
+    } catch (e) {}
 
     const trackingLink = `http://localhost:3000/track?id=${newOrderObj.orderId}`;
 

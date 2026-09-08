@@ -22,6 +22,7 @@ import AdminPanel from './component/AdminPanel';
 import HomeDecor from './component/HomeDecor';
 import TrackOrder from './component/TrackOrder';
 import HelpCenter from './component/HelpCenter';
+import FloatingContactWidget from './component/FloatingContactWidget';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -115,6 +116,9 @@ function App() {
           <Route path="/admin" element={<AdminPanel isLoggedIn={isLoggedIn} userRole={userRole} />} />
           <Route path="/product/:name" element={<ProductPage isLoggedIn={isLoggedIn} userRole={userRole} addToCart={addToCart} triggerLogin={() => setShowLogin(true)} />} />
         </Routes>
+
+        {/* Right Corner Floating Contact Action Widget */}
+        <FloatingContactWidget />
    
       </div>
 

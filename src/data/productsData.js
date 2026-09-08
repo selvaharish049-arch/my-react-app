@@ -76,11 +76,23 @@ const LOCAL_STORAGE_KEY = 'luxe_custom_products_v2';
 const DELETED_PRODUCTS_KEY = 'luxe_deleted_products_v2';
 
 // Get local stored custom items
-const getStoredCustomProducts = () => {
+export const getStoredCustomProducts = () => {
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
     const parsed = stored ? JSON.parse(stored) : [];
-    return Array.isArray(parsed) ? parsed.map(sanitizeProduct) : [];
+    const deletedIds = getDeletedProductIds();
+    return (Array.isArray(parsed) ? parsed : [])
+      .filter(p => {
+        if (!p) return false;
+        const name = String(p.name || '').toLowerCase().trim();
+        const cat = String(p.category || '').toLowerCase().trim();
+        const id = String(p.id || '').toLowerCase().trim();
+        if (name === 'selva' || cat === 'selva' || id === 'selva' || deletedIds.includes(id)) {
+          return false;
+        }
+        return true;
+      })
+      .map(sanitizeProduct);
   } catch (e) {
     console.error("Error reading products from localStorage:", e);
     return [];
@@ -118,14 +130,46 @@ const saveDeletedProductIds = (deletedIds) => {
   }
 };
 
-export const fileToBase64 = (file) => {
+export const fileToBase64 = (file, maxWidth = 800, maxHeight = 800, quality = 0.75) => {
   return new Promise((resolve) => {
     if (!file || !(file instanceof File)) {
       resolve('');
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result || '');
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl || event.target.result || '');
+        } catch (e) {
+          resolve(event.target.result || '');
+        }
+      };
+      img.onerror = () => resolve(event.target.result || '');
+      img.src = event.target.result;
+    };
     reader.onerror = () => resolve('');
     reader.readAsDataURL(file);
   });
@@ -133,11 +177,24 @@ export const fileToBase64 = (file) => {
 
 const DEFAULT_FALLBACK_IMG = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80';
 
-const sanitizeImage = (url) => {
-  if (!url || typeof url !== 'string' || url.startsWith('blob:')) {
+export const isValidImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return false;
+  const u = url.trim();
+  if (u.length < 5) return false;
+  if (u.startsWith('data:image') || u.startsWith('blob:') || u.startsWith('http://') || u.startsWith('https://') || u.startsWith('/')) {
+    return true;
+  }
+  if (/\.(jpg|jpeg|png|webp|avif|svg)(\?.*)?$/i.test(u)) {
+    return true;
+  }
+  return false;
+};
+
+export const sanitizeImage = (url) => {
+  if (!isValidImageUrl(url)) {
     return DEFAULT_FALLBACK_IMG;
   }
-  return url;
+  return url.trim();
 };
 
 export const sanitizeProduct = (product) => {
@@ -146,6 +203,10 @@ export const sanitizeProduct = (product) => {
   const cleanImages = (Array.isArray(product.images) && product.images.length > 0)
     ? product.images.map(sanitizeImage)
     : [cleanImg, cleanImg, cleanImg];
+
+  while (cleanImages.length < 3) {
+    cleanImages.push(cleanImg);
+  }
 
   return {
     ...product,
@@ -183,19 +244,22 @@ export const getAllProducts = async () => {
         serverDeletedIds = await deletedRes.json();
       }
 
-      const combinedDeletedIds = Array.from(new Set([...deletedIds, ...serverDeletedIds]));
+      const combinedDeletedIds = Array.from(new Set([...deletedIds, ...serverDeletedIds])).map(i => String(i).toLowerCase().trim());
 
       // Construct local products excluding deleted ones
       const allLocal = [...defaultProducts, ...customItems]
-        .filter(p => p && p.id !== undefined && p.id !== null && !combinedDeletedIds.includes(String(p.id)))
+        .filter(p => p && p.id !== undefined && p.id !== null && !combinedDeletedIds.includes(String(p.id).toLowerCase().trim()))
         .map(sanitizeProduct);
 
       if (Array.isArray(serverProducts) && serverProducts.length > 0) {
         // Merge server products with local ones, eliminating duplicates by ID
         const map = new Map();
         [...allLocal, ...serverProducts].forEach(p => {
-          if (p && p.id !== undefined && p.id !== null && !combinedDeletedIds.includes(String(p.id))) {
-            map.set(String(p.id), sanitizeProduct(p));
+          if (p && p.id !== undefined && p.id !== null) {
+            const cleanId = String(p.id).toLowerCase().trim();
+            if (!combinedDeletedIds.includes(cleanId)) {
+              map.set(cleanId, sanitizeProduct(p));
+            }
           }
         });
         return Array.from(map.values());
@@ -206,9 +270,10 @@ export const getAllProducts = async () => {
     console.warn("Backend server offline or waking up, using instant local products folder dataset.");
   }
 
+  const deletedIdsClean = deletedIds.map(i => String(i).toLowerCase().trim());
   // Construct local products excluding deleted ones
   const allLocal = [...defaultProducts, ...customItems]
-    .filter(p => p && p.id !== undefined && p.id !== null && !deletedIds.includes(String(p.id)))
+    .filter(p => p && p.id !== undefined && p.id !== null && !deletedIdsClean.includes(String(p.id).toLowerCase().trim()))
     .map(sanitizeProduct);
 
   return allLocal;
@@ -291,6 +356,10 @@ export const addCustomProduct = async (formData) => {
     const updatedCustom = [newProduct, ...currentCustom];
     saveCustomProductsLocally(updatedCustom);
 
+    window.dispatchEvent(new Event('productDataUpdated'));
+    window.dispatchEvent(new Event('productUpdated'));
+    window.dispatchEvent(new Event('storage'));
+
     // Also attempt non-blocking background upload to server
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
@@ -312,21 +381,25 @@ export const addCustomProduct = async (formData) => {
  */
 export const deleteCustomProduct = async (id) => {
   try {
-    const idStr = id !== undefined && id !== null ? String(id) : '';
+    const idStr = id !== undefined && id !== null ? String(id).trim() : '';
     if (!idStr) {
       return { success: false };
     }
 
     // Track deletion locally so it persists even if backend reset/failures happen
-    const deletedIds = getDeletedProductIds();
+    const deletedIds = getDeletedProductIds().map(i => String(i).trim());
     if (!deletedIds.includes(idStr)) {
       deletedIds.push(idStr);
       saveDeletedProductIds(deletedIds);
     }
 
     const currentCustom = getStoredCustomProducts();
-    const updatedCustom = currentCustom.filter(p => p && p.id !== undefined && p.id !== null && String(p.id) !== idStr);
+    const updatedCustom = currentCustom.filter(p => p && p.id !== undefined && p.id !== null && String(p.id).trim() !== idStr);
     saveCustomProductsLocally(updatedCustom);
+
+    window.dispatchEvent(new Event('productDataUpdated'));
+    window.dispatchEvent(new Event('productUpdated'));
+    window.dispatchEvent(new Event('storage'));
 
     // Background sync to server
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -355,7 +428,22 @@ const CUSTOM_CAT_KEY = 'luxe_custom_craftsmanship_cats';
 export const getStoredCraftsmanshipCategories = () => {
   try {
     const raw = localStorage.getItem(CUSTOM_CAT_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const list = raw ? JSON.parse(raw) : [];
+    const deleted = getDeletedCraftsmanshipCategorySlugs();
+    return (Array.isArray(list) ? list : [])
+      .filter(c => {
+        if (!c) return false;
+        const title = String(c.title || '').toLowerCase().trim();
+        const slug = String(c.slug || '').toLowerCase().trim();
+        if (title === 'selva' || slug === 'selva' || slug === 'explore-selva' || deleted.includes(slug)) {
+          return false;
+        }
+        return true;
+      })
+      .map(c => ({
+        ...c,
+        img: sanitizeImage(c.img)
+      }));
   } catch (e) {
     return [];
   }
