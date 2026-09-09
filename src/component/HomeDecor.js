@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
+  getAllProducts,
   getStoredCraftsmanshipCategories, 
   getDeletedCraftsmanshipCategorySlugs,
   sanitizeImage
@@ -53,6 +54,7 @@ const HomeDecor = () => {
   const fetchProducts = async () => {
     try {
       const deletedSlugs = getDeletedCraftsmanshipCategorySlugs();
+      const allProds = await getAllProducts();
 
       // 1. Exactly 10 Base Craftsmanship Categories
       const categoryConfig = [
@@ -70,25 +72,46 @@ const HomeDecor = () => {
 
       const baseMapped = categoryConfig
         .filter(cfg => !deletedSlugs.includes(cfg.key))
-        .map(cfg => ({
-          id: cfg.key,
-          title: cfg.label,
-          img: cfg.defaultImg,
-          path: cfg.path,
-          type: 'category'
-        }));
+        .map(cfg => {
+          const keyClean = cfg.key.replace('explore-', '').toLowerCase().trim();
+          const subCount = allProds.filter(p => {
+            if (!p || !p.category) return false;
+            const c = String(p.category).toLowerCase().trim();
+            return c === cfg.key || c === keyClean || c.replace('explore-', '').trim() === keyClean;
+          }).length;
+
+          return {
+            id: cfg.key,
+            title: cfg.label,
+            img: cfg.defaultImg,
+            path: cfg.path,
+            subCount: subCount,
+            type: 'category'
+          };
+        });
 
       // 2. Custom categories added by Admin in Admin Panel (e.g. Chair, Recliners, Bar Counter, etc.)
       const customCats = getStoredCraftsmanshipCategories().filter(c => !deletedSlugs.includes(c.slug));
-      const customMapped = customCats.map(c => ({
-        id: c.id || c.slug,
-        title: c.title,
-        img: sanitizeImage(c.img),
-        path: c.path || `/product/${c.slug}`,
-        type: 'customCategory'
-      }));
+      const customMapped = customCats.map(c => {
+        const slugClean = (c.slug || '').replace('explore-', '').toLowerCase().trim();
+        const titleClean = (c.title || '').toLowerCase().trim();
+        const subCount = allProds.filter(p => {
+          if (!p || !p.category) return false;
+          const catStr = String(p.category).toLowerCase().trim();
+          return catStr === (c.slug || '').toLowerCase() || catStr === titleClean || catStr.replace('explore-', '').trim() === slugClean;
+        }).length;
 
-      // Combine base 10 + Admin custom categories ONLY (no individual product cards on category slider!)
+        return {
+          id: c.id || c.slug,
+          title: c.title,
+          img: sanitizeImage(c.img),
+          path: c.path || `/product/${c.slug}`,
+          subCount: subCount,
+          type: 'customCategory'
+        };
+      });
+
+      // Combine base 10 + Admin custom categories
       const combined = [...baseMapped, ...customMapped];
 
       setSliderItems(combined);
@@ -99,6 +122,11 @@ const HomeDecor = () => {
 
   useEffect(() => {
     fetchProducts();
+
+    // Auto-sync every 30 seconds so additions/deletions update within 1 min on PC & mobile
+    const intervalId = setInterval(() => {
+      fetchProducts();
+    }, 30000);
 
     window.addEventListener('craftsmanshipCategoryUpdated', fetchProducts);
     window.addEventListener('productUpdated', fetchProducts);
@@ -118,6 +146,7 @@ const HomeDecor = () => {
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => {
+      clearInterval(intervalId);
       window.removeEventListener('craftsmanshipCategoryUpdated', fetchProducts);
       window.removeEventListener('productUpdated', fetchProducts);
       window.removeEventListener('productDataUpdated', fetchProducts);
@@ -251,6 +280,7 @@ const HomeDecor = () => {
                   <div className="decor-card-body">
                     <div className="decor-card-text">
                       <h3 className="decor-card-title">{item.title}</h3>
+                      <span className="decor-card-subcount">📦 {item.subCount || 0} {item.subCount === 1 ? 'Design' : 'Designs'}</span>
                     </div>
                     <span className="decor-card-arrow">&rarr;</span>
                   </div>
@@ -329,6 +359,7 @@ const HomeDecor = () => {
                   <div className="decor-card-body">
                     <div className="decor-card-text">
                       <h3 className="decor-card-title">{item.title}</h3>
+                      <span className="decor-card-subcount">📦 {item.subCount || 0} {item.subCount === 1 ? 'Design' : 'Designs'}</span>
                     </div>
                     <span className="decor-card-arrow">&rarr;</span>
                   </div>
