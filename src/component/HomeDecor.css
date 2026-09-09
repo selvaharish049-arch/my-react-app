@@ -306,39 +306,54 @@
   }
 
   .decor-grid-view {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px 14px;
-  }
-
-  .decor-grid-card {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 18px 12px !important;
     width: 100% !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    padding: 5px 0 25px 0 !important;
   }
 
+  .decor-grid-view .decor-project-card,
+  .decor-grid-card {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .decor-grid-view .decor-card-image-box,
   .decor-grid-card .decor-card-image-box {
-    width: 100%;
-    max-width: 100%;
-    height: 165px;
-    border-radius: 16px;
-    overflow: hidden;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 160px !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    margin: 0 !important;
   }
 
+  .decor-grid-view .decor-card-body,
   .decor-grid-card .decor-card-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    text-align: center;
-    padding: 10px 0 0 0;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    text-align: center !important;
+    padding: 8px 0 0 0 !important;
+    margin-top: 0 !important;
   }
 
+  .decor-grid-view .decor-card-title,
   .decor-grid-card .decor-card-title {
-    text-align: center;
-    font-size: 15px;
-    font-weight: 600;
+    text-align: center !important;
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
   }
 
   .decor-page-header {

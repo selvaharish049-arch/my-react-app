@@ -371,15 +371,21 @@
     margin-top: 2px;
   }
 
-  .navbar-search {
-    order: 3;
-    margin: 4px 0 0 0;
-    max-width: 100%;
-    width: 100%;
+  .logo {
+    order: 1;
   }
 
   .nav-icons {
+    order: 2;
     gap: 16px;
+  }
+
+  .navbar-search {
+    order: 3;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 8px 0 2px 0 !important;
   }
 
   .nav-icon-text {
