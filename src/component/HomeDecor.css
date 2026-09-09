@@ -307,17 +307,53 @@
 
   .decor-grid-view {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 20px 14px;
   }
 
   .decor-grid-card {
     width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .decor-grid-card .decor-card-image-box {
     width: 100%;
     max-width: 100%;
-    height: 150px;
+    height: 165px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .decor-grid-card .decor-card-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0 0 0;
+  }
+
+  .decor-grid-card .decor-card-title {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .decor-page-header {
+    padding: 32px 16px 28px 16px;
+    margin-bottom: 20px;
+  }
+
+  .decor-page-main-title {
+    font-size: 26px !important;
+    line-height: 1.25 !important;
+  }
+
+  .decor-page-subtitle {
+    font-size: 13.5px !important;
+    margin-bottom: 16px !important;
   }
 }
 

@@ -358,9 +358,17 @@
     padding: 10px 12px;
   }
 
+  .logo-brand {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
   .logo-text {
-    font-size: 17px !important;
-    letter-spacing: 1.5px !important;
+    font-size: 11.5px !important;
+    letter-spacing: 1.2px !important;
+    line-height: 1.1;
+    margin-top: 2px;
   }
 
   .navbar-search {
