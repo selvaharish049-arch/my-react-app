@@ -223,10 +223,10 @@ export const getAllProducts = async () => {
   const customItems = getStoredCustomProducts();
   const deletedIds = getDeletedProductIds();
 
-  // Try fast fetch with 1.2 second timeout so we never block or wait 50s
+  // Try fetch with 8 second timeout for Render response
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1200);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
@@ -478,7 +478,22 @@ const DELETED_CAT_KEY = 'luxe_deleted_craftsmanship_cats';
 export const getDeletedCraftsmanshipCategorySlugs = () => {
   try {
     const raw = localStorage.getItem(DELETED_CAT_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const list = raw ? JSON.parse(raw) : [];
+
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+
+    fetch(`${baseUrl}/api/deleted-craftsmanship-categories`)
+      .then(res => res.ok ? res.json() : [])
+      .then(serverDeleted => {
+        if (Array.isArray(serverDeleted) && serverDeleted.length > 0) {
+          const merged = Array.from(new Set([...list, ...serverDeleted])).map(s => String(s).toLowerCase().trim());
+          localStorage.setItem(DELETED_CAT_KEY, JSON.stringify(merged));
+        }
+      })
+      .catch(() => {});
+
+    return (Array.isArray(list) ? list : []).map(s => String(s).toLowerCase().trim());
   } catch (e) {
     return [];
   }
