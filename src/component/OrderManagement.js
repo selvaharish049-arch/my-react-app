@@ -108,10 +108,10 @@ const OrderManagement = () => {
     // Filter out deleted IDs
     combinedOrders = combinedOrders.filter(o => o && o.orderId && !deletedIds.includes(String(o.orderId).toLowerCase().trim()));
 
-    // Fast non-blocking fetch from backend API if available
+    // Fast non-blocking fetch from backend API with 8-second timeout for Render response
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
       const response = await fetch(`${API_BASE_URL}/orders`, { signal: controller.signal });
       clearTimeout(timeoutId);
       if (response.ok) {
@@ -148,8 +148,22 @@ const OrderManagement = () => {
       }
     });
 
-    setOrders(Array.from(finalMap.values()));
+    const finalOrders = Array.from(finalMap.values());
+    setOrders(finalOrders);
     setLoading(false);
+
+    // Sync any unsynced local orders to backend server database so PC and Mobile show identical database orders
+    try {
+      finalOrders.forEach((ord) => {
+        if (ord && ord.orderId) {
+          fetch(`${API_BASE_URL}/orders/create`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ord)
+          }).catch(() => {});
+        }
+      });
+    } catch (e) {}
   };
 
   // WhatsApp Reply Handler for Admin to reply directly to Customer's WhatsApp Number

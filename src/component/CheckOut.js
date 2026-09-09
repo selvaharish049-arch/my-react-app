@@ -111,12 +111,16 @@ const Checkout = () => {
     const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
 
     try {
-      // 1. Post to Backend DB first
+      // 1. Post to Backend DB with 8s timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
       const response = await fetch(`${baseUrl}/api/orders/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newOrderObj)
+        body: JSON.stringify(newOrderObj),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       if (response.ok) {
         const orderResult = await response.json();
         if (orderResult && orderResult.orderId) {

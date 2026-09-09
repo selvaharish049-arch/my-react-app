@@ -323,7 +323,7 @@ textarea {
 
 @media (max-width: 768px) {
   .admin-panel-container {
-    padding: 20px 15px;
+    padding: 16px 10px;
   }
 
   .admin-card {
@@ -331,7 +331,21 @@ textarea {
   }
 
   .admin-header h1 {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .admin-tabs-bar {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px !important;
+  }
+
+  .admin-tab-btn {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
   }
 
   .form-row-2, .form-row-3 {

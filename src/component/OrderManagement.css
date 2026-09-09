@@ -301,3 +301,43 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+@media (max-width: 768px) {
+  .mgmt-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .order-mgmt-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .refresh-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .actions-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    white-space: normal;
+  }
+
+  .btn-action-whatsapp,
+  .btn-action-edit,
+  .btn-action-delete {
+    width: 100%;
+    margin-right: 0 !important;
+    text-align: center;
+    padding: 10px 12px !important;
+    box-sizing: border-box;
+  }
+
+  .modal-content {
+    padding: 16px;
+    width: 95%;
+  }
+}
