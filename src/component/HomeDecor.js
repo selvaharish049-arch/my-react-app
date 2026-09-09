@@ -102,6 +102,7 @@ const HomeDecor = () => {
 
     window.addEventListener('craftsmanshipCategoryUpdated', fetchProducts);
     window.addEventListener('productUpdated', fetchProducts);
+    window.addEventListener('productDataUpdated', fetchProducts);
     window.addEventListener('storage', fetchProducts);
 
     const handleResize = () => {
@@ -119,6 +120,7 @@ const HomeDecor = () => {
     return () => {
       window.removeEventListener('craftsmanshipCategoryUpdated', fetchProducts);
       window.removeEventListener('productUpdated', fetchProducts);
+      window.removeEventListener('productDataUpdated', fetchProducts);
       window.removeEventListener('storage', fetchProducts);
       window.removeEventListener('resize', handleResize);
     };
