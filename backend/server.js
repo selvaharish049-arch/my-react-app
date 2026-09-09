@@ -283,6 +283,62 @@ app.get('/api/deleted-products', (req, res) => {
   res.json(deletedIds);
 });
 
+// API - Craftsmanship Categories
+app.get('/api/craftsmanship-categories', (req, res) => {
+  const categories = loadJson('craftsmanship_categories.json', []);
+  const deletedSlugs = loadJson('deleted_craftsmanship_categories.json', []);
+  const deletedClean = deletedSlugs.map(s => String(s).trim().toLowerCase());
+  const active = categories.filter(c => c && c.slug && !deletedClean.includes(String(c.slug).trim().toLowerCase()));
+  res.json(active);
+});
+
+app.post('/api/craftsmanship-categories', (req, res) => {
+  const categories = loadJson('craftsmanship_categories.json', []);
+  const { title, slug, img } = req.body;
+  if (!title) {
+    return res.status(400).json({ error: "Title is required" });
+  }
+  const cleanSlug = (slug || title).toLowerCase().trim().replace(/\s+/g, '-');
+  const finalSlug = cleanSlug.startsWith('explore-') ? cleanSlug : `explore-${cleanSlug}`;
+
+  // Remove from deleted list if re-adding
+  let deletedSlugs = loadJson('deleted_craftsmanship_categories.json', []);
+  deletedSlugs = deletedSlugs.filter(s => String(s).trim().toLowerCase() !== finalSlug);
+  saveJson('deleted_craftsmanship_categories.json', deletedSlugs);
+
+  const newCat = {
+    id: req.body.id || `cat-${Date.now()}`,
+    title,
+    slug: finalSlug,
+    img: img || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80',
+    path: `/product/${finalSlug}`
+  };
+
+  const filtered = categories.filter(c => c && String(c.slug).trim().toLowerCase() !== finalSlug);
+  filtered.unshift(newCat);
+  saveJson('craftsmanship_categories.json', filtered);
+  res.status(201).json(newCat);
+});
+
+app.delete('/api/craftsmanship-categories/:slug', (req, res) => {
+  const rawSlug = (req.params.slug || '').trim().toLowerCase();
+  let categories = loadJson('craftsmanship_categories.json', []);
+  categories = categories.filter(c => c && String(c.slug).trim().toLowerCase() !== rawSlug);
+  saveJson('craftsmanship_categories.json', categories);
+
+  let deletedSlugs = loadJson('deleted_craftsmanship_categories.json', []);
+  if (!deletedSlugs.map(s => String(s).trim().toLowerCase()).includes(rawSlug)) {
+    deletedSlugs.push(rawSlug);
+    saveJson('deleted_craftsmanship_categories.json', deletedSlugs);
+  }
+  res.json({ success: true });
+});
+
+app.get('/api/deleted-craftsmanship-categories', (req, res) => {
+  const deletedSlugs = loadJson('deleted_craftsmanship_categories.json', []);
+  res.json(deletedSlugs);
+});
+
 // API - Reviews
 app.get('/api/reviews', (req, res) => {
   const reviews = loadJson('reviews.json', defaultReviews);
