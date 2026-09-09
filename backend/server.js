@@ -257,10 +257,11 @@ app.post('/api/products', upload.single('image'), (req, res) => {
 });
 
 app.delete('/api/products/:id', (req, res) => {
-  const productId = req.params.id;
+  const productId = (req.params.id || '').trim();
+  const cleanId = productId.toLowerCase();
   let products = loadJson('products.json', defaultProducts);
   const initialLen = products.length;
-  products = products.filter(p => p.id !== productId);
+  products = products.filter(p => p && p.id !== undefined && p.id !== null && String(p.id).trim().toLowerCase() !== cleanId);
 
   if (products.length !== initialLen) {
     saveJson('products.json', products);
@@ -268,7 +269,8 @@ app.delete('/api/products/:id', (req, res) => {
 
   // Track deleted IDs on server
   const deletedIds = loadJson('deleted_products.json', []);
-  if (!deletedIds.includes(productId)) {
+  const deletedClean = deletedIds.map(i => String(i).trim().toLowerCase());
+  if (!deletedClean.includes(cleanId)) {
     deletedIds.push(productId);
     saveJson('deleted_products.json', deletedIds);
   }

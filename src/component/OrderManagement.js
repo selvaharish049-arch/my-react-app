@@ -5,51 +5,6 @@ const isLocalhost = typeof window !== 'undefined' && (window.location.hostname =
 const API_BASE_URL = isLocalhost ? 'http://localhost:5000/api' : 'https://selvaharish-interior-back.onrender.com/api';
 const DELETED_ORDERS_KEY = 'luxe_deleted_orders_v2';
 
-const DEMO_CUSTOMER_ORDERS = [
-  {
-    orderId: 'LX-1001',
-    customerName: 'Ananya Sharma',
-    phone: '9876543210',
-    email: 'ananya@gmail.com',
-    address: 'No 45, Anna Nagar, Chennai 600040',
-    projectType: 'Luxe German Island Kitchen',
-    totalAmount: '₹1,45,000',
-    paymentMode: 'Cash on Delivery',
-    currentStep: 3,
-    expectedCompletionDate: '2026-09-15',
-    orderDate: '2026-08-20',
-    notes: 'Acrylic finish with soft-close Blum drawers & quartz countertop.'
-  },
-  {
-    orderId: 'LX-1002',
-    customerName: 'Karthick Raja',
-    phone: '9876543210',
-    email: 'karthick@gmail.com',
-    address: 'Flat 3B, T. Nagar, Chennai 600017',
-    projectType: 'Spacious Sliding Wardrobe',
-    totalAmount: '₹55,000',
-    paymentMode: 'Online Payment',
-    currentStep: 2,
-    expectedCompletionDate: '2026-09-20',
-    orderDate: '2026-08-28',
-    notes: 'Glass sliding doors with customized storage dividers.'
-  },
-  {
-    orderId: 'LX-1003',
-    customerName: 'Suresh Kumar',
-    phone: '9443322110',
-    email: 'suresh@gmail.com',
-    address: 'Plot 12, Velachery, Chennai 600042',
-    projectType: 'Floating Minimalist TV Console',
-    totalAmount: '₹22,500',
-    paymentMode: 'Cash on Delivery',
-    currentStep: 4,
-    expectedCompletionDate: '2026-09-05',
-    orderDate: '2026-08-10',
-    notes: 'Wall-mounted TV panel with ambient backlighting.'
-  }
-];
-
 const getDeletedOrderIds = () => {
   try {
     const stored = localStorage.getItem(DELETED_ORDERS_KEY);
@@ -96,12 +51,6 @@ const OrderManagement = () => {
       try {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) combinedOrders = parsed;
-      } catch (e) {}
-    } else {
-      // First time ever: initialize with default demo orders
-      combinedOrders = DEMO_CUSTOMER_ORDERS;
-      try {
-        localStorage.setItem('luxe_customer_orders', JSON.stringify(DEMO_CUSTOMER_ORDERS));
       } catch (e) {}
     }
 
