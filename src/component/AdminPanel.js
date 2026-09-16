@@ -3,7 +3,7 @@ import {
   getAllProducts, 
   addCustomProduct, 
   deleteCustomProduct,
-  getStoredCraftsmanshipCategories,
+  fetchCraftsmanshipCategories,
   getDeletedCraftsmanshipCategorySlugs,
   saveCraftsmanshipCategory,
   deleteCraftsmanshipCategory,
@@ -21,30 +21,32 @@ import img6 from '../assets/d6.jpg';
 import img7 from '../assets/d7.jpg';
 import img8 from '../assets/d8.jpg';
 import img9 from '../assets/d9.jpg';
+import img10 from '../assets/d1.jpg';
 
-const CORE_CUSTOM_CATS = [
-  'modularkitchen', 'bedroomcupboard', 'wardrobe', 'tvunit',
-  'poojacupboard', 'showcase', 'woodendoors', 'furniture', 'woodenwork'
-];
+const CORE_CUSTOM_CATS = ['modularkitchen', 'bedroomcupboard', 'wardrobe', 'tvunit', 'showcase', 'poojacupboard', 'woodendoors', 'furniture', 'woodenwork'];
 
 const BASE_CRAFTSMANSHIP_CATS = [
-  { title: 'Sofa', slug: 'explore-sofa', img: img1 },
-  { title: 'Bed', slug: 'explore-bed', img: img2 },
-  { title: 'Dining', slug: 'explore-dining', img: img3 },
-  { title: 'TV Unit', slug: 'explore-tvunit', img: img4 },
-  { title: 'Coffee Table', slug: 'explore-coffeetable', img: img5 },
-  { title: 'Mattress', slug: 'explore-mattress', img: img6 },
-  { title: 'Wardrobe', slug: 'explore-wardrobe', img: img7 },
-  { title: 'Sofa Cum Bed', slug: 'explore-sofacumbed', img: img8 },
-  { title: 'Bookshelf', slug: 'explore-bookshelf', img: img9 },
-  { title: 'Study', slug: 'explore-study', img: img1 },
+  { slug: 'explore-sofa', title: 'Sofa', img: img1 },
+  { slug: 'explore-bed', title: 'Bed', img: img2 },
+  { slug: 'explore-dining', title: 'Dining', img: img3 },
+  { slug: 'explore-tvunit', title: 'TV Unit', img: img4 },
+  { slug: 'explore-coffeetable', title: 'Coffee Table', img: img5 },
+  { slug: 'explore-mattress', title: 'Mattress', img: img6 },
+  { slug: 'explore-wardrobe', title: 'Wardrobe', img: img7 },
+  { slug: 'explore-sofacumbed', title: 'Sofa Cum Bed', img: img8 },
+  { slug: 'explore-bookshelf', title: 'Bookshelf', img: img9 },
+  { slug: 'explore-study', title: 'Study', img: img10 },
 ];
 
 const AdminPanel = ({ isLoggedIn, userRole }) => {
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'customized', 'craftsmanship', 'categories'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'customized', 'craftsmanship'
   const [productsList, setProductsList] = useState([]);
   const [customCraftCats, setCustomCraftCats] = useState([]);
-
+  const [showCustomCatInput, setShowCustomCatInput] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+  
+  // Category creation modal/form state
+  const [showAddCatModal, setShowAddCatModal] = useState(false);
   const [catForm, setCatForm] = useState({
     title: '',
     slug: '',
@@ -57,35 +59,32 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
-    discountPercent: '26',
     category: 'modularkitchen',
     description: '',
+    discountPercent: 26,
     material: '',
     dimensions: '',
     color: '',
     warranty: '',
-    assemblyRequired: 'No',
+    assemblyRequired: 'No'
   });
-  
+
   const [imageType, setImageType] = useState('upload'); // 'upload' or 'url'
   const [imageUrl, setImageUrl] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
 
+  const [imageType2, setImageType2] = useState('upload');
   const [imageUrl2, setImageUrl2] = useState('');
   const [imageFile2, setImageFile2] = useState(null);
   const [imagePreview2, setImagePreview2] = useState('');
 
+  const [imageType3, setImageType3] = useState('upload');
   const [imageUrl3, setImageUrl3] = useState('');
   const [imageFile3, setImageFile3] = useState(null);
   const [imagePreview3, setImagePreview3] = useState('');
 
-  const [customCategory, setCustomCategory] = useState('');
-  const [showCustomCatInput, setShowCustomCatInput] = useState(false);
-
   const [message, setMessage] = useState('');
-
-  // Solution Modal state
   const [selectedSolutionProduct, setSelectedSolutionProduct] = useState(null);
   const [solutionForm, setSolutionForm] = useState({
     customerName: '',
@@ -95,8 +94,9 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
     solutionDetails: ''
   });
 
-  const loadCategories = () => {
-    setCustomCraftCats(getStoredCraftsmanshipCategories());
+  const loadCategories = async () => {
+    const cats = await fetchCraftsmanshipCategories();
+    setCustomCraftCats(cats);
   };
 
   useEffect(() => {
@@ -137,7 +137,7 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
       catImg = catForm.imageUrl;
     }
 
-    const saved = saveCraftsmanshipCategory({
+    const saved = await saveCraftsmanshipCategory({
       title: catForm.title.trim(),
       slug: catForm.slug.trim(),
       img: catImg
@@ -154,15 +154,15 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
         imagePreview: ''
       });
       setFormData(prev => ({ ...prev, category: saved.slug }));
-      loadCategories();
+      await loadCategories();
       setTimeout(() => setMessage(''), 4000);
     }
   };
 
-  const handleDeleteCategory = (slug) => {
+  const handleDeleteCategory = async (slug) => {
     if (window.confirm("Are you sure you want to remove this custom category?")) {
-      deleteCraftsmanshipCategory(slug);
-      loadCategories();
+      await deleteCraftsmanshipCategory(slug);
+      await loadCategories();
       setMessage("🗑️ Category removed successfully!");
       setTimeout(() => setMessage(''), 4000);
     }

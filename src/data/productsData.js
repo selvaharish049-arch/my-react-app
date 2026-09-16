@@ -424,6 +424,56 @@ export const deleteCustomProduct = async (id) => {
  * Custom Craftsmanship Category Storage & Management
  */
 const CUSTOM_CAT_KEY = 'luxe_custom_craftsmanship_cats';
+const DELETED_CAT_KEY = 'luxe_deleted_craftsmanship_cats';
+
+export const getDeletedCraftsmanshipCategorySlugs = () => {
+  try {
+    const raw = localStorage.getItem(DELETED_CAT_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+
+    fetch(`${baseUrl}/api/deleted-craftsmanship-categories`)
+      .then(res => res.ok ? res.json() : [])
+      .then(serverDeleted => {
+        if (Array.isArray(serverDeleted) && serverDeleted.length > 0) {
+          const merged = Array.from(new Set([...list, ...serverDeleted])).map(s => String(s).toLowerCase().trim());
+          localStorage.setItem(DELETED_CAT_KEY, JSON.stringify(merged));
+          window.dispatchEvent(new Event('craftsmanshipCategoryUpdated'));
+        }
+      })
+      .catch(() => {});
+
+    return (Array.isArray(list) ? list : []).map(s => String(s).toLowerCase().trim());
+  } catch (e) {
+    return [];
+  }
+};
+
+export const fetchDeletedCraftsmanshipCategorySlugs = async () => {
+  const localList = getDeletedCraftsmanshipCategorySlugs();
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+
+    const res = await fetch(`${baseUrl}/api/deleted-craftsmanship-categories`, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const serverDeleted = await res.json();
+      if (Array.isArray(serverDeleted)) {
+        const merged = Array.from(new Set([...localList, ...serverDeleted])).map(s => String(s).toLowerCase().trim());
+        localStorage.setItem(DELETED_CAT_KEY, JSON.stringify(merged));
+        return merged;
+      }
+    }
+  } catch (e) {
+    // fallback to local list
+  }
+  return localList;
+};
 
 export const getStoredCraftsmanshipCategories = () => {
   try {
@@ -450,6 +500,7 @@ export const getStoredCraftsmanshipCategories = () => {
           });
           const merged = Array.from(map.values());
           localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(merged));
+          window.dispatchEvent(new Event('craftsmanshipCategoryUpdated'));
         }
       })
       .catch(() => {});
@@ -473,33 +524,44 @@ export const getStoredCraftsmanshipCategories = () => {
   }
 };
 
-const DELETED_CAT_KEY = 'luxe_deleted_craftsmanship_cats';
+export const fetchCraftsmanshipCategories = async () => {
+  const localList = getStoredCraftsmanshipCategories();
+  const deletedSlugs = await fetchDeletedCraftsmanshipCategorySlugs();
 
-export const getDeletedCraftsmanshipCategorySlugs = () => {
   try {
-    const raw = localStorage.getItem(DELETED_CAT_KEY);
-    const list = raw ? JSON.parse(raw) : [];
-
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
 
-    fetch(`${baseUrl}/api/deleted-craftsmanship-categories`)
-      .then(res => res.ok ? res.json() : [])
-      .then(serverDeleted => {
-        if (Array.isArray(serverDeleted) && serverDeleted.length > 0) {
-          const merged = Array.from(new Set([...list, ...serverDeleted])).map(s => String(s).toLowerCase().trim());
-          localStorage.setItem(DELETED_CAT_KEY, JSON.stringify(merged));
-        }
-      })
-      .catch(() => {});
+    const res = await fetch(`${baseUrl}/api/craftsmanship-categories`, { signal: controller.signal });
+    clearTimeout(timeoutId);
 
-    return (Array.isArray(list) ? list : []).map(s => String(s).toLowerCase().trim());
+    if (res.ok) {
+      const serverCats = await res.json();
+      if (Array.isArray(serverCats)) {
+        const map = new Map();
+        [...localList, ...serverCats].forEach(c => {
+          if (c && c.slug) {
+            const cleanSlug = String(c.slug).toLowerCase().trim();
+            if (!deletedSlugs.includes(cleanSlug)) {
+              map.set(cleanSlug, { ...c, img: sanitizeImage(c.img) });
+            }
+          }
+        });
+        const merged = Array.from(map.values());
+        localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(merged));
+        return merged;
+      }
+    }
   } catch (e) {
-    return [];
+    // fallback to local list
   }
+
+  return localList.filter(c => c && c.slug && !deletedSlugs.includes(String(c.slug).toLowerCase().trim()));
 };
 
-export const saveCraftsmanshipCategory = (catObj) => {
+export const saveCraftsmanshipCategory = async (catObj) => {
   try {
     const list = getStoredCraftsmanshipCategories();
     const rawSlug = catObj.slug || catObj.title || 'custom-category';
@@ -524,15 +586,17 @@ export const saveCraftsmanshipCategory = (catObj) => {
     localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(updated));
     window.dispatchEvent(new Event('craftsmanshipCategoryUpdated'));
 
-    // Upload to server backend in background
+    // Upload to server backend
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
 
-    fetch(`${baseUrl}/api/craftsmanship-categories`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newCat)
-    }).catch(() => {});
+    try {
+      await fetch(`${baseUrl}/api/craftsmanship-categories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCat)
+      });
+    } catch (e) {}
 
     return newCat;
   } catch (e) {
@@ -541,7 +605,7 @@ export const saveCraftsmanshipCategory = (catObj) => {
   }
 };
 
-export const deleteCraftsmanshipCategory = (slug) => {
+export const deleteCraftsmanshipCategory = async (slug) => {
   try {
     const cleanSlug = String(slug).toLowerCase().trim();
     const deletedSlugs = getDeletedCraftsmanshipCategorySlugs().map(s => String(s).toLowerCase().trim());
@@ -555,16 +619,19 @@ export const deleteCraftsmanshipCategory = (slug) => {
     localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(updated));
     window.dispatchEvent(new Event('craftsmanshipCategoryUpdated'));
 
-    // Delete on server backend in background
+    // Delete on server backend
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
 
-    fetch(`${baseUrl}/api/craftsmanship-categories/${cleanSlug}`, {
-      method: 'DELETE'
-    }).catch(() => {});
+    try {
+      await fetch(`${baseUrl}/api/craftsmanship-categories/${cleanSlug}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {}
 
     return true;
   } catch (e) {
     return false;
   }
 };
+

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   getAllProducts, 
   deleteCustomProduct, 
-  getStoredCraftsmanshipCategories, 
+  fetchCraftsmanshipCategories,
   deleteCraftsmanshipCategory
 } from '../data/productsData';
 import ProductModal from './ProductModal';
@@ -50,7 +50,7 @@ const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
 
   const loadProducts = async () => {
     const list = await getAllProducts();
-    const cCats = getStoredCraftsmanshipCategories();
+    const cCats = await fetchCraftsmanshipCategories();
     setProductsList(list);
     setCustomCatsList(cCats);
     setLoading(false);

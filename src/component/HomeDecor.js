@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   getAllProducts,
-  getStoredCraftsmanshipCategories, 
-  getDeletedCraftsmanshipCategorySlugs,
+  fetchCraftsmanshipCategories, 
+  fetchDeletedCraftsmanshipCategorySlugs,
   sanitizeImage
 } from '../data/productsData';
 import './HomeDecor.css';
@@ -53,7 +53,7 @@ const HomeDecor = () => {
 
   const fetchProducts = async () => {
     try {
-      const deletedSlugs = getDeletedCraftsmanshipCategorySlugs();
+      const deletedSlugs = await fetchDeletedCraftsmanshipCategorySlugs();
       const allProds = await getAllProducts();
 
       // 1. Exactly 10 Base Craftsmanship Categories
@@ -91,7 +91,8 @@ const HomeDecor = () => {
         });
 
       // 2. Custom categories added by Admin in Admin Panel (e.g. Chair, Recliners, Bar Counter, etc.)
-      const customCats = getStoredCraftsmanshipCategories().filter(c => !deletedSlugs.includes(c.slug));
+      const customFetched = await fetchCraftsmanshipCategories();
+      const customCats = customFetched.filter(c => !deletedSlugs.includes(c.slug));
       const customMapped = customCats.map(c => {
         const slugClean = (c.slug || '').replace('explore-', '').toLowerCase().trim();
         const titleClean = (c.title || '').toLowerCase().trim();
