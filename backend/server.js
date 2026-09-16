@@ -212,14 +212,11 @@ app.post('/api/products', upload.single('image'), (req, res) => {
 
   const { id, name, price, category, description, material, dimensions, color, warranty, assemblyRequired } = req.body;
 
-  const validCategories = [
-    'modularkitchen', 'bedroomcupboard', 'wardrobe', 'tvunit', 'poojacupboard', 'showcase', 'woodendoors', 'furniture', 'woodenwork',
-    'explore-sofa', 'explore-bed', 'explore-dining', 'explore-tvunit', 'explore-coffeetable', 'explore-mattress', 'explore-wardrobe', 'explore-sofacumbed', 'explore-bookshelf', 'explore-study'
-  ];
-
-  if (!category || !validCategories.includes(category.trim().toLowerCase())) {
-    return res.status(400).json({ error: `Invalid product category: "${category}". Product not stored.` });
+  if (!category || typeof category !== 'string' || !category.trim()) {
+    return res.status(400).json({ error: `Category is required. Product not stored.` });
   }
+
+  const cleanCategory = category.trim().toLowerCase();
 
   // Specifications
   const specs = {

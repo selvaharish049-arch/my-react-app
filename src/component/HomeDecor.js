@@ -280,7 +280,6 @@ const HomeDecor = () => {
                   <div className="decor-card-body">
                     <div className="decor-card-text">
                       <h3 className="decor-card-title">{item.title}</h3>
-                      <span className="decor-card-subcount">📦 {item.subCount || 0} {item.subCount === 1 ? 'Design' : 'Designs'}</span>
                     </div>
                     <span className="decor-card-arrow">&rarr;</span>
                   </div>
@@ -359,7 +358,6 @@ const HomeDecor = () => {
                   <div className="decor-card-body">
                     <div className="decor-card-text">
                       <h3 className="decor-card-title">{item.title}</h3>
-                      <span className="decor-card-subcount">📦 {item.subCount || 0} {item.subCount === 1 ? 'Design' : 'Designs'}</span>
                     </div>
                     <span className="decor-card-arrow">&rarr;</span>
                   </div>
