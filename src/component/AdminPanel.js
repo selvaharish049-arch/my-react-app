@@ -46,7 +46,6 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
   const [customCategory, setCustomCategory] = useState('');
   
   // Category creation modal/form state
-  const [showAddCatModal, setShowAddCatModal] = useState(false);
   const [catForm, setCatForm] = useState({
     title: '',
     slug: '',
@@ -74,12 +73,10 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
 
-  const [imageType2, setImageType2] = useState('upload');
   const [imageUrl2, setImageUrl2] = useState('');
   const [imageFile2, setImageFile2] = useState(null);
   const [imagePreview2, setImagePreview2] = useState('');
 
-  const [imageType3, setImageType3] = useState('upload');
   const [imageUrl3, setImageUrl3] = useState('');
   const [imageFile3, setImageFile3] = useState(null);
   const [imagePreview3, setImagePreview3] = useState('');
