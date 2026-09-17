@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../config/apiConfig';
 import './Cart.css';
 
 const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
@@ -109,8 +110,7 @@ const Cart = ({ cartItems, setCartItems, onClose, isLoggedIn }) => {
       notes: `Cart Items (${itemsList.length}): ${itemsList.map(i => `${i.name} (x${i.quantity})`).join(', ')} | PAN: ${formData.panNumber.toUpperCase()}`
     };
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     try {
       // 1. Post Cart Order to Backend API first

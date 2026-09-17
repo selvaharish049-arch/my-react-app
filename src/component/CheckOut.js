@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config/apiConfig';
 import './CheckOut.css';
 
 const Checkout = () => {
@@ -107,8 +108,7 @@ const Checkout = () => {
       notes: `Solution Notes: ${formData.solutionNotes || 'Standard order'} | Quantity: ${quantity} | PAN: ${formData.panNumber.toUpperCase()}`
     };
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     try {
       // 1. Post to Backend DB with 8s timeout

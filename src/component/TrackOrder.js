@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { API_BASE_URL as CENTRAL_API } from '../config/apiConfig';
 import './TrackOrder.css';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = `${CENTRAL_API}/api`;
 const DELETED_ORDERS_KEY = 'luxe_deleted_orders_v2';
 
 const getDeletedOrderIds = () => {

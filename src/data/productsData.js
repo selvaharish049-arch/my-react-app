@@ -1,4 +1,5 @@
 // Local product storage with immediate fallback and optional fast backend sync
+import { API_BASE_URL } from '../config/apiConfig';
 import img1 from '../assets/c1.jpg';
 import img2 from '../assets/c2.jpg';
 import img4 from '../assets/c4.jpg';
@@ -249,9 +250,7 @@ export const getAllProducts = async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
-
+    const baseUrl = API_BASE_URL;
     const timestamp = Date.now();
     const [productsRes, deletedRes] = await Promise.all([
       fetch(`${baseUrl}/api/products?t=${timestamp}`, { cache: 'no-cache', signal: controller.signal }),
@@ -381,8 +380,7 @@ export const addCustomProduct = async (formData) => {
     }
 
     // Save to server
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     try {
       await fetch(`${baseUrl}/api/products`, {
@@ -460,8 +458,7 @@ export const deleteCustomProduct = async (id) => {
     window.dispatchEvent(new Event('storage'));
 
     // Server delete request
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     try {
       await fetch(`${baseUrl}/api/products/${idStr}`, {
@@ -489,8 +486,7 @@ export const getDeletedCraftsmanshipCategorySlugs = () => {
     const raw = localStorage.getItem(DELETED_CAT_KEY);
     const list = raw ? JSON.parse(raw) : [];
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     fetch(`${baseUrl}/api/deleted-craftsmanship-categories`)
       .then(res => res.ok ? res.json() : [])
@@ -514,8 +510,7 @@ export const fetchDeletedCraftsmanshipCategorySlugs = async () => {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     const res = await fetch(`${baseUrl}/api/deleted-craftsmanship-categories`, { signal: controller.signal });
     clearTimeout(timeoutId);
@@ -540,8 +535,7 @@ export const getStoredCraftsmanshipCategories = () => {
     const deleted = getDeletedCraftsmanshipCategorySlugs().map(s => String(s).toLowerCase().trim());
     
     // Fast background sync with server database
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     fetch(`${baseUrl}/api/craftsmanship-categories`)
       .then(res => res.ok ? res.json() : [])
@@ -589,8 +583,7 @@ export const fetchCraftsmanshipCategories = async () => {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     const res = await fetch(`${baseUrl}/api/craftsmanship-categories`, { signal: controller.signal });
     clearTimeout(timeoutId);
@@ -645,8 +638,7 @@ export const saveCraftsmanshipCategory = async (catObj) => {
     window.dispatchEvent(new Event('craftsmanshipCategoryUpdated'));
 
     // Upload to server backend
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     try {
       await fetch(`${baseUrl}/api/craftsmanship-categories`, {
@@ -678,8 +670,7 @@ export const deleteCraftsmanshipCategory = async (slug) => {
     window.dispatchEvent(new Event('craftsmanshipCategoryUpdated'));
 
     // Delete on server backend
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     try {
       await fetch(`${baseUrl}/api/craftsmanship-categories/${cleanSlug}`, {

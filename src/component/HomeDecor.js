@@ -30,7 +30,7 @@ const baseItems = [
   { id: 'explore-wardrobe', title: 'Wardrobe', img: img7, path: '/product/explore-wardrobe' },
   { id: 'explore-sofacumbed', title: 'Sofa Cum Bed', img: img8, path: '/product/explore-sofacumbed' },
   { id: 'explore-bookshelf', title: 'Bookshelf', img: img9, path: '/product/explore-bookshelf' },
-  { id: 'explore-study', title: 'Study', img: img10, path: '/product/explore-study' },
+  { id: 'explore-study', title: 'Study Workspace', img: img10, path: '/product/explore-study' }
 ];
 
 const HomeDecor = () => {
@@ -68,7 +68,7 @@ const HomeDecor = () => {
         { key: 'explore-wardrobe', label: 'Wardrobe', defaultImg: img7, path: '/product/explore-wardrobe' },
         { key: 'explore-sofacumbed', label: 'Sofa Cum Bed', defaultImg: img8, path: '/product/explore-sofacumbed' },
         { key: 'explore-bookshelf', label: 'Bookshelf', defaultImg: img9, path: '/product/explore-bookshelf' },
-        { key: 'explore-study', label: 'Study', defaultImg: img10, path: '/product/explore-study' }
+        { key: 'explore-study', label: 'Study Workspace', defaultImg: img10, path: '/product/explore-study' }
       ];
 
       const baseMapped = categoryConfig

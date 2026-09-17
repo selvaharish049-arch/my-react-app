@@ -1,5 +1,7 @@
 // Fast local reviews storage with immediate fallback and non-blocking background sync
 
+import { API_BASE_URL } from '../config/apiConfig';
+
 const initialReviews = [
   { id: 1, name: 'Ananya Sharma', rating: 5, comment: 'Exceptional craftsmanship! The modular kitchen was installed on time and looks stunning.', date: '2026-05-12' },
   { id: 2, name: 'Vikram Patel', rating: 5, comment: 'Custom wardrobe quality exceeded my expectations. Smooth sliding doors and luxury finish.', date: '2026-06-04' },
@@ -53,8 +55,7 @@ export const getAllReviews = async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     const [reviewsRes, deletedRes] = await Promise.all([
       fetch(`${baseUrl}/api/reviews`, { signal: controller.signal }),
@@ -102,8 +103,7 @@ export const deleteReview = async (id) => {
     const updated = current.filter(r => r && r.id !== undefined && r.id !== null && String(r.id) !== idStr);
     saveStoredReviews(updated);
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     try {
       await fetch(`${baseUrl}/api/reviews/${idStr}`, {
@@ -126,8 +126,7 @@ export const addReview = async (review) => {
   const updated = [newRev, ...current];
   saveStoredReviews(updated);
 
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+  const baseUrl = API_BASE_URL;
 
   fetch(`${baseUrl}/api/reviews`, {
     method: 'POST',

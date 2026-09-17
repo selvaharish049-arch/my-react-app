@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config/apiConfig';
 import './LoginModal.css';
 
 const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => {
@@ -84,8 +85,7 @@ const LoginModal = ({ onClose, setIsLoggedIn, setUserRole, setCurrentUser }) => 
       localStorage.setItem('luxe_user', userPayload);
 
       // Non-blocking server sync if server is online
-      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+      const baseUrl = API_BASE_URL;
       fetch(`${baseUrl}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

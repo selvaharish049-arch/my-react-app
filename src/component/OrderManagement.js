@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL as CENTRAL_API } from '../config/apiConfig';
 import './OrderManagement.css';
 
-const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-const API_BASE_URL = isLocalhost ? 'http://localhost:5000/api' : 'https://selvaharish-interior-back.onrender.com/api';
+const API_BASE_URL = `${CENTRAL_API}/api`;
 const DELETED_ORDERS_KEY = 'luxe_deleted_orders_v2';
 
 const getDeletedOrderIds = () => {

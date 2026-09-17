@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config/apiConfig';
 import './ProductModal.css';
 
 const DEFAULT_REVIEWS = [
@@ -193,8 +194,7 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
       notes: `Consultation Booking for ${product.name} (Qty: ${qty}) | PAN: ${consultForm.panNumber ? consultForm.panNumber.toUpperCase() : 'N/A'} | Notes: ${consultForm.notes || 'None'}`
     };
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+    const baseUrl = API_BASE_URL;
 
     try {
       const res = await fetch(`${baseUrl}/api/orders/create`, {
