@@ -698,3 +698,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 600px) {
+  .amazon-modal-layout {
+    padding: 16px 12px;
+    max-height: 94vh;
+    border-radius: 8px;
+  }
+
+  .modal-close-x {
+    top: 10px;
+    right: 12px;
+    font-size: 24px;
+  }
+
+  .amazon-main-img {
+    height: 200px;
+  }
+
+  .amazon-product-title {
+    font-size: 18px;
+  }
+
+  .amazon-buy-box {
+    padding: 14px 12px;
+  }
+}
+

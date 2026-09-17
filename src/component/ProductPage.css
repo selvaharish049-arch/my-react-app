@@ -248,3 +248,16 @@
   display: block;
 }
 
+@media (max-width: 768px) {
+  .category-banner-container {
+    height: 220px;
+    width: 95%;
+    margin: 10px auto 20px auto;
+  }
+  .banner-container {
+    height: 200px;
+    margin-bottom: 20px;
+  }
+}
+
+
