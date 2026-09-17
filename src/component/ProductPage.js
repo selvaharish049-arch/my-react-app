@@ -4,14 +4,14 @@ import {
   getAllProducts, 
   deleteCustomProduct, 
   fetchCraftsmanshipCategories,
-  deleteCraftsmanshipCategory
+  deleteCraftsmanshipCategory,
+  isProductInCategory
 } from '../data/productsData';
 import ProductModal from './ProductModal';
-import { getPriceDetails, renderStars } from '../utils/priceHelper';
-import './ProductPage.css';
-
 import BannerImage from './BannerImage';
 import CollectionSplit from './CollectionSplit';
+import { getPriceDetails, renderStars } from '../utils/priceHelper';
+import './ProductPage.css';
 
 const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
   const { name } = useParams();
@@ -162,26 +162,10 @@ const ProductPage = ({ isLoggedIn, userRole, addToCart, triggerLogin }) => {
   const isCategoryQuery = allCategories.includes(query) || allCategories.includes(queryClean) || !!matchedCustomCat;
 
   if (isCategoryQuery) {
-    // 1. Filter products belonging to this category cleanly matching slug or clean name
     const filteredProducts = productsList.filter(p => {
-      if (!p || !p.category) return false;
-      const c = String(p.category).toLowerCase().trim();
-      const cClean = c.replace('explore-', '').replace(/\s+/g, '');
-      const catSlugClean = matchedCustomCat ? (matchedCustomCat.slug || '').toLowerCase().replace('explore-', '').replace(/\s+/g, '') : '';
-      const catTitleClean = matchedCustomCat ? (matchedCustomCat.title || '').toLowerCase().replace('explore-', '').replace(/\s+/g, '') : '';
-
-      return (
-        c === query ||
-        cClean === queryClean ||
-        c === queryClean ||
-        cClean === query ||
-        (matchedCustomCat && (
-          c === (matchedCustomCat.slug || '').toLowerCase() ||
-          c === (matchedCustomCat.title || '').toLowerCase() ||
-          cClean === catSlugClean ||
-          cClean === catTitleClean
-        ))
-      );
+      if (isProductInCategory(p, query)) return true;
+      if (matchedCustomCat && (isProductInCategory(p, matchedCustomCat.slug) || isProductInCategory(p, matchedCustomCat.title))) return true;
+      return false;
     });
 
     pageTitle = getCategoryTitle(query);

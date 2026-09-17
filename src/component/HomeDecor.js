@@ -4,6 +4,7 @@ import {
   getAllProducts,
   fetchCraftsmanshipCategories, 
   fetchDeletedCraftsmanshipCategorySlugs,
+  isProductInCategory,
   sanitizeImage
 } from '../data/productsData';
 import './HomeDecor.css';
@@ -73,12 +74,7 @@ const HomeDecor = () => {
       const baseMapped = categoryConfig
         .filter(cfg => !deletedSlugs.includes(cfg.key))
         .map(cfg => {
-          const keyClean = cfg.key.replace('explore-', '').toLowerCase().trim();
-          const subCount = allProds.filter(p => {
-            if (!p || !p.category) return false;
-            const c = String(p.category).toLowerCase().trim();
-            return c === cfg.key || c === keyClean || c.replace('explore-', '').trim() === keyClean;
-          }).length;
+          const subCount = allProds.filter(p => isProductInCategory(p, cfg.key)).length;
 
           return {
             id: cfg.key,
@@ -94,13 +90,7 @@ const HomeDecor = () => {
       const customFetched = await fetchCraftsmanshipCategories();
       const customCats = customFetched.filter(c => !deletedSlugs.includes(c.slug));
       const customMapped = customCats.map(c => {
-        const slugClean = (c.slug || '').replace('explore-', '').toLowerCase().trim();
-        const titleClean = (c.title || '').toLowerCase().trim();
-        const subCount = allProds.filter(p => {
-          if (!p || !p.category) return false;
-          const catStr = String(p.category).toLowerCase().trim();
-          return catStr === (c.slug || '').toLowerCase() || catStr === titleClean || catStr.replace('explore-', '').trim() === slugClean;
-        }).length;
+        const subCount = allProds.filter(p => isProductInCategory(p, c.slug || c.title)).length;
 
         return {
           id: c.id || c.slug,
@@ -124,10 +114,10 @@ const HomeDecor = () => {
   useEffect(() => {
     fetchProducts();
 
-    // Auto-sync every 30 seconds so additions/deletions update within 1 min on PC & mobile
+    // Auto-sync every 10 seconds for real-time cross-device updates
     const intervalId = setInterval(() => {
       fetchProducts();
-    }, 30000);
+    }, 10000);
 
     window.addEventListener('craftsmanshipCategoryUpdated', fetchProducts);
     window.addEventListener('productUpdated', fetchProducts);

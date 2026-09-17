@@ -1,23 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllProducts } from '../data/productsData';
-import { getTranslation } from '../utils/translations';
 import './SearchComponent.css';
 
 const SearchComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [allProducts, setAllProducts] = useState([]);
-  const [currentLang, setCurrentLang] = useState(localStorage.getItem('luxe_lang') || 'en');
   const navigate = useNavigate();
 
   useEffect(() => {
     loadProducts();
-    const handleLangChange = () => {
-      setCurrentLang(localStorage.getItem('luxe_lang') || 'en');
-    };
-    window.addEventListener('languageChange', handleLangChange);
-    return () => window.removeEventListener('languageChange', handleLangChange);
   }, [isOpen]);
 
   const loadProducts = async () => {
@@ -27,18 +20,22 @@ const SearchComponent = () => {
 
   const getSuggestions = () => {
     if (!searchInput.trim()) return [];
-    const term = searchInput.toLowerCase();
+    const term = searchInput.toLowerCase().trim();
     
     return allProducts.filter(item => 
-      item.name.toLowerCase().includes(term) || 
-      item.category.toLowerCase().includes(term)
+      item && (
+        String(item.name || '').toLowerCase().includes(term) || 
+        String(item.category || '').toLowerCase().includes(term)
+      )
     ).slice(0, 6);
   };
 
   const handleSuggestionClick = (item) => {
     setSearchInput('');
     setIsOpen(false);
-    navigate(`/product/${item.name}`);
+    if (item && item.name) {
+      navigate(`/product/${item.name}`);
+    }
   };
 
   const handleSearchSubmit = (e) => {
@@ -57,7 +54,6 @@ const SearchComponent = () => {
   };
 
   const suggestions = getSuggestions();
-  const t = (key) => getTranslation(currentLang, key);
 
   return (
     <div className="search-component-wrapper">
@@ -65,13 +61,13 @@ const SearchComponent = () => {
         <form onSubmit={handleSearchSubmit}>
           <input 
             type="text" 
-            placeholder={t('searchPlaceholder')} 
+            placeholder="Search products, sofa, bed, chair, table..." 
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onFocus={() => setIsOpen(true)} 
             onBlur={() => setTimeout(() => setIsOpen(false), 250)}
           />
-          <button type="submit" className="search-go-btn">{t('searchBtn')}</button>
+          <button type="submit" className="search-go-btn">Search</button>
         </form>
 
         {isOpen && searchInput.trim() !== '' && (

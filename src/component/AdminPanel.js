@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   getAllProducts, 
   addCustomProduct, 
+  updateCustomProduct,
   deleteCustomProduct,
   fetchCraftsmanshipCategories,
   getDeletedCraftsmanshipCategorySlugs,
@@ -44,6 +45,7 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
   const [customCraftCats, setCustomCraftCats] = useState([]);
   const [showCustomCatInput, setShowCustomCatInput] = useState(false);
   const [customCategory, setCustomCategory] = useState('');
+  const [editingProductId, setEditingProductId] = useState(null);
   
   // Category creation modal/form state
   const [catForm, setCatForm] = useState({
@@ -196,10 +198,59 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
     }
   };
 
+  const handleEditStart = (item) => {
+    setEditingProductId(item.id);
+    setFormData({
+      name: item.name || '',
+      price: (item.price || '').replace(/[₹,]/g, ''),
+      discountPercent: item.discountPercent || 26,
+      category: item.category || 'modularkitchen',
+      description: item.description || '',
+      material: item.specifications?.Material || '',
+      dimensions: item.specifications?.Dimensions || '',
+      color: item.specifications?.Color || '',
+      warranty: item.specifications?.Warranty || '',
+      assemblyRequired: item.specifications?.['Assembly Required'] || 'No'
+    });
+    if (item.img) {
+      setImageType('url');
+      setImageUrl(item.img);
+      setImagePreview(item.img);
+    }
+    const formElem = document.getElementById('admin-product-form-card');
+    if (formElem) {
+      formElem.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingProductId(null);
+    setFormData({
+      name: '',
+      price: '',
+      discountPercent: 26,
+      category: activeTab === 'customized' ? 'modularkitchen' : 'explore-sofa',
+      description: '',
+      material: '',
+      dimensions: '',
+      color: '',
+      warranty: '',
+      assemblyRequired: 'No'
+    });
+    setShowCustomCatInput(false);
+    setCustomCategory('');
+    setImageUrl('');
+    setImageFile(null);
+    setImagePreview('');
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     
     const dataToSend = new FormData();
+    if (editingProductId) {
+      dataToSend.append('id', editingProductId);
+    }
     dataToSend.append('name', formData.name);
     
     let formattedPrice = formData.price.trim();
@@ -245,9 +296,13 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
       if (imageUrl3) dataToSend.append('imageUrl3', imageUrl3);
     }
 
-    const res = await addCustomProduct(dataToSend);
+    const res = editingProductId 
+      ? await updateCustomProduct(editingProductId, dataToSend) 
+      : await addCustomProduct(dataToSend);
+
     if (res) {
-      setMessage("✅ Product added to catalog successfully!");
+      setMessage(editingProductId ? "✅ Product updated successfully!" : "✅ Product added to catalog successfully!");
+      setEditingProductId(null);
       
       setFormData(prev => ({
         ...prev,
@@ -280,10 +335,10 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
       const fileInput = document.getElementById('admin-file-input');
       if (fileInput) fileInput.value = '';
 
-      loadProducts();
+      await loadProducts();
       window.dispatchEvent(new Event('productDataUpdated'));
     } else {
-      alert("Error adding product to catalog!");
+      alert(editingProductId ? "Error updating product!" : "Error adding product to catalog!");
     }
     
     setTimeout(() => setMessage(''), 3000);
@@ -293,8 +348,11 @@ const AdminPanel = ({ isLoggedIn, userRole }) => {
     if (window.confirm("Are you sure you want to delete this product from catalog?")) {
       const res = await deleteCustomProduct(id);
       if (res && res.success) {
+        if (editingProductId === id) {
+          handleEditCancel();
+        }
         setMessage("🗑️ Product deleted permanently.");
-        loadProducts();
+        await loadProducts();
         window.dispatchEvent(new Event('productDataUpdated'));
         setTimeout(() => setMessage(''), 3000);
       } else {
@@ -695,10 +753,23 @@ Please review this solution and let us know if you'd like to proceed! Thank you.
       ) : (
         <div className="admin-main-grid">
           {/* Form Column */}
-          <div className="admin-card admin-form-card">
-            <h2>
-              {activeTab === 'customized' ? '✨ Add Core Customized Reference Design' : '🎨 Add Our Craftsmanship Product'}
-            </h2>
+          <div id="admin-product-form-card" className="admin-card admin-form-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2>
+                {editingProductId 
+                  ? `✏️ Edit Product (${editingProductId})` 
+                  : (activeTab === 'customized' ? '✨ Add Core Customized Reference Design' : '🎨 Add Our Craftsmanship Product')}
+              </h2>
+              {editingProductId && (
+                <button 
+                  type="button" 
+                  onClick={handleEditCancel}
+                  style={{ background: '#6c757d', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '13px' }}
+                >
+                  ❌ Cancel Edit
+                </button>
+              )}
+            </div>
             <form onSubmit={handleFormSubmit} className="admin-product-form">
               <div className="form-group">
                 <label>Product Name *</label>
@@ -739,8 +810,9 @@ Please review this solution and let us know if you'd like to proceed! Thank you.
                 </div>
               </div>
 
+              {/* Category Select Dropdown */}
               <div className="form-group">
-                <label>Target Category *</label>
+                <label>Product Category *</label>
                 {!showCustomCatInput ? (
                   <select 
                     name="category" 
@@ -859,16 +931,14 @@ Please review this solution and let us know if you'd like to proceed! Thank you.
 
                     {/* Image 2 */}
                     <div style={{ background: '#faf6f0', border: '1px solid #e8decb', padding: '10px 12px', borderRadius: '8px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#3c312e', display: 'block', marginBottom: '4px' }}>
-                        📷 2nd Image (Left Corner Gallery View 2)
-                      </label>
+                      <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#3c312e', display: 'block', marginBottom: '4px' }}>2nd Image (Gallery View 2)</label>
                       <input 
                         type="file" 
                         accept="image/*" 
                         onChange={handleFileChange2} 
                       />
                       {imagePreview2 && (
-                        <div style={{ marginTop: '8px' }}>
+                        <div style={{ marginTop: '6px' }}>
                           <img src={imagePreview2} alt="Preview 2" style={{ width: '75px', height: '75px', objectFit: 'cover', borderRadius: '6px', border: '2px solid #c98544' }} />
                         </div>
                       )}
@@ -876,26 +946,26 @@ Please review this solution and let us know if you'd like to proceed! Thank you.
 
                     {/* Image 3 */}
                     <div style={{ background: '#faf6f0', border: '1px solid #e8decb', padding: '10px 12px', borderRadius: '8px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#3c312e', display: 'block', marginBottom: '4px' }}>
-                        📷 3rd Image (Left Corner Gallery View 3)
-                      </label>
+                      <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#3c312e', display: 'block', marginBottom: '4px' }}>3rd Image (Gallery View 3)</label>
                       <input 
                         type="file" 
                         accept="image/*" 
                         onChange={handleFileChange3} 
                       />
                       {imagePreview3 && (
-                        <div style={{ marginTop: '8px' }}>
+                        <div style={{ marginTop: '6px' }}>
                           <img src={imagePreview3} alt="Preview 3" style={{ width: '75px', height: '75px', objectFit: 'cover', borderRadius: '6px', border: '2px solid #c98544' }} />
                         </div>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {/* Image 1 URL */}
                     <div style={{ background: '#faf6f0', border: '1px solid #e8decb', padding: '10px 12px', borderRadius: '8px' }}>
-                      <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#3c312e', display: 'block', marginBottom: '4px' }}>1st Image URL (Main Cover) *</label>
+                      <label style={{ fontSize: '13px', fontWeight: 'bold', color: '#3c312e', display: 'block', marginBottom: '4px' }}>
+                        📷 1st Image URL (Main Cover) *
+                      </label>
                       <input 
                         type="text" 
                         placeholder="https://images.unsplash.com/..." 
@@ -903,7 +973,7 @@ Please review this solution and let us know if you'd like to proceed! Thank you.
                         onChange={(e) => setImageUrl(e.target.value)} 
                       />
                       {imageUrl && (
-                        <div style={{ marginTop: '6px' }}>
+                        <div style={{ marginTop: '8px' }}>
                           <img src={imageUrl} alt="Preview 1" style={{ width: '75px', height: '75px', objectFit: 'cover', borderRadius: '6px', border: '2px solid #c98544' }} />
                         </div>
                       )}
@@ -988,8 +1058,8 @@ Please review this solution and let us know if you'd like to proceed! Thank you.
                 </div>
               </div>
 
-              <button type="submit" className="btn-admin-submit" style={{ marginTop: '16px' }}>
-                ➕ Add Product to {activeTab === 'customized' ? 'Core Customized Catalog' : 'Our Craftsmanship Catalog'}
+              <button type="submit" className="btn-admin-submit" style={{ marginTop: '16px', background: editingProductId ? '#28a745' : undefined }}>
+                {editingProductId ? '💾 Save & Update Product' : `➕ Add Product to ${activeTab === 'customized' ? 'Core Customized Catalog' : 'Our Craftsmanship Catalog'}`}
               </button>
             </form>
           </div>
@@ -1019,7 +1089,25 @@ Please review this solution and let us know if you'd like to proceed! Thank you.
                       <p className="item-price">{item.price}</p>
                       <span className="item-cat-badge">{(item.category || '').toUpperCase()}</span>
                     </div>
-                    <div className="custom-item-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <div className="custom-item-actions" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      <button 
+                        type="button"
+                        onClick={() => handleEditStart(item)}
+                        style={{
+                          background: '#28a745',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                        title="Edit Product Details"
+                      >
+                        ✏️ Edit
+                      </button>
+
                       <button 
                         className="btn-send-whatsapp-solution"
                         onClick={() => handleOpenSolutionModal(item)}
@@ -1035,13 +1123,14 @@ Please review this solution and let us know if you'd like to proceed! Thank you.
                         }}
                         title="Send Custom Solution via WhatsApp"
                       >
-                        📱 Send Solution via WhatsApp
+                        📱 WhatsApp
                       </button>
 
                       <button 
+                        type="button"
                         className="btn-delete-item" 
                         onClick={() => handleDelete(item.id)}
-                        title="Remove Product"
+                        title="Delete Product"
                       >
                         🗑️ Delete
                       </button>

@@ -215,15 +215,36 @@ export const sanitizeProduct = (product) => {
   };
 };
 
+// Global in-memory cache for live server data
+let cachedServerProducts = null;
+
+export const getCachedServerProducts = () => cachedServerProducts;
+
+export const isProductInCategory = (product, categoryQuery) => {
+  if (!product || !product.category || !categoryQuery) return false;
+  const pCat = String(product.category).toLowerCase().trim();
+  const qCat = String(categoryQuery).toLowerCase().trim();
+
+  if (pCat === qCat) return true;
+
+  const pClean = pCat.replace(/^explore-/, '').replace(/[\s-_]+/g, '');
+  const qClean = qCat.replace(/^explore-/, '').replace(/[\s-_]+/g, '');
+
+  if (pClean === qClean) return true;
+  if (pCat === qClean) return true;
+  if (pClean === qCat) return true;
+
+  return false;
+};
+
 /**
- * Fetch all products instantly from local defaults + localStorage.
- * Performs a fast non-blocking background check with 1.2s timeout if server is up.
+ * Fetch all products from live backend server API (Single Source of Truth).
+ * Includes anti-cache parameters and instant in-memory fallback.
  */
 export const getAllProducts = async () => {
   const customItems = getStoredCustomProducts();
   const deletedIds = getDeletedProductIds();
 
-  // Try fetch with 8 second timeout for Render response
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -231,9 +252,10 @@ export const getAllProducts = async () => {
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
 
+    const timestamp = Date.now();
     const [productsRes, deletedRes] = await Promise.all([
-      fetch(`${baseUrl}/api/products`, { signal: controller.signal }),
-      fetch(`${baseUrl}/api/deleted-products`, { signal: controller.signal }).catch(() => null)
+      fetch(`${baseUrl}/api/products?t=${timestamp}`, { cache: 'no-cache', signal: controller.signal }),
+      fetch(`${baseUrl}/api/deleted-products?t=${timestamp}`, { cache: 'no-cache', signal: controller.signal }).catch(() => null)
     ]);
     clearTimeout(timeoutId);
 
@@ -246,32 +268,25 @@ export const getAllProducts = async () => {
 
       const combinedDeletedIds = Array.from(new Set([...deletedIds, ...serverDeletedIds])).map(i => String(i).toLowerCase().trim());
 
-      // Construct local products excluding deleted ones
-      const allLocal = [...defaultProducts, ...customItems]
-        .filter(p => p && p.id !== undefined && p.id !== null && !combinedDeletedIds.includes(String(p.id).toLowerCase().trim()))
-        .map(sanitizeProduct);
-
       if (Array.isArray(serverProducts) && serverProducts.length > 0) {
-        // Merge server products with local ones, eliminating duplicates by ID
-        const map = new Map();
-        [...allLocal, ...serverProducts].forEach(p => {
-          if (p && p.id !== undefined && p.id !== null) {
-            const cleanId = String(p.id).toLowerCase().trim();
-            if (!combinedDeletedIds.includes(cleanId)) {
-              map.set(cleanId, sanitizeProduct(p));
-            }
-          }
-        });
-        return Array.from(map.values());
+        const cleanedServerList = serverProducts
+          .filter(p => p && p.id !== undefined && p.id !== null && !combinedDeletedIds.includes(String(p.id).toLowerCase().trim()))
+          .map(sanitizeProduct);
+
+        cachedServerProducts = cleanedServerList;
+        return cleanedServerList;
       }
     }
   } catch (e) {
-    // Fast fallback to local products if server is sleeping or offline
     console.warn("Backend server offline or waking up, using instant local products folder dataset.");
   }
 
+  if (cachedServerProducts && cachedServerProducts.length > 0) {
+    const deletedIdsClean = deletedIds.map(i => String(i).toLowerCase().trim());
+    return cachedServerProducts.filter(p => p && !deletedIdsClean.includes(String(p.id).toLowerCase().trim()));
+  }
+
   const deletedIdsClean = deletedIds.map(i => String(i).toLowerCase().trim());
-  // Construct local products excluding deleted ones
   const allLocal = [...defaultProducts, ...customItems]
     .filter(p => p && p.id !== undefined && p.id !== null && !deletedIdsClean.includes(String(p.id).toLowerCase().trim()))
     .map(sanitizeProduct);
@@ -280,12 +295,15 @@ export const getAllProducts = async () => {
 };
 
 /**
- * Add custom product and save instantly to local storage folder.
+ * Add custom product and save to server + local storage.
  */
 export const addCustomProduct = async (formData) => {
   try {
-    const id = 'custom-' + Date.now();
-    formData.append('id', id);
+    const existingId = formData.get('id');
+    const id = existingId || ('custom-' + Date.now());
+    if (!existingId) {
+      formData.append('id', id);
+    }
     const name = formData.get('name') || 'New Custom Product';
     const price = formData.get('price') || '₹20,000';
     const categoryRaw = formData.get('category') || 'modularkitchen';
@@ -352,32 +370,68 @@ export const addCustomProduct = async (formData) => {
       }
     };
 
+    // Save locally
     const currentCustom = getStoredCustomProducts();
-    const updatedCustom = [newProduct, ...currentCustom];
-    saveCustomProductsLocally(updatedCustom);
+    const existingIdx = currentCustom.findIndex(p => p && String(p.id).trim() === id);
+    if (existingIdx !== -1) {
+      currentCustom[existingIdx] = newProduct;
+      saveCustomProductsLocally(currentCustom);
+    } else {
+      saveCustomProductsLocally([newProduct, ...currentCustom]);
+    }
+
+    // Save to server
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
+
+    try {
+      await fetch(`${baseUrl}/api/products`, {
+        method: 'POST',
+        body: formData
+      });
+    } catch (err) {
+      console.log("Server sync failed, saved locally.");
+    }
+
+    // Refresh memory cache
+    if (cachedServerProducts) {
+      const idx = cachedServerProducts.findIndex(p => p && String(p.id).trim() === id);
+      if (idx !== -1) {
+        cachedServerProducts[idx] = newProduct;
+      } else {
+        cachedServerProducts.unshift(newProduct);
+      }
+    }
 
     window.dispatchEvent(new Event('productDataUpdated'));
     window.dispatchEvent(new Event('productUpdated'));
     window.dispatchEvent(new Event('storage'));
 
-    // Also attempt non-blocking background upload to server
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
-
-    fetch(`${baseUrl}/api/products`, {
-      method: 'POST',
-      body: formData
-    }).catch(err => console.log("Background server sync failed, saved locally."));
-
     return { success: true, product: newProduct };
   } catch (e) {
-    console.error("Failed to add product locally:", e);
+    console.error("Failed to add product:", e);
     return null;
   }
 };
 
 /**
- * Delete custom product instantly from local storage.
+ * Update custom product and sync with server.
+ */
+export const updateCustomProduct = async (id, formData) => {
+  try {
+    const idStr = String(id).trim();
+    if (!formData.get('id')) {
+      formData.append('id', idStr);
+    }
+    return await addCustomProduct(formData);
+  } catch (e) {
+    console.error(`Failed to update product ${id}:`, e);
+    return { success: false };
+  }
+};
+
+/**
+ * Delete custom product instantly from local storage & server.
  */
 export const deleteCustomProduct = async (id) => {
   try {
@@ -386,7 +440,7 @@ export const deleteCustomProduct = async (id) => {
       return { success: false };
     }
 
-    // Track deletion locally so it persists even if backend reset/failures happen
+    // Track deletion locally so it persists
     const deletedIds = getDeletedProductIds().map(i => String(i).trim());
     if (!deletedIds.includes(idStr)) {
       deletedIds.push(idStr);
@@ -397,11 +451,15 @@ export const deleteCustomProduct = async (id) => {
     const updatedCustom = currentCustom.filter(p => p && p.id !== undefined && p.id !== null && String(p.id).trim() !== idStr);
     saveCustomProductsLocally(updatedCustom);
 
+    if (cachedServerProducts) {
+      cachedServerProducts = cachedServerProducts.filter(p => p && p.id !== undefined && p.id !== null && String(p.id).trim() !== idStr);
+    }
+
     window.dispatchEvent(new Event('productDataUpdated'));
     window.dispatchEvent(new Event('productUpdated'));
     window.dispatchEvent(new Event('storage'));
 
-    // Background sync to server
+    // Server delete request
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const baseUrl = isLocalhost ? 'http://localhost:5000' : 'https://selvaharish-interior-back.onrender.com';
 
@@ -410,7 +468,7 @@ export const deleteCustomProduct = async (id) => {
         method: 'DELETE'
       });
     } catch (err) {
-      console.log("Background server delete sync failed, removed locally.");
+      console.log("Server delete sync failed, removed locally.");
     }
 
     return { success: true };

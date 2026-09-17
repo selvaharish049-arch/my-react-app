@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getAllProducts, deleteCustomProduct } from '../data/productsData';
+import { getAllProducts, deleteCustomProduct, isProductInCategory } from '../data/productsData';
 import BannerImage from './BannerImage';
 import CollectionSplit from './CollectionSplit';
 import ProductModal from './ProductModal';
@@ -14,28 +14,26 @@ const CategoryLayout = ({ category, isLoggedIn, userRole, addToCart, triggerLogi
   const loadProducts = useCallback(async () => {
     setLoading(true);
     const all = await getAllProducts();
-    const targetCat = (category || '').toLowerCase().trim();
-    const targetCatClean = targetCat.replace('explore-', '');
-
-    const filtered = all.filter(p => {
-      if (!p || !p.category) return false;
-      const c = String(p.category).toLowerCase().trim();
-      const cClean = c.replace('explore-', '');
-      return c === targetCat || cClean === targetCatClean || c === targetCatClean || cClean === targetCat;
-    });
-
+    const filtered = all.filter(p => isProductInCategory(p, category));
     setProducts(filtered);
     setLoading(false);
   }, [category]);
 
   useEffect(() => {
     loadProducts();
+    const intervalId = setInterval(() => {
+      loadProducts();
+    }, 10000);
+
     window.addEventListener('productDataUpdated', loadProducts);
     window.addEventListener('productUpdated', loadProducts);
+    window.addEventListener('craftsmanshipCategoryUpdated', loadProducts);
     window.addEventListener('storage', loadProducts);
     return () => {
+      clearInterval(intervalId);
       window.removeEventListener('productDataUpdated', loadProducts);
       window.removeEventListener('productUpdated', loadProducts);
+      window.removeEventListener('craftsmanshipCategoryUpdated', loadProducts);
       window.removeEventListener('storage', loadProducts);
     };
   }, [loadProducts, isLoggedIn]);

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTranslation } from '../utils/translations';
 import './ProductModal.css';
 
 const DEFAULT_REVIEWS = [
@@ -25,7 +24,6 @@ const DEFAULT_REVIEWS = [
 const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, triggerLogin }) => {
   const navigate = useNavigate();
   const [activeImgIndex, setActiveImgIndex] = useState(0);
-  const [currentLang, setCurrentLang] = useState(localStorage.getItem('luxe_lang') || 'en');
 
   // Customer Reviews state
   const [reviews, setReviews] = useState([]);
@@ -56,14 +54,6 @@ const ProductModal = ({ product, onClose, addToCart, isLoggedIn, userRole, trigg
     setModalOrderId('CON-' + Math.floor(1000 + Math.random() * 9000));
     setShowConsultModal(true);
   };
-
-  useEffect(() => {
-    const handleLangChange = () => {
-      setCurrentLang(localStorage.getItem('luxe_lang') || 'en');
-    };
-    window.addEventListener('languageChange', handleLangChange);
-    return () => window.removeEventListener('languageChange', handleLangChange);
-  }, []);
 
   useEffect(() => {
     if (!product) return;
@@ -262,8 +252,6 @@ Please contact me to schedule our consultation. Thank you!`;
 
   if (!product) return null;
 
-  const t = (key) => getTranslation(currentLang, key);
-
   // Price calculations
   const priceRaw = parseInt((product.price || '₹10,000').replace(/[₹,]/g, ''), 10) || 10000;
 
@@ -444,7 +432,7 @@ Please contact me to schedule our consultation. Thank you!`;
         {/* Customer Reviews Section */}
         <div className="amazon-reviews-container">
           <div className="reviews-header-bar">
-            <h2>{t('customerReviews')} ({reviews.length})</h2>
+            <h2>Customer Reviews ({reviews.length})</h2>
             <button 
               className="btn-write-review"
               onClick={() => {
@@ -542,7 +530,7 @@ Please contact me to schedule our consultation. Thank you!`;
                     <div className="reviewer-info">
                       <span className="avatar-circle">{(rev.name || 'C').charAt(0).toUpperCase()}</span>
                       <strong>{rev.name}</strong>
-                      {rev.verified && <span className="verified-badge">✓ {t('verifiedPurchase')}</span>}
+                      {rev.verified && <span className="verified-badge">✓ Verified Purchase</span>}
                     </div>
                     <div className="review-stars">
                       {'★'.repeat(rev.rating || 5)}{'☆'.repeat(5 - (rev.rating || 5))} 

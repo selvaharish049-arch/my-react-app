@@ -203,6 +203,9 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 
 // API - Products
 app.get('/api/products', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   const products = loadJson('products.json', defaultProducts);
   res.json(products);
 });
@@ -237,20 +240,90 @@ app.post('/api/products', upload.single('image'), (req, res) => {
     imgUrl = req.body.imageUrl || 'https://via.placeholder.com/300?text=No+Image';
   }
 
+  const targetId = id ? String(id).trim() : `custom-${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`;
+
+  // Find existing product index to update in place instead of duplicating
+  const existingIdx = products.findIndex(p => p && p.id !== undefined && p.id !== null && String(p.id).trim().toLowerCase() === targetId.toLowerCase());
+
+  let existingImg = 'https://via.placeholder.com/300?text=No+Image';
+  if (existingIdx !== -1 && products[existingIdx] && products[existingIdx].img) {
+    existingImg = products[existingIdx].img;
+  }
+
+  const finalImg = (req.file || req.body.imageUrl) ? imgUrl : (existingImg || imgUrl);
+
   const newProd = {
-    "id": id || `custom-${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`,
-    "name": name,
-    "price": price,
-    "img": imgUrl,
-    "category": category,
-    "rating": 4.5,
-    "description": description || '',
+    "id": targetId,
+    "name": name || (existingIdx !== -1 ? products[existingIdx].name : 'Custom Product'),
+    "price": price || (existingIdx !== -1 ? products[existingIdx].price : '₹20,000'),
+    "img": finalImg,
+    "category": cleanCategory,
+    "rating": (existingIdx !== -1 && products[existingIdx].rating) ? products[existingIdx].rating : 4.5,
+    "description": description || (existingIdx !== -1 ? products[existingIdx].description : ''),
     "specifications": specs
   };
 
-  products.push(newProd);
+  if (existingIdx !== -1) {
+    products[existingIdx] = { ...products[existingIdx], ...newProd };
+  } else {
+    products.unshift(newProd);
+  }
+
+  // Remove from deleted list if re-adding/updating
+  let deletedIds = loadJson('deleted_products.json', []);
+  deletedIds = deletedIds.filter(i => String(i).trim().toLowerCase() !== targetId.toLowerCase());
+  saveJson('deleted_products.json', deletedIds);
+
   saveJson('products.json', products);
   res.status(201).json(newProd);
+});
+
+app.put('/api/products/:id', upload.single('image'), (req, res) => {
+  const reqId = (req.params.id || '').trim();
+  req.body.id = reqId;
+  const products = loadJson('products.json', defaultProducts);
+
+  const { name, price, category, description, material, dimensions, color, warranty, assemblyRequired } = req.body;
+  const cleanCategory = (category || 'modularkitchen').trim().toLowerCase();
+
+  const existingIdx = products.findIndex(p => p && p.id !== undefined && p.id !== null && String(p.id).trim().toLowerCase() === reqId.toLowerCase());
+
+  let imgUrl = existingIdx !== -1 ? products[existingIdx].img : "";
+  if (req.file) {
+    const host = req.get('host');
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    imgUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+  } else if (req.body.imageUrl) {
+    imgUrl = req.body.imageUrl;
+  }
+
+  const specs = {
+    "Material": material || (existingIdx !== -1 ? products[existingIdx].specifications?.Material : 'Premium Finish'),
+    "Dimensions": dimensions || (existingIdx !== -1 ? products[existingIdx].specifications?.Dimensions : 'Standard Size'),
+    "Color": color || (existingIdx !== -1 ? products[existingIdx].specifications?.Color : 'As shown'),
+    "Warranty": warranty || (existingIdx !== -1 ? products[existingIdx].specifications?.Warranty : '1 Year brand warranty'),
+    "Assembly Required": assemblyRequired || (existingIdx !== -1 ? products[existingIdx].specifications?.['Assembly Required'] : 'No')
+  };
+
+  const updatedProd = {
+    "id": reqId,
+    "name": name || (existingIdx !== -1 ? products[existingIdx].name : 'Product'),
+    "price": price || (existingIdx !== -1 ? products[existingIdx].price : '₹20,000'),
+    "img": imgUrl || 'https://via.placeholder.com/300?text=No+Image',
+    "category": cleanCategory,
+    "rating": existingIdx !== -1 ? products[existingIdx].rating : 4.5,
+    "description": description || (existingIdx !== -1 ? products[existingIdx].description : ''),
+    "specifications": specs
+  };
+
+  if (existingIdx !== -1) {
+    products[existingIdx] = { ...products[existingIdx], ...updatedProd };
+  } else {
+    products.unshift(updatedProd);
+  }
+
+  saveJson('products.json', products);
+  res.json(updatedProd);
 });
 
 app.delete('/api/products/:id', (req, res) => {
@@ -276,12 +349,18 @@ app.delete('/api/products/:id', (req, res) => {
 });
 
 app.get('/api/deleted-products', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   const deletedIds = loadJson('deleted_products.json', []);
   res.json(deletedIds);
 });
 
 // API - Craftsmanship Categories
 app.get('/api/craftsmanship-categories', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   const categories = loadJson('craftsmanship_categories.json', []);
   const deletedSlugs = loadJson('deleted_craftsmanship_categories.json', []);
   const deletedClean = deletedSlugs.map(s => String(s).trim().toLowerCase());
